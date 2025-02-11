@@ -7,7 +7,7 @@ final ThemeData warlocksTheme = ThemeData(
   primaryColor: Color(0xFF464538), // Dark olive green
   scaffoldBackgroundColor: Color(0xFF464538), // Deep earthy green
   appBarTheme: AppBarTheme(
-    backgroundColor: Color(0xFF464538),
+    backgroundColor: Color(0xFF25291C),
     titleTextStyle: TextStyle(
         color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
     iconTheme: IconThemeData(color: Colors.white),

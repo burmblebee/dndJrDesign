@@ -6,13 +6,13 @@ class MainAppbar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
 
-    final theme = Theme.of(context).appBarTheme;
+    final theme = Theme.of(context).bottomNavigationBarTheme;
 
     return AppBar(
       iconTheme: const IconThemeData(color: Colors.white),
       title: const Text('Warlocks of the Beach', style: TextStyle(color: Colors.white),),
-      //backgroundColor: theme.backgroundColor,
-       backgroundColor: Color(0xFF25291C),
+      backgroundColor: theme.backgroundColor,
+      //backgroundColor: Color(0xFF25291C),
     );
   }
 
