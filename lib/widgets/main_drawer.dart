@@ -28,9 +28,11 @@ class MainDrawer extends StatelessWidget{
             },
           ),
           const Divider(),
+          const Spacer(),
+          const Divider(),
           ListTile(
-            leading: const Icon(Icons.search),
-            title: const Text('Browse Content', style: TextStyle(color: Colors.white),),
+            leading: const Icon(Icons.person),
+            title: const Text('Profile', style: TextStyle(color: Colors.white),),
             onTap: () {
               Navigator.of(context).pushReplacementNamed('/');
             },
@@ -43,20 +45,17 @@ class MainDrawer extends StatelessWidget{
               children: [
                 const Divider(),
                 ListTile(
-                  leading: const Icon(Icons.book),
-                  title: const Text('Your Content', style: TextStyle(color: Colors.white),),
+                  leading: const Icon(Icons.logout),
+                  title: const Text('Logout', style: TextStyle(color: Colors.white),),
                   onTap: () {
                     Navigator.of(context).pushReplacementNamed('/');
                   },
                 ),
                 const Divider(),
-                ListTile(
-                  leading: const Icon(Icons.campaign),
-                  title: const Text('Campaigns', style: TextStyle(color: Colors.white),),
-                  onTap: () {
-                    Navigator.of(context).pushReplacementNamed('/');
-                  },
+                Container(
+                  height: 60,
                 ),
+                
               ],
             ),
           ),
