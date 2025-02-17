@@ -1,225 +1,136 @@
-// import 'package:flutter/material.dart';
-// import 'package:image_picker/image_picker.dart';
-// import 'dart:io'; // Import the dart:io package
-// import '../widgets/main_appbar.dart';
-// import '../widgets/main_drawer.dart';
-// import '../widgets/bottom_navbar.dart';
+import 'package:flutter/material.dart';
+import 'package:warlocks_of_the_beach/screens/campaign_screen.dart';
+import 'package:warlocks_of_the_beach/widgets/bottom_navbar.dart';
+import 'package:warlocks_of_the_beach/widgets/main_appbar.dart';
+import 'package:warlocks_of_the_beach/widgets/main_drawer.dart';
 
-// class NewCampaignScreen extends StatefulWidget {
-//   const NewCampaignScreen({super.key});
+class NewCampaignScreen extends StatefulWidget {
+  const NewCampaignScreen({super.key});
 
-//   @override
-//   _NewCampaignScreenState createState() => _NewCampaignScreenState();
-// }
+  @override
+  State<NewCampaignScreen> createState() => _NewCampaignScreenState();
+}
 
-// class _NewCampaignScreenState extends State<NewCampaignScreen> {
-//   final _formKeyJoinCode = GlobalKey<FormState>();
-//   final _formKeyNewCampaign = GlobalKey<FormState>();
-//   final _joinCodeController = TextEditingController();
-//   final _campaignNameController = TextEditingController();
-//   final _campaignDescriptionController = TextEditingController();
-//   bool _isPublic = false;
-//   XFile? _imageFile;
+class _NewCampaignScreenState extends State<NewCampaignScreen> {
+  String? selectedCharacter;
+  final List<String> characters = ['Character 1', 'Character 2', 'Character 3'];
 
-//   @override
-//   void dispose() {
-//     _joinCodeController.dispose();
-//     _campaignNameController.dispose();
-//     _campaignDescriptionController.dispose();
-//     super.dispose();
-//   }
+  TextEditingController joinCodeController = TextEditingController();
+  TextEditingController campaignNameController = TextEditingController();
 
-//   Future<void> _pickImage() async {
-//     final ImagePicker picker = ImagePicker();
-//     final XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
-//     setState(() {
-//       _imageFile = pickedFile;
-//     });
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     final theme = Theme.of(context).primaryColor;
-
-//     return Scaffold(
-//       appBar: const MainAppbar(),
-//       drawer: const MainDrawer(),
-//       bottomNavigationBar: const MainBottomNavBar(),
-//       backgroundColor: theme,
-//       body: Padding(
-//         padding: const EdgeInsets.all(16.0),
-//         child: SingleChildScrollView(
-//           child: Center(
-//             child: Column(
-//               mainAxisAlignment: MainAxisAlignment.center,
-//               crossAxisAlignment: CrossAxisAlignment.center,
-//               children: [
-//                 Form(
-//                   key: _formKeyJoinCode,
-//                   child: Column(
-//                     crossAxisAlignment: CrossAxisAlignment.start,
-//                     children: [
-//                       const Center(
-//                         child: Text(
-//                           'Do you have a join code?',
-//                           style: TextStyle(
-//                             fontSize: 18,
-//                             fontWeight: FontWeight.bold,
-//                             color: Colors.white,
-//                           ),
-//                         ),
-//                       ),
-//                       const SizedBox(height: 10),
-//                       TextFormField(
-//                         controller: _joinCodeController,
-//                         decoration: const InputDecoration(
-
-//                           border: OutlineInputBorder(),
-//                           labelText: 'Enter join code',
-//                           labelStyle: TextStyle(color: Colors.white),
-//                           enabledBorder: OutlineInputBorder(
-//                             borderSide: BorderSide(color: Colors.white),
-//                           ),
-//                           focusedBorder: OutlineInputBorder(
-//                             borderSide: BorderSide(color: Colors.white),
-//                           ),
-//                         ),
-//                         style: const TextStyle(color: Colors.white),
-//                         validator: (value) {
-//                           if (value == null || value.isEmpty) {
-//                             return 'Please enter a join code';
-//                           }
-//                           return null;
-//                         },
-//                       ),
-//                       const SizedBox(height: 20),
-//                       ElevatedButton(
-//                         onPressed: () {
-//                           if (_formKeyJoinCode.currentState!.validate()) {
-//                             // Process the join code
-//                             print('Join code: ${_joinCodeController.text}');
-//                           }
-//                         },
-//                         child: const Center(child: Text('Submit Join Code')),
-//                       ),
-//                     ],
-//                   ),
-//                 ),
-//                 const SizedBox(height: 30),
-//                 Form(
-//                   key: _formKeyNewCampaign,
-//                   child: Column(
-//                     crossAxisAlignment: CrossAxisAlignment.start,
-//                     children: [
-//                       const Center(
-//                         child: Text(
-//                           'Create a new campaign',
-//                           style: TextStyle(
-//                             fontSize: 18,
-//                             fontWeight: FontWeight.bold,
-//                             color: Colors.white,
-//                           ),
-//                         ),
-//                       ),
-//                       const SizedBox(height: 10),
-//                       TextFormField(
-//                         controller: _campaignNameController,
-//                         decoration: const InputDecoration(
-//                           border: OutlineInputBorder(),
-//                           labelText: 'Campaign Name',
-//                           labelStyle: TextStyle(color: Colors.white),
-//                           enabledBorder: OutlineInputBorder(
-//                             borderSide: BorderSide(color: Colors.white),
-//                           ),
-//                           focusedBorder: OutlineInputBorder(
-//                             borderSide: BorderSide(color: Colors.white),
-//                           ),
-//                         ),
-//                         style: const TextStyle(color: Colors.white),
-//                         validator: (value) {
-//                           if (value == null || value.isEmpty) {
-//                             return 'Please enter a campaign name';
-//                           }
-//                           return null;
-//                         },
-//                       ),
-//                       const SizedBox(height: 10),
-//                       TextFormField(
-//                         controller: _campaignDescriptionController,
-//                         decoration: const InputDecoration(
-//                           border: OutlineInputBorder(),
-//                           labelText: 'Description',
-//                           labelStyle: TextStyle(color: Colors.white),
-//                           enabledBorder: OutlineInputBorder(
-//                             borderSide: BorderSide(color: Colors.white),
-//                           ),
-//                           focusedBorder: OutlineInputBorder(
-//                             borderSide: BorderSide(color: Colors.white),
-//                           ),
-//                         ),
-//                         style: const TextStyle(color: Colors.white),
-//                         maxLines: 3,
-//                         validator: (value) {
-//                           if (value == null || value.isEmpty) {
-//                             return 'Please enter a description';
-//                           }
-//                           return null;
-//                         },
-//                       ),
-//                       const SizedBox(height: 10),
-//                       Row(
-//                         mainAxisAlignment: MainAxisAlignment.center,
-//                         children: [
-//                           const Text(
-//                             'Public',
-//                             style: TextStyle(color: Colors.white),
-//                           ),
-//                           Switch(
-//                             value: _isPublic,
-//                             onChanged: (value) {
-//                               setState(() {
-//                                 _isPublic = value;
-//                               });
-//                             },
-//                           ),
-//                         ],
-//                       ),
-//                       const SizedBox(height: 10),
-//                       ElevatedButton(
-//                         onPressed: _pickImage,
-//                         child: const Center(child: Text('Pick an Image')),
-//                       ),
-//                       if (_imageFile != null)
-//                         Padding(
-//                           padding: const EdgeInsets.only(top: 10),
-//                           child: Image.file(
-//                             File(_imageFile!.path), // Ensure File is imported from dart:io
-//                             height: 100,
-//                           ),
-//                         ),
-//                       const SizedBox(height: 20),
-//                       ElevatedButton(
-//                         onPressed: () {
-//                           if (_formKeyNewCampaign.currentState!.validate()) {
-//                             // Process the new campaign
-//                             print('Campaign Name: ${_campaignNameController.text}');
-//                             print('Description: ${_campaignDescriptionController.text}');
-//                             print('Is Public: $_isPublic');
-//                             if (_imageFile != null) {
-//                               print('Image Path: ${_imageFile!.path}');
-//                             }
-//                           }
-//                         },
-//                         child: const Center(child: Text('Submit New Campaign')),
-//                       ),
-//                     ],
-//                   ),
-//                 ),
-//               ],
-//             ),
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: MainAppbar(),
+      drawer: MainDrawer(),
+      bottomNavigationBar: MainBottomNavBar(),
+      body: Column(
+        children: [
+          SizedBox(height: 20),
+          Center(
+            child: Text(
+              'Want to join a campaign?\n Enter the join code here:',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
+          SizedBox(height: 10),
+          Container(
+            width: 350,
+            child: TextField(
+              controller: joinCodeController,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Enter join code',
+              ),
+            ),
+          ),
+          SizedBox(height: 10),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              minimumSize: const Size(200, 50),
+              shadowColor: Colors.black,
+              elevation: 10,
+            ),
+            onPressed: () {
+              // Process the join code
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => const CampaignScreen()));
+            },
+            child: Text(
+              'Submit Join Code',
+              style: TextStyle(
+                color: Theme.of(context).textTheme.bodyMedium?.color,
+              ),
+            ),
+          ),
+          SizedBox(height: 20),
+          Center(
+            child: Text(
+              'Optionally: Select a character to join with:',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
+          SizedBox(height: 10),
+          Container(
+            width: 350,
+            child: DropdownButton<String>(
+              value: selectedCharacter,
+              onChanged: (String? newValue) {
+                setState(() {
+                  selectedCharacter = newValue!;
+                });
+              },
+              items: characters.map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+              hint: Text('Select a character'),
+            ),
+          ),
+          Divider(
+            color: Colors.white,
+          ),
+          SizedBox(height: 30),
+          Center(
+            child: Text(
+              'Create a new campaign:',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
+          SizedBox(height: 10),
+          Container(
+            width: 350,
+            child: TextFormField(
+              controller: campaignNameController,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Campaign Name',
+              ),
+            ),
+          ),
+          SizedBox(height: 10),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              minimumSize: const Size(200, 50),
+              shadowColor: Colors.black,
+              elevation: 10,
+            ),
+            onPressed: () {
+              // Process the new campaign
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => const CampaignScreen()));
+            },
+            child: Text(
+              'Create New Campaign',
+              style: TextStyle(
+                color: Theme.of(context).textTheme.bodyMedium?.color,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

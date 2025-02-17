@@ -1,10 +1,9 @@
-import '../widgets/bottom_navbar.dart';
 import 'package:flutter/material.dart';
 import '../widgets/main_appbar.dart';
 import '../widgets/main_drawer.dart';
+import '../widgets/bottom_navbar.dart';
 import '../models/campaign.dart';
-// import '../screens/new_campaign_screen.dart';
-
+import 'new_campaign_screen.dart';
 
 class CampaignScreen extends StatefulWidget {
   const CampaignScreen({super.key});
@@ -14,7 +13,6 @@ class CampaignScreen extends StatefulWidget {
 }
 
 class _CampaignScreenState extends State<CampaignScreen> {
-  //This is a hardcoded list of campaigns, but I will get somehting similar from fierbase later
   final List<Campaign> _campaigns = [
     Campaign(
         id: '1',
@@ -50,11 +48,9 @@ class _CampaignScreenState extends State<CampaignScreen> {
 
   String _gameType(bool isDm) {
     return isDm ? 'Dungeon Master' : 'Player';
-  } //bascially a function to return the game type
+  }
 
-  //for testing purposes, simulating a delay to get the campaigns from "firestore"
   Stream<List<Campaign>> _getCampaigns() async* {
-    // Simulate a delay
     await Future.delayed(const Duration(seconds: 1));
     yield _campaigns;
   }
@@ -66,98 +62,97 @@ class _CampaignScreenState extends State<CampaignScreen> {
     return Scaffold(
       appBar: const MainAppbar(),
       drawer: const MainDrawer(),
-      // bottomNavigationBar: const BottomNavBar(),
       bottomNavigationBar: const MainBottomNavBar(),
       backgroundColor: theme,
       body: Column(
         children: [
-          SizedBox(
-            width: double.infinity,
-            height: 550,
+          Expanded(
             child: StreamBuilder<List<Campaign>>(
               stream: _getCampaigns(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                      child:
-                          CircularProgressIndicator()); //funny circle loading icon
+                  return const Center(child: CircularProgressIndicator());
                 }
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(
-                      child: Text(
-                          'No campaigns found')); //if no campaigns are found notifies the user
+                  return const Center(child: Text('No campaigns found'));
                 }
 
                 final campaigns = snapshot.data!;
 
-                return ListView.builder(
-                  //using a list view becuase I dont know how many campaigns there will be
-                  itemCount: campaigns.length,
-                  itemBuilder: (context, index) {
-                    final campaign = campaigns[index];
-                    return Column(
-                      children: [
-                        SizedBox(height: 20),
-                        Center(
-                            child: Text(
-                                'Campaign: ${campaign.title}')), //puts the name of the campaign over the image
-                        GestureDetector(
-                          onTap: () {
-                            // Handles the tap - will link to another page later
-                          },
-                          child: Container(
-                            margin: const EdgeInsets.all(8.0),
-                            height: 150,
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.black, width: 1),
-                              boxShadow: const [
-                                BoxShadow(
-                                  spreadRadius: 2,
-                                  color: Colors.black,
-                                  blurRadius: 5,
-                                  offset: Offset(0, 3),
+                return Stack(
+                  children: [
+                    ListView.builder(
+                      padding: const EdgeInsets.only(bottom: 50),
+                      itemCount: campaigns.length,
+                      itemBuilder: (context, index) {
+                        final campaign = campaigns[index];
+                        return Column(
+                          children: [
+                            const SizedBox(height: 20),
+                            Center(
+                                child: Text(
+                                    'Campaign: ${campaign.title}',
+                                    style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold))),
+                            GestureDetector(
+                              onTap: () {
+                                // Handles the tap - will link to another page later
+                              },
+                              child: Container(
+                                margin: const EdgeInsets.all(8.0),
+                                height: 200,
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                      color: Colors.black, width: 1),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      spreadRadius: 2,
+                                      color: Colors.black,
+                                      blurRadius: 5,
+                                      offset: Offset(0, 3),
+                                    ),
+                                  ],
                                 ),
-                              ],
+                                child: Image.asset(
+                                  campaign.imageUrl,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
                             ),
-                            child: Image.asset(
-                              campaign.imageUrl,
-                              fit: BoxFit.cover,
+                            Center(
+                                child: Text(
+                                    'Your Role: ${_gameType(campaign.isDM)}',
+                                    style: const TextStyle(fontSize: 16))),
+                          ],
+                        );
+                      },
+                    ),
+                    Positioned.fill(
+                      child: Align(
+                        alignment: Alignment.bottomCenter,
+                        child: Container(
+                          height: 50,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.bottomCenter,
+                              end: Alignment.topCenter,
+                              colors: [
+                                theme.withAlpha(255), //fully opaque
+                                theme.withAlpha(0), //fully transparent
+                              ],
                             ),
                           ),
                         ),
-                        Center(
-                            child: Text(
-                                'Your Role: ${_gameType(campaign.isDM)}')), //puts the game type under the image
-                      ],
-                    );
-                  },
+                      ),
+                    ),
+                  ],
                 );
               },
             ),
           ),
-          const SizedBox(height: 30), //end of the list view
-          // Center(
-          //   child: ElevatedButton(
-          //     //set the button width
-          //     style: ElevatedButton.styleFrom(
-          //       minimumSize: const Size(200, 50),
-          //       //add a shodow t the button 
-          //       shadowColor: Colors.black,
-          //       elevation: 10,
-          //     ),
-          //     onPressed: () {
-          //       // Handles the tap - will link to another page later
-          //     },
-          //     child: Text(
-          //       'Create a new campaign',
-          //       style: TextStyle(
-          //         color: Theme.of(context).textTheme.bodyMedium?.color,
-          //       ),
-          //     ),
-          //   ),
-          // ),
-          const SizedBox(height: 30),
+          const SizedBox(height: 20),
           Center(
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -166,21 +161,21 @@ class _CampaignScreenState extends State<CampaignScreen> {
                 elevation: 10,
               ),
               onPressed: () {
-                // Routes to the NewCampaignScreen
-                // Navigator.of(context).push(
-                //   MaterialPageRoute(
-                //     builder: (context) => const NewCampaignScreen(),
-                //   ),
-                // );
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const NewCampaignScreen(),
+                  ),
+                );
               },
               child: Text(
-                'New Campaign',
+                'Create or Join a New Campaign',
                 style: TextStyle(
                   color: Theme.of(context).textTheme.bodyMedium?.color,
                 ),
               ),
             ),
           ),
+          const SizedBox(height: 20),
         ],
       ),
     );
