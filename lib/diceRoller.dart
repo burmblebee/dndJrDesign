@@ -41,8 +41,8 @@ class _DiceRollScreenState extends State<DiceRollScreen>
   bool showDice = false;
   bool advantage = false;
   bool disadvantage = false;
-  Color advantageButtonColor = Colors.white;
-  Color disadvantageButtonColor = Colors.white;
+  Color advantageButtonColor = Color(0xFF25291C);
+  Color disadvantageButtonColor = Color(0xFF25291C);
   Color diceColor = Color.fromARGB(255, 243, 241, 230);
   Color onDiceColor = Color(0xFF464538);
 
@@ -55,7 +55,6 @@ class _DiceRollScreenState extends State<DiceRollScreen>
       vsync: this,
       duration: Duration(seconds: 1),
     )..repeat(reverse: true); // Keep it animating while rolling
-
   }
 
   void rollDice() {
@@ -127,29 +126,28 @@ class _DiceRollScreenState extends State<DiceRollScreen>
   }
 
   void sendToCampaign() async {
-    if(widget.campaignId != '') {
-      final String? currentUserUid = FirebaseAuth.instance.currentUser?.uid;
-      if (currentUserUid != null) {
-        final docRef = FirebaseFirestore.instance
-            .collection('campaigns')
-            .doc(campaignId);
-
-        try {
-          await docRef.set({
-            'Rolls': diceValues,
-            'Total': diceValues.reduce((value, element) => value + element),
-            'timestamp': FieldValue.serverTimestamp(), // Add timestamp
-            'userId': currentUserUid, // Store the user who rolled
-          }, SetOptions(merge: true));
-
-          print('Rolls successfully sent to campaign: $campaignId');
-        } catch (e) {
-          print('Error saving dice rolls: $e');
-        }
-      }
-    }
+    // if(widget.campaignId != '') {
+    //   final String? currentUserUid = FirebaseAuth.instance.currentUser?.uid;
+    //   if (currentUserUid != null) {
+    //     final docRef = FirebaseFirestore.instance
+    //         .collection('campaigns')
+    //         .doc(campaignId);
+    //
+    //     try {
+    //       await docRef.set({
+    //         'Rolls': diceValues,
+    //         'Total': diceValues.reduce((value, element) => value + element),
+    //         'timestamp': FieldValue.serverTimestamp(), // Add timestamp
+    //         'userId': currentUserUid, // Store the user who rolled
+    //       }, SetOptions(merge: true));
+    //
+    //       print('Rolls successfully sent to campaign: $campaignId');
+    //     } catch (e) {
+    //       print('Error saving dice rolls: $e');
+    //     }
+    //   }
+    // }
   }
-
 
   void showAdvantageDialog() {
     showDialog(
@@ -186,7 +184,6 @@ class _DiceRollScreenState extends State<DiceRollScreen>
   }
 
   void showRollResultDialog(int total) {
-
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -222,10 +219,9 @@ class _DiceRollScreenState extends State<DiceRollScreen>
       children: [
         Container(
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.black),
-            borderRadius: BorderRadius.circular(10),
-            color: Color(0xFF25291C)
-          ),
+              border: Border.all(color: Colors.black),
+              borderRadius: BorderRadius.circular(10),
+              color: Color(0xFF25291C)),
           height: 150,
           width: 150,
           child: Column(
@@ -240,7 +236,7 @@ class _DiceRollScreenState extends State<DiceRollScreen>
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color:onDiceColor, // Ensure contrast
+                      color: onDiceColor, // Ensure contrast
                     ),
                   ),
                 ],
@@ -286,8 +282,8 @@ class _DiceRollScreenState extends State<DiceRollScreen>
     setState(() {
       advantage = !advantage;
       disadvantage = false;
-      advantageButtonColor = advantage ? Colors.green : Colors.white;
-      disadvantageButtonColor = Colors.white;
+      advantageButtonColor = advantage ? Colors.green : Color(0xFF25291C);
+      disadvantageButtonColor = Color(0xFF25291C);
     });
   }
 
@@ -295,8 +291,8 @@ class _DiceRollScreenState extends State<DiceRollScreen>
     setState(() {
       disadvantage = !disadvantage;
       advantage = false;
-      disadvantageButtonColor = disadvantage ? Colors.red : Colors.white;
-      advantageButtonColor = Colors.white;
+      disadvantageButtonColor = disadvantage ? Colors.red : Color(0xFF25291C);
+      advantageButtonColor = Color(0xFF25291C);
     });
   }
 
@@ -366,6 +362,37 @@ class _DiceRollScreenState extends State<DiceRollScreen>
           ),
         );
       }),
+    );
+  }
+
+  Widget removeDiceContainer() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          decoration: BoxDecoration(
+              border: Border.all(color: Colors.black),
+              borderRadius: BorderRadius.circular(10),
+              color: Color(0xFF25291C)),
+          height: 150,
+          width: 150,
+          child: Column(
+            children: [
+              Spacer(),
+              Icon(Icons.cancel_outlined, size: 75, color: diceColor),
+              SizedBox(height: 10),
+              Row(
+                children: [
+                  Spacer(),
+                  ElevatedButton(onPressed: removeDice(), child: Text("Remove Dice", style: TextStyle(color: Colors.white))),
+                  Spacer(),
+                ],
+              ),
+              Spacer()
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -443,12 +470,20 @@ class _DiceRollScreenState extends State<DiceRollScreen>
                     ],
                   ),
                   SizedBox(height: 15),
-                  buildDice(
-                      "d100",
-                      CustomPaint(
-                          painter: DecagonPainter(diceColor),
-                          size: Size(80, 80)),
-                      6),
+                  Row(
+                    children: [
+                      Spacer(),
+                      buildDice(
+                          "d100",
+                          CustomPaint(
+                              painter: DecagonPainter(diceColor),
+                              size: Size(80, 80)),
+                          6),
+                      Spacer(),
+                      removeDiceContainer(),
+                      Spacer(),
+                    ],
+                  ),
                   SizedBox(height: 15),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -458,19 +493,27 @@ class _DiceRollScreenState extends State<DiceRollScreen>
                         style: ButtonStyle(
                             backgroundColor:
                                 WidgetStateProperty.all(advantageButtonColor)),
-                        child: Text("Advantage"),
+                        child: Text("Advantage",
+                            style: TextStyle(
+                                color: ((advantage)
+                                    ? Color(0xFF25291C)
+                                    : Colors.white))),
                       ),
                       ElevatedButton(
                           onPressed: () {
                             rollDice();
                           },
-                          child: const Text("Roll Dice")),
+                          child: const Text("Roll Dice", style: TextStyle(color: Colors.white))),
                       ElevatedButton(
                         onPressed: disadvantageToggle,
                         style: ButtonStyle(
                             backgroundColor: WidgetStateProperty.all(
                                 disadvantageButtonColor)),
-                        child: Text("Disadvantage"),
+                        child: Text("Disadvantage",
+                            style: TextStyle(
+                                color: ((disadvantage)
+                                    ? Color(0xFF25291C)
+                                    : Colors.white))),
                       ),
                     ],
                   ),
@@ -481,6 +524,14 @@ class _DiceRollScreenState extends State<DiceRollScreen>
         ],
       ),
     );
+  }
+
+  removeDice() {
+    return () {
+      setState(() {
+        diceToRoll = [0, 0, 0, 0, 0, 0, 0];
+      });
+    };
   }
 }
 
