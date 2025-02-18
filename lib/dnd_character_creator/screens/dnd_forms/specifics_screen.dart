@@ -182,41 +182,32 @@ class _SpecificsScreenState extends State<SpecificsScreen> {
   
   //Method to save the selections to the database
   Future<void> _saveSelections() async {
-    //grab the current userID so we can save the data to the correct user
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      // Handle user not being authenticated
-      print('User not authenticated');
-      return;
-    }
-    final userId = user.uid;
+  try {
+    // Access Firestore
+    final firestore = FirebaseFirestore.instance;
+    
+    // Reference to the document for this character, using characterName instead of userId
+    final docRef = firestore.collection('characters').doc(widget.characterName);
 
-    try {
-      // Access Firestore
-      final firestore = FirebaseFirestore.instance;
-      
+    // Set the data
+    await docRef.set({
+      'race': widget.raceName,
+      'class': widget.className,
+      'background': widget.backgroundName,
+      'proficiencies': _selectedProficiencies + _givenProficiencies,
+      'languages': _selectedLanguages + _givenLanguages,
+    });
 
-      // Reference to the document for this character
-      final docRef = firestore.collection('app_user_profiles/${userId}/characters').doc(widget.characterName);
-
-      // Set the data
-      await docRef.set({
-        'race' : widget.raceName,
-        'class': widget.className,
-        'background': widget.backgroundName,
-        'proficiencies': "${_selectedProficiencies + _givenProficiencies}",
-        'languages': "${_selectedLanguages + _givenLanguages}",
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Data saved successfully!")),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Failed to save data: $e")),
-      );
-    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Data saved successfully!")),
+    );
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Failed to save data: $e")),
+    );
   }
+}
+
 
 
 

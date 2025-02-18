@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../Screens/dnd_forms/race_selection.dart';
 
 class CharacterName extends StatefulWidget {
-
-
   const CharacterName({super.key});
 
   @override
@@ -24,28 +21,37 @@ class _CharacterNameState extends State<CharacterName> {
     });
   }
 
-  // Function to save character name to Firestore
+  // Function to save character name to Firestore under the character's name as the document ID
   Future<void> saveCharacterName() async {
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        // If no user is signed in, print an error
-        print('No user is signed in!');
+      if (_characterName.isEmpty) {
+        print('Character name cannot be empty!');
         return;
       }
+
+      // Save character data under the character's name
+      await FirebaseFirestore.instance
+          .collection('characters') // Firestore collection
+          .doc(_characterName) // Use character name as the document ID
+          .set({
+        'name': _characterName, // Store name explicitly
+        'created_at': Timestamp.now(), // Optional timestamp
+      });
+
+      print('Character "$_characterName" saved to Firestore!');
     } catch (e) {
       print('Error saving character name: $e');
     }
   }
 
-  //set up save character name to send a map with the character name to the firestore
   final customColor = const Color.fromARGB(255, 138, 28, 20);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: customColor,foregroundColor: Colors.white,
+        backgroundColor: customColor,
+        foregroundColor: Colors.white,
         title: const Text('Character Name'),
       ),
       body: Padding(
@@ -88,7 +94,7 @@ class _CharacterNameState extends State<CharacterName> {
                       // Save the character name to Firestore
                       await saveCharacterName();
 
-                      // Navigate to the next screen with characterID as characterName
+                      // Navigate to the next screen with character name
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -98,7 +104,6 @@ class _CharacterNameState extends State<CharacterName> {
                         ),
                       );
                     } else {
-                      // Show an error message if the character name is empty
                       print('Character name cannot be empty!');
                     }
                   },

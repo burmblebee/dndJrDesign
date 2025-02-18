@@ -1,4 +1,3 @@
-// import 'package:dnd_character_creator/Screens/dnd_forms/specifics_selection.dart';
 import '../../screens/dnd_forms/background_selection.dart';
 import '../../screens/dnd_forms/specifics_screen.dart';
 import '../../Widgets/dnd_form_widgets/class_data_loader.dart';
@@ -7,7 +6,6 @@ import '../../widgets/dnd_form_widgets/main_drawer.dart';
 import 'package:flutter/material.dart';
 import '../../widgets/buttons/button_with_padding.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class ClassSelection extends StatefulWidget {
   final String characterName;
@@ -24,22 +22,14 @@ class _ClassSelectionState extends State<ClassSelection> {
 
   // Method to save the selected class to Firebase
   void _saveSelections() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      // Handle user not being authenticated
-      print('User not authenticated');
-      return;
-    }
-    final userId = user.uid;
-
     final docRef = FirebaseFirestore.instance
-        .collection('app_user_profiles')
-        .doc(userId); // Use the authenticated user's ID
+        .collection('characters')
+        .doc(widget.characterName); // Use character name as document ID
 
     try {
       await docRef.set({
         'class': selectedClassName,
-        'name' : widget.characterName,
+        'name': widget.characterName,
       }, SetOptions(merge: true)); // Merge ensures only this field is updated
     } catch (e) {
       print('Error saving class: $e');
@@ -90,7 +80,9 @@ class _ClassSelectionState extends State<ClassSelection> {
         ),
       ),
       appBar: AppBar(
-backgroundColor: customColor, foregroundColor: Colors.white,        title: Text(
+        backgroundColor: customColor, 
+        foregroundColor: Colors.white,
+        title: Text(
           'Class Selection for ${widget.characterName}', // Use characterName here
           style: Theme.of(context).appBarTheme.titleTextStyle,
         ),
@@ -173,7 +165,6 @@ backgroundColor: customColor, foregroundColor: Colors.white,        title: Text(
               ),
             ),
           ),
-          
         ],
       ),
     );

@@ -109,39 +109,12 @@ class _StatsScreenState extends State<StatsScreen> {
     });
   }
 
+  // Replace your _getRace() with this version:
   Future<void> _getRace() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      print('User not authenticated');
-      return;
-    }
-    final userId = user.uid;
-
-    try {
-      final firestore = FirebaseFirestore.instance;
-      final docRef = firestore
-          .collection('app_user_profiles')
-          .doc(userId)
-          .collection('characters')
-          .doc(widget.characterName);
-
-      final docSnapshot = await docRef.get();
-      if (docSnapshot.exists) {
-        final data = docSnapshot.data();
-        if (data != null && data.containsKey('race')) {
-          final race = data['race'];
-          setState(() {
-            _selectedRace = race;
-          });
-        } else {
-          print('Race field does not exist in the document');
-        }
-      } else {
-        print('Document does not exist');
-      }
-    } catch (e) {
-      print('Error getting race: $e');
-    }
+    // Instead of fetching from a user-specific document, simply use the passed race.
+    setState(() {
+      _selectedRace = widget.selectedRace;
+    });
   }
 
   void _decrementSkill(String skill) {
@@ -251,8 +224,8 @@ class _StatsScreenState extends State<StatsScreen> {
     final scoresToUse = index == 0
         ? baseScores
         : index == 1
-        ? rolledScores
-        : standardScores;
+            ? rolledScores
+            : standardScores;
     final finalScores = _applyRaceBonuses(scoresToUse);
 
     // Display the final scores
@@ -290,7 +263,11 @@ class _StatsScreenState extends State<StatsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Stats"), backgroundColor: customColor,foregroundColor: Colors.white,),
+      appBar: AppBar(
+        title: const Text("Stats"),
+        backgroundColor: customColor,
+        foregroundColor: Colors.white,
+      ),
       drawer: const MainDrawer(),
       bottomNavigationBar: Row(
         children: [
@@ -301,16 +278,16 @@ class _StatsScreenState extends State<StatsScreen> {
           const SizedBox(width: 30),
           NavigationButton(
             onPressed: (index == 2 &&
-                !(readyStatuses[0] &&
-                    readyStatuses[1] &&
-                    readyStatuses[2] &&
-                    readyStatuses[3] &&
-                    readyStatuses[4] &&
-                    readyStatuses[5]))
+                    !(readyStatuses[0] &&
+                        readyStatuses[1] &&
+                        readyStatuses[2] &&
+                        readyStatuses[3] &&
+                        readyStatuses[4] &&
+                        readyStatuses[5]))
                 ? () {
-              showSnackbar(
-                  'You haven\'t picked a skill for each option!');
-            }
+                    showSnackbar(
+                        'You haven\'t picked a skill for each option!');
+                  }
                 : _showFinalScores,
             textContent: 'Next',
           ),
@@ -393,7 +370,7 @@ class _StatsScreenState extends State<StatsScreen> {
                       child: const Center(
                         child: Text('15',
                             style:
-                            TextStyle(color: Colors.black, fontSize: 50)),
+                                TextStyle(color: Colors.black, fontSize: 50)),
                       ),
                     ),
                     DropdownButton(
@@ -458,7 +435,7 @@ class _StatsScreenState extends State<StatsScreen> {
                       child: const Center(
                         child: Text('14',
                             style:
-                            TextStyle(color: Colors.black, fontSize: 50)),
+                                TextStyle(color: Colors.black, fontSize: 50)),
                       ),
                     ),
                     DropdownButton(
@@ -523,7 +500,7 @@ class _StatsScreenState extends State<StatsScreen> {
                       child: const Center(
                         child: Text('13',
                             style:
-                            TextStyle(color: Colors.black, fontSize: 50)),
+                                TextStyle(color: Colors.black, fontSize: 50)),
                       ),
                     ),
                     DropdownButton(
@@ -594,7 +571,7 @@ class _StatsScreenState extends State<StatsScreen> {
                       child: const Center(
                         child: Text('12',
                             style:
-                            TextStyle(color: Colors.black, fontSize: 50)),
+                                TextStyle(color: Colors.black, fontSize: 50)),
                       ),
                     ),
                     DropdownButton(
@@ -659,7 +636,7 @@ class _StatsScreenState extends State<StatsScreen> {
                       child: const Center(
                         child: Text('10',
                             style:
-                            TextStyle(color: Colors.black, fontSize: 50)),
+                                TextStyle(color: Colors.black, fontSize: 50)),
                       ),
                     ),
                     DropdownButton(
@@ -724,7 +701,7 @@ class _StatsScreenState extends State<StatsScreen> {
                       child: const Center(
                         child: Text('8',
                             style:
-                            TextStyle(color: Colors.black, fontSize: 50)),
+                                TextStyle(color: Colors.black, fontSize: 50)),
                       ),
                     ),
                     DropdownButton(
@@ -814,7 +791,7 @@ class _StatsScreenState extends State<StatsScreen> {
                             decoration: BoxDecoration(
                               color: customColor,
                               borderRadius:
-                              const BorderRadius.all(Radius.circular(10)),
+                                  const BorderRadius.all(Radius.circular(10)),
                             ),
                             height: 100,
                             width: 100,
@@ -849,23 +826,24 @@ class _StatsScreenState extends State<StatsScreen> {
     );
   }
 
+  // Replace your _saveSelections() with this version:
   Future<void> _saveSelections() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      print('User not authenticated');
-      return;
-    }
-    final userId = user.uid;
-
     try {
       final firestore = FirebaseFirestore.instance;
-      final docRef = firestore
-          .collection('app_user_profiles')
-          .doc(userId)
-          .collection('characters')
-          .doc(widget.characterName);
+      // Use a root-level collection (e.g., "characters") and the character's name as the document ID.
+      final docRef =
+          firestore.collection('characters').doc(widget.characterName);
 
-      // Define all ability scores and default them to 0 if not set
+      // Choose the ability scores based on the selected index.
+      if (index == 0) {
+        abilityScores = baseScores;
+      } else if (index == 1) {
+        abilityScores = rolledScores;
+      } else {
+        abilityScores = standardScores;
+      }
+
+      // Set default scores for every ability.
       final Map<String, int> defaultAbilityScores = {
         'Strength': 8,
         'Dexterity': 8,
@@ -875,20 +853,7 @@ class _StatsScreenState extends State<StatsScreen> {
         'Charisma': 8,
       };
 
-    //   buildPointBuy(),
-    // buildDiceRoller(),
-    // buildStandardArray(),
-
-      if(index == 0) {
-        abilityScores = baseScores;
-      } else if(index == 1) {
-        abilityScores = rolledScores;
-      } else {
-        abilityScores = standardScores;
-      }
-
-
-      // Merge current abilityScores with defaults (ensures every score is included)
+      // Merge ability scores with racial bonuses.
       final updatedAbilityScores = {
         for (final key in defaultAbilityScores.keys)
           key: (abilityScores[key] ?? defaultAbilityScores[key])! +
@@ -896,22 +861,16 @@ class _StatsScreenState extends State<StatsScreen> {
                   0),
       };
 
-      // Save to Firestore
-      await docRef.set(
-        {'abilityScores': updatedAbilityScores},
-        SetOptions(merge: true),
-      );
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Data saved successfully!")),
-      );
+      // Save the data under the "characters" collection.
+      await docRef.set({
+        'name': widget.characterName,
+        'race': widget.selectedRace,
+        'abilityScores': updatedAbilityScores,
+      }, SetOptions(merge: true));
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Failed to save data: $e")),
-      );
+      print("Error saving selections: $e");
     }
   }
-
 
   // Future<void> _saveSelections() async {
   //   final user = FirebaseAuth.instance.currentUser;
@@ -1025,9 +984,9 @@ class _StatsScreenState extends State<StatsScreen> {
               value: _chosenAbility,
               items: rolledScores.keys
                   .map((key) => DropdownMenuItem(
-                value: key,
-                child: Text(key),
-              ))
+                        value: key,
+                        child: Text(key),
+                      ))
                   .toList(),
               onChanged: (value) => setState(() => _chosenAbility = value!),
             ),

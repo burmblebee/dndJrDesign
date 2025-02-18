@@ -1,26 +1,25 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../screens/dnd_forms/character_trait_selection.dart';
-import '../../screens/dnd_forms/spell_selection.dart';
-import '../../widgets/loaders/weapon_data_loader.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../../widgets/loaders/alignment_data_loader.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:warlocks_of_the_beach/rpg_awesome_icons.dart';
+import '../../screens/dnd_forms/character_trait_selection.dart';
 import '../../widgets/dnd_form_widgets/main_drawer.dart';
 import '../../widgets/buttons/navigation_button.dart';
-import '../../widgets/loaders/lifestyle_data_loader.dart';
+import '../../widgets/loaders/weapon_data_loader.dart';
 
 class EquipmentSelection extends StatefulWidget {
-  const EquipmentSelection({super.key, required this.characterName});
+  const EquipmentSelection({Key? key, required this.characterName})
+      : super(key: key);
 
-  final characterName;
+  final String characterName;
 
   @override
   _EquipmentSelectionState createState() => _EquipmentSelectionState();
 }
 
 class _EquipmentSelectionState extends State<EquipmentSelection> {
+  // Lists of available weapons (excluding a "None" option)
   final List<String> simpleWeapons = [
-    'None',
     'Club',
     'Dagger',
     'Greatclub',
@@ -39,7 +38,6 @@ class _EquipmentSelectionState extends State<EquipmentSelection> {
   ];
 
   final List<String> martialWeapons = [
-    'None',
     'Battleaxe',
     'Flail',
     'Glaive',
@@ -58,233 +56,328 @@ class _EquipmentSelectionState extends State<EquipmentSelection> {
     'War Pick',
     'Warhammer',
     'Whip',
-    'Blowgun',
     'Hand Crossbow',
     'Heavy Crossbow',
     'Longbow',
     'Net',
   ];
 
-  late Widget mainContent;
-  late var weaponOne = "None";
-  late var weaponTwo = "None";
-  late var weaponThree = "None";
-  late var weaponFour = "None";
-  final customColor = const Color.fromARGB(255, 138, 28, 20);
+  // Combined list of weapons (duplicates removed and sorted alphabetically)
+  late final List<String> allWeapons = (() {
+    final weapons = {...simpleWeapons, ...martialWeapons}.toList();
+    weapons.sort();
+    return weapons;
+  })();
 
-  final TextEditingController _firstWeaponController = TextEditingController();
-  final TextEditingController _secondWeaponController = TextEditingController();
-  final TextEditingController _thirdWeaponController = TextEditingController();
-  final TextEditingController _fourthWeaponController = TextEditingController();
+  // Mapping of weapon details.
+  final Map<String, Map<String, String>> weaponDetails = {
+    'Club': {
+      'cost': '1 gp',
+      'damage': '1d4',
+      'damageType': 'Bludgeoning',
+      'weaponType': 'Simple'
+    },
+    'Dagger': {
+      'cost': '2 gp',
+      'damage': '1d4',
+      'damageType': 'Piercing',
+      'weaponType': 'Simple'
+    },
+    'Greatclub': {
+      'cost': '2 gp',
+      'damage': '1d8',
+      'damageType': 'Bludgeoning',
+      'weaponType': 'Simple'
+    },
+    'Handaxe': {
+      'cost': '5 gp',
+      'damage': '1d6',
+      'damageType': 'Slashing',
+      'weaponType': 'Simple'
+    },
+    'Javelin': {
+      'cost': '1 gp',
+      'damage': '1d6',
+      'damageType': 'Piercing',
+      'weaponType': 'Simple'
+    },
+    'Light Hammer': {
+      'cost': '2 gp',
+      'damage': '1d4',
+      'damageType': 'Bludgeoning',
+      'weaponType': 'Simple'
+    },
+    'Mace': {
+      'cost': '5 gp',
+      'damage': '1d6',
+      'damageType': 'Bludgeoning',
+      'weaponType': 'Simple'
+    },
+    'Quarterstaff': {
+      'cost': '2 gp',
+      'damage': '1d6',
+      'damageType': 'Bludgeoning',
+      'weaponType': 'Simple'
+    },
+    'Sickle': {
+      'cost': '1 gp',
+      'damage': '1d4',
+      'damageType': 'Slashing',
+      'weaponType': 'Simple'
+    },
+    'Spear': {
+      'cost': '1 gp',
+      'damage': '1d6',
+      'damageType': 'Piercing',
+      'weaponType': 'Simple'
+    },
+    'Light Crossbow': {
+      'cost': '25 gp',
+      'damage': '1d8',
+      'damageType': 'Piercing',
+      'weaponType': 'Simple'
+    },
+    'Dart': {
+      'cost': '1/4 gp',
+      'damage': '1d4',
+      'damageType': 'Piercing',
+      'weaponType': 'Simple'
+    },
+    'Shortbow': {
+      'cost': '25 gp',
+      'damage': '1d6',
+      'damageType': 'Piercing',
+      'weaponType': 'Simple'
+    },
+    'Sling': {
+      'cost': '1 gp',
+      'damage': '1d4',
+      'damageType': 'Bludgeoning',
+      'weaponType': 'Simple'
+    },
+    'Blowgun': {
+      'cost': '10 gp',
+      'damage': '1',
+      'damageType': 'Piercing',
+      'weaponType': 'Simple'
+    },
+    'Battleaxe': {
+      'cost': '10 gp',
+      'damage': '1d8',
+      'damageType': 'Slashing',
+      'weaponType': 'Martial'
+    },
+    'Flail': {
+      'cost': '10 gp',
+      'damage': '1d8',
+      'damageType': 'Bludgeoning',
+      'weaponType': 'Martial'
+    },
+    'Glaive': {
+      'cost': '20 gp',
+      'damage': '1d10',
+      'damageType': 'Slashing',
+      'weaponType': 'Martial'
+    },
+    'Greataxe': {
+      'cost': '30 gp',
+      'damage': '1d12',
+      'damageType': 'Slashing',
+      'weaponType': 'Martial'
+    },
+    'Greatsword': {
+      'cost': '50 gp',
+      'damage': '2d6',
+      'damageType': 'Slashing',
+      'weaponType': 'Martial'
+    },
+    'Halberd': {
+      'cost': '20 gp',
+      'damage': '1d10',
+      'damageType': 'Slashing',
+      'weaponType': 'Martial'
+    },
+    'Lance': {
+      'cost': '10 gp',
+      'damage': '1d12',
+      'damageType': 'Piercing',
+      'weaponType': 'Martial'
+    },
+    'Longsword': {
+      'cost': '15 gp',
+      'damage': '1d8',
+      'damageType': 'Slashing',
+      'weaponType': 'Martial'
+    },
+    'Maul': {
+      'cost': '10 gp',
+      'damage': '2d6',
+      'damageType': 'Bludgeoning',
+      'weaponType': 'Martial'
+    },
+    'Morningstar': {
+      'cost': '15 gp',
+      'damage': '1d8',
+      'damageType': 'Piercing',
+      'weaponType': 'Martial'
+    },
+    'Pike': {
+      'cost': '5 gp',
+      'damage': '1d10',
+      'damageType': 'Piercing',
+      'weaponType': 'Martial'
+    },
+    'Rapier': {
+      'cost': '25 gp',
+      'damage': '1d8',
+      'damageType': 'Piercing',
+      'weaponType': 'Martial'
+    },
+    'Scimitar': {
+      'cost': '25 gp',
+      'damage': '1d6',
+      'damageType': 'Slashing',
+      'weaponType': 'Martial'
+    },
+    'Shortsword': {
+      'cost': '10 gp',
+      'damage': '1d6',
+      'damageType': 'Piercing',
+      'weaponType': 'Martial'
+    },
+    'Trident': {
+      'cost': '5 gp',
+      'damage': '1d6',
+      'damageType': 'Piercing',
+      'weaponType': 'Martial'
+    },
+    'War Pick': {
+      'cost': '5 gp',
+      'damage': '1d8',
+      'damageType': 'Piercing',
+      'weaponType': 'Martial'
+    },
+    'Warhammer': {
+      'cost': '15 gp',
+      'damage': '1d8',
+      'damageType': 'Bludgeoning',
+      'weaponType': 'Martial'
+    },
+    'Whip': {
+      'cost': '2 gp',
+      'damage': '1d4',
+      'damageType': 'Slashing',
+      'weaponType': 'Martial'
+    },
+    'Hand Crossbow': {
+      'cost': '75 gp',
+      'damage': '1d6',
+      'damageType': 'Piercing',
+      'weaponType': 'Martial'
+    },
+    'Heavy Crossbow': {
+      'cost': '50 gp',
+      'damage': '1d10',
+      'damageType': 'Piercing',
+      'weaponType': 'Martial'
+    },
+    'Longbow': {
+      'cost': '50 gp',
+      'damage': '1d8',
+      'damageType': 'Piercing',
+      'weaponType': 'Martial'
+    },
+    'Net': {
+      'cost': '1 gp',
+      'damage': '-',
+      'damageType': '-',
+      'weaponType': 'Martial'
+    },
+  };
 
-  String _currentSection = 'Weapon 1';
+  // Controller for the search bar.
+  final TextEditingController _searchController = TextEditingController();
+  String searchQuery = '';
 
-  void _saveSelections() async {
-    final String? currentUserUid = FirebaseAuth.instance.currentUser?.uid;
-    if (currentUserUid != null) {
-      final docRef = FirebaseFirestore.instance
-          .collection('app_user_profiles')
-          .doc(currentUserUid)
-          .collection('characters')
-          .doc(widget.characterName); // Use the UID directly
+  // List to hold the selected weapons.
+  List<String> selectedWeapons = [];
 
-      try {
-        await docRef.set({
-          'weaponOne': weaponOne,
-          'weaponTwo': weaponTwo,
-          'weaponThree': weaponThree,
-          'weaponFour': weaponFour,
-          'name': widget.characterName,
-        }, SetOptions(merge: true)); // Merge ensures only this field is updated
-      } catch (e) {
-        print('Error saving weapons: $e');
-      }
+  // Custom color used in the UI.
+  final Color customColor = const Color.fromARGB(255, 138, 28, 20);
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(() {
+      setState(() {
+        searchQuery = _searchController.text;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+    
+  }
+
+  // Returns a FontAwesome icon that best matches the given weapon.
+  IconData _getWeaponIcon(String weapon) {
+    final lower = weapon.toLowerCase();
+    if (lower.contains('sword') ||
+        lower.contains('rapier') ||
+        lower.contains('scimitar') ||
+        lower.contains('shortsword') ||
+        lower.contains('longsword') ||
+        lower.contains('greatsword')) {
+       return RpgAwesomeIcons.crossedSwords;
+    } else if (lower.contains('axe')) {
+      return RpgAwesomeIcons.batteredAxe;
+    } else if (lower.contains('bow') || lower.contains('crossbow')) {
+      return RpgAwesomeIcons.arrowCluster;
+    } else if (lower.contains('dagger')) {
+      return RpgAwesomeIcons.knife; 
+    } else if (lower.contains('club') ||
+        lower.contains('mace') ||
+        lower.contains('hammer') ||
+        lower.contains('flail')) {
+      return FontAwesomeIcons.hammer;
+    } else if (lower.contains('spear') || lower.contains('javelin')) {
+      return FontAwesomeIcons.solidCircle; // a placeholder icon
     }
+    return FontAwesomeIcons.crosshairs; // default icon
   }
 
-  Widget weaponOneScreen() {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Weapon 1',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-            const SizedBox(height: 10),
-            DropdownButton<String>(
-              value: weaponOne,
-              hint: Text('Select a weapon'),
-              items: simpleWeapons.map((String weapon) {
-                return DropdownMenuItem<String>(
-                  value: weapon,
-                  child: Text(weapon),
-                );
-              }).toList(),
-              onChanged: (String? newValue) {
-                setState(() {
-                  weaponOne = newValue ?? "None";
-                });
-              },
-            ),
-            if (weaponOne.isNotEmpty)
-              WeaponDataLoader(
-                weaponName: weaponOne,
-                WeaponType: "SimpleWeapons",
-              ),
-            const SizedBox(height: 35),
-          ],
-        ),
-      ),
-    );
-  }
+  // Save the selected weapons to Firestore under a root-level "characters" collection.
+  Future<void> _saveSelections() async {
+    try {
+      final firestore = FirebaseFirestore.instance;
+      final docRef =
+          firestore.collection('characters').doc(widget.characterName);
 
-  Widget weaponTwoScreen() {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Weapon 2',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-            const SizedBox(height: 10),
-            DropdownButton<String>(
-              value: weaponTwo,
-              hint: Text('Select a weapon'),
-              items: simpleWeapons.map((String weapon) {
-                return DropdownMenuItem<String>(
-                  value: weapon,
-                  child: Text(weapon),
-                );
-              }).toList(),
-              onChanged: (String? newValue) {
-                setState(() {
-                  weaponTwo = newValue ?? "None";
-                });
-              },
-            ),
-            if (weaponTwo.isNotEmpty)
-              WeaponDataLoader(
-                weaponName: weaponTwo,
-                WeaponType: "SimpleWeapons",
-              ),
-            const SizedBox(height: 35),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget weaponThreeScreen() {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Weapon 3',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-            const SizedBox(height: 10),
-            DropdownButton<String>(
-              value: weaponThree,
-              hint: Text('Select a weapon'),
-              items: martialWeapons.map((String weapon) {
-                return DropdownMenuItem<String>(
-                  value: weapon,
-                  child: Text(weapon),
-                );
-              }).toList(),
-              onChanged: (String? newValue) {
-                setState(() {
-                  weaponThree = newValue ?? "None";
-                });
-              },
-            ),
-            if (weaponThree.isNotEmpty)
-              WeaponDataLoader(
-                weaponName: weaponThree,
-                WeaponType: "MartialWeapons",
-              ),
-            const SizedBox(height: 35),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget weaponFourScreen() {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Weapon 4',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-            const SizedBox(height: 10),
-            DropdownButton<String>(
-              value: weaponFour,
-              hint: Text('Select a weapon'),
-              items: martialWeapons.map((String weapon) {
-                return DropdownMenuItem<String>(
-                  value: weapon,
-                  child: Text(weapon),
-                );
-              }).toList(),
-              onChanged: (String? newValue) {
-                setState(() {
-                  weaponFour = newValue ?? "None";
-                });
-              },
-            ),
-            if (weaponFour.isNotEmpty)
-              WeaponDataLoader(
-                weaponName: weaponFour,
-                WeaponType: "MartialWeapons",
-              ),
-            const SizedBox(height: 35),
-          ],
-        ),
-      ),
-    );
+      await docRef.set({
+        'name': widget.characterName,
+        'weapons': selectedWeapons,
+      }, SetOptions(merge: true));
+    } catch (e) {
+      print('Error saving weapons: $e');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_currentSection == 'Weapon 1') {
-      mainContent = weaponOneScreen();
-    } else if (_currentSection == 'Weapon 2') {
-      mainContent = weaponTwoScreen();
-    } else if (_currentSection == 'Weapon 3') {
-      mainContent = weaponThreeScreen();
-    } else if (_currentSection == 'Weapon 4') {
-      mainContent = weaponFourScreen();
-    } else {
-      mainContent = Container();
-    }
+    // Filter available weapons by the current search query (case-insensitive)
+    final List<String> filteredWeapons = allWeapons.where((weapon) {
+      return weapon.toLowerCase().contains(searchQuery.toLowerCase());
+    }).toList();
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: const Text("Equipment"),
-        iconTheme: const IconThemeData(color: Colors.white),
-        backgroundColor: customColor,foregroundColor: Colors.white,
+        backgroundColor: customColor,
+        foregroundColor: Colors.white,
       ),
       drawer: const MainDrawer(),
       bottomNavigationBar: Row(
@@ -303,7 +396,8 @@ class _EquipmentSelectionState extends State<EquipmentSelection> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => CharacterTraitScreen(characterName: widget.characterName), // Pass characterName
+                  builder: (context) => CharacterTraitScreen(
+                      characterName: widget.characterName),
                 ),
               );
             },
@@ -311,49 +405,109 @@ class _EquipmentSelectionState extends State<EquipmentSelection> {
         ],
       ),
       body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            const SizedBox(height: 20),
-            SegmentedButton<String>(
-              style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.resolveWith<Color>(
-                  (states) {
-                    if (states.contains(WidgetState.selected)) {
-                      return customColor;
-                    }
-                    return Colors.grey;
-                  },
-                ),
-                foregroundColor: const WidgetStatePropertyAll(Colors.white),
+            // Search bar for filtering weapons.
+            TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                labelText: 'Search Weapons',
+                border: OutlineInputBorder(),
+                suffixIcon: const Icon(Icons.search),
               ),
-              showSelectedIcon: false,
-              segments: const <ButtonSegment<String>>[
-                ButtonSegment<String>(
-                  value: 'Weapon 1',
-                  label: Center(child: Text('Weapon 1')),
-                ),
-                ButtonSegment<String>(
-                  value: 'Weapon 2',
-                  label: Center(child: Text('Weapon 2')),
-                ),
-                ButtonSegment<String>(
-                  value: 'Weapon 3',
-                  label: Center(child: Text('Weapon 3')),
-                ),
-                ButtonSegment<String>(
-                  value: 'Weapon 4',
-                  label: Center(child: Text('Weapon 4')),
-                ),
-              ],
-              selected: {_currentSection},
-              emptySelectionAllowed: false,
-              onSelectionChanged: (Set<String> newSelection) {
-                setState(() {
-                  _currentSection = newSelection.first;
-                });
-              },
             ),
-            mainContent,
+            const SizedBox(height: 20),
+            // List of filtered weapons.
+            if (filteredWeapons.isNotEmpty)
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: filteredWeapons.length,
+                itemBuilder: (context, index) {
+                  final weapon = filteredWeapons[index];
+                  final details = weaponDetails[weapon] ??
+                      {
+                        'cost': 'N/A',
+                        'damage': 'N/A',
+                        'damageType': 'N/A',
+                        'weaponType': simpleWeapons.contains(weapon)
+                            ? 'Simple'
+                            : 'Martial'
+                      };
+                  return ListTile(
+                    leading: FaIcon(_getWeaponIcon(weapon), color: customColor),
+                    title: Text(weapon),
+                    subtitle: Text(
+                        'Cost: ${details['cost']} | Damage: ${details['damage']} (${details['damageType']}) | Type: ${details['weaponType']}'),
+                    trailing: IconButton(
+                      icon: Icon(Icons.add, color: customColor),
+                      onPressed: () {
+                        if (!selectedWeapons.contains(weapon)) {
+                          setState(() {
+                            selectedWeapons.add(weapon);
+                          });
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text('$weapon already added!')));
+                        }
+                      },
+                    ),
+                  );
+                },
+              )
+            else
+              const Text('No weapons match your search.'),
+            const SizedBox(height: 20),
+            // Display the selected weapons as chips with a delete icon.
+            if (selectedWeapons.isNotEmpty)
+              Wrap(
+                spacing: 8,
+                children: selectedWeapons.map((weapon) {
+                  return Chip(
+                    label: Text(weapon),
+                    deleteIcon: const Icon(Icons.close),
+                    onDeleted: () {
+                      setState(() {
+                        selectedWeapons.remove(weapon);
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+            const SizedBox(height: 20),
+            // Optionally, display detailed info for each selected weapon.
+            Column(
+              children: selectedWeapons.map((weapon) {
+                final details = weaponDetails[weapon] ??
+                    {
+                      'cost': 'N/A',
+                      'damage': 'N/A',
+                      'damageType': 'N/A',
+                      'weaponType': simpleWeapons.contains(weapon)
+                          ? 'Simple'
+                          : 'Martial'
+                    };
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ListTile(
+                      leading:
+                          FaIcon(_getWeaponIcon(weapon), color: customColor),
+                      title: Text(weapon,
+                          style: const TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: Text(
+                          'Cost: ${details['cost']} | Damage: ${details['damage']} (${details['damageType']}) | Type: ${details['weaponType']}'),
+                    ),
+                    WeaponDataLoader(
+                      weaponName: weapon,
+                      WeaponType: details['weaponType']!,
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+                );
+              }).toList(),
+            ),
           ],
         ),
       ),

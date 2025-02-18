@@ -5,13 +5,11 @@ import 'package:flutter/material.dart';
 import '../../Widgets/buttons/button_with_padding.dart';
 import '../../Screens/dnd_forms/class_selection.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class RaceSelection extends StatefulWidget {
-  final String characterName; // Use characterName instead of characterID
+  final String characterName;
 
-  const RaceSelection(
-      {super.key, required this.characterName}); // Update constructor
+  const RaceSelection({super.key, required this.characterName});
 
   @override
   _RaceSelectionState createState() => _RaceSelectionState();
@@ -21,49 +19,17 @@ class _RaceSelectionState extends State<RaceSelection> {
   String _selectedRace = 'Elf'; // Default race
   final Color customColor = const Color.fromARGB(255, 138, 28, 20);
 
-  // Method to save the selected race to Firebase
-  // void _saveSelections() async {
-  //   final String? currentUserUid = FirebaseAuth.instance.currentUser?.uid;
-
-  //   if (currentUserUid != null) {
-  //     final docRef = FirebaseFirestore.instance
-  //         .collection('app_user_profiles')
-  //         .doc(currentUserUid); // Use the UID directly
-
-  //     try {
-  //       await docRef.set({
-  //         'race': _selectedRace,
-  //       }, SetOptions(merge: true)); // Merge ensures only this field is updated
-  //     } catch (e) {
-  //       print('Error saving race: $e');
-  //     }
-  //   }
-  // }
   Future<void> _saveSelections() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      print('User not authenticated');
-      return;
-    }
-    final userId = user.uid;
-
     try {
       final firestore = FirebaseFirestore.instance;
-      final docRef = firestore
-          .collection('app_user_profiles')
-          .doc(userId)
-          .collection('characters')
-          .doc(widget.characterName);
+      final docRef = firestore.collection('characters').doc(widget.characterName);
 
       await docRef.set({
-        'character name': widget.characterName,
+        'race': _selectedRace,
       }, SetOptions(merge: true));
-      await docRef.set({
-        'character name' : widget.characterName,
-      });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Data saved successfully!")),
+        const SnackBar(content: Text("Data saved successfully!")),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -72,7 +38,6 @@ class _RaceSelectionState extends State<RaceSelection> {
     }
   }
 
-  // Updates the selected race and calls setState
   void _updateSelectedRace(String raceName) {
     setState(() {
       _selectedRace = raceName;
@@ -99,8 +64,9 @@ class _RaceSelectionState extends State<RaceSelection> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => ClassSelection(
-                      characterName: widget.characterName,
-                      race: _selectedRace), // Pass characterName
+                    characterName: widget.characterName,
+                    race: _selectedRace,
+                  ),
                 ),
               );
             },
@@ -111,7 +77,7 @@ class _RaceSelectionState extends State<RaceSelection> {
         backgroundColor: customColor,
         foregroundColor: Colors.white,
         title: Text(
-          'Race Selection for ${widget.characterName}', // Use characterName here
+          'Race Selection for ${widget.characterName}',
           style: Theme.of(context).appBarTheme.titleTextStyle,
         ),
       ),
@@ -130,42 +96,14 @@ class _RaceSelectionState extends State<RaceSelection> {
             spacing: 10,
             runSpacing: 10,
             children: [
-              ButtonWithPadding(
-                onPressed: () => _updateSelectedRace('Aasimar'),
-                textContent: 'Aasimar',
-              ),
-              ButtonWithPadding(
-                onPressed: () => _updateSelectedRace('Dragonborn'),
-                textContent: 'Dragonborn',
-              ),
-              ButtonWithPadding(
-                onPressed: () => _updateSelectedRace('Dwarf'),
-                textContent: 'Dwarf',
-              ),
-              ButtonWithPadding(
-                onPressed: () => _updateSelectedRace('Elf'),
-                textContent: 'Elf',
-              ),
-              ButtonWithPadding(
-                onPressed: () => _updateSelectedRace('Gnome'),
-                textContent: 'Gnome',
-              ),
-              ButtonWithPadding(
-                onPressed: () => _updateSelectedRace('Halfling'),
-                textContent: 'Halfling',
-              ),
-              ButtonWithPadding(
-                onPressed: () => _updateSelectedRace('Human'),
-                textContent: 'Human',
-              ),
-              ButtonWithPadding(
-                onPressed: () => _updateSelectedRace('Orc'),
-                textContent: 'Orc',
-              ),
-              ButtonWithPadding(
-                onPressed: () => _updateSelectedRace('Tiefling'),
-                textContent: 'Tiefling',
-              ),
+              for (var race in [
+                'Aasimar', 'Dragonborn', 'Dwarf', 'Elf', 'Gnome', 'Halfling',
+                'Human', 'Orc', 'Tiefling'
+              ])
+                ButtonWithPadding(
+                  onPressed: () => _updateSelectedRace(race),
+                  textContent: race,
+                ),
             ],
           ),
           const SizedBox(height: 20),
