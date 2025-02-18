@@ -1,11 +1,17 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hexagon/hexagon.dart';
 
 import 'die.dart';
 
 class DiceRollScreen extends StatefulWidget {
+  DiceRollScreen({this.campaignId = '', super.key});
+
+  String? campaignId;
+
   @override
   _DiceRollScreenState createState() => _DiceRollScreenState();
 }
@@ -37,7 +43,10 @@ class _DiceRollScreenState extends State<DiceRollScreen>
   bool disadvantage = false;
   Color advantageButtonColor = Colors.white;
   Color disadvantageButtonColor = Colors.white;
-  Color diceColor = Colors.green;
+  Color diceColor = Color.fromARGB(255, 243, 241, 230);
+  Color onDiceColor = Color(0xFF464538);
+
+  String? get campaignId => widget.campaignId;
 
   @override
   void initState() {
@@ -46,76 +55,160 @@ class _DiceRollScreenState extends State<DiceRollScreen>
       vsync: this,
       duration: Duration(seconds: 1),
     )..repeat(reverse: true); // Keep it animating while rolling
+
   }
 
   void rollDice() {
-    if (diceToRoll.every((element) => element == 0)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Select at least one die to roll")));
-      return;
-    }
-    _timer?.cancel();
-
     setState(() {
-      showDice = true;
-      diceValues.clear();
       activeDice.clear();
+      diceValues.clear();
+      dicePositions.clear();
       diceRotations.clear();
-    });
+      doubleRoll = [0, 0];
 
-    int flashCount = 0;
-    const int totalFlashes = 10;
-
-    for (int i = 0; i < diceToRoll.length; i++) {
-      int sides = [4, 6, 8, 10, 12, 20, 100][i];
-      for (int j = 0; j < diceToRoll[i]; j++) {
-        activeDice.add(Die(sides));
-        diceRotations
-            .add(Random().nextDouble() * 2 * pi); // Random rotation angle
+      for (int i = 0; i < diceToRoll.length; i++) {
+        if (diceToRoll[i] > 0) {
+          for (int j = 0; j < diceToRoll[i]; j++) {
+            int sides = [4, 6, 8, 10, 12, 20, 100][i];
+            activeDice.add(Die(sides));
+            diceValues.add(1); // Placeholder before rolling
+            dicePositions
+                .add(Offset(100 + j * 50, 300)); // Random start positions
+            diceRotations.add(0); // Start rotations at 0
+          }
+        }
       }
-    }
 
-    _timer = Timer.periodic(Duration(milliseconds: 100), (timer) {
-      setState(() {
-        diceValues =
-            activeDice.map((die) => _random.nextInt(die.sides) + 1).toList();
-        diceRotations = List.generate(
-            diceValues.length, (_) => Random().nextDouble() * 2 * pi);
-        dicePositions = List.generate(
-            diceValues.length,
-            (_) =>
-                Offset(_random.nextDouble() * 300, _random.nextDouble() * 500));
-      });
-
-      flashCount++;
-      if (flashCount >= totalFlashes) {
-        _timer?.cancel();
-        _animationController.stop();
-        setState(() {
-          diceValues =
-              activeDice.map((die) => _random.nextInt(die.sides) + 1).toList();
-        });
-
-        showRollResultDialog(diceValues.reduce((a, b) => a + b));
+      if (activeDice.isNotEmpty) {
+        showDice = true;
+        roll();
       }
     });
   }
 
-  void showRollResultDialog(int total) {
+  void roll() async {
+    Random random = Random();
+    int rollCount = 10;
+
+    for (int i = 0; i < rollCount; i++) {
+      setState(() {
+        for (int j = 0; j < activeDice.length; j++) {
+          diceValues[j] = random.nextInt(activeDice[j].sides) + 1;
+          dicePositions[j] = Offset(
+            random.nextInt(300).toDouble(),
+            50 + random.nextInt(600).toDouble(),
+          );
+          diceRotations[j] = random.nextDouble() * 2 * pi;
+        }
+      });
+
+      await Future.delayed(Duration(milliseconds: 100));
+    }
+
+    _animationController.stop(); // Stop animation
+    int total = diceValues.fold(0, (sum, value) => sum + value);
+
+    if (advantage || disadvantage) {
+      if (doubleRoll[0] == 0) {
+        doubleRoll[0] = total; // Store first roll
+        await Future.delayed(Duration(milliseconds: 500));
+        _animationController.repeat(); // Start animation again
+        roll(); // Trigger second roll
+        return; // Prevent the dialog from showing yet
+      } else {
+        doubleRoll[1] = total; // Store second roll
+        sendToCampaign();
+        showAdvantageDialog();
+      }
+    } else {
+      sendToCampaign();
+      showRollResultDialog(total);
+    }
+  }
+
+  void sendToCampaign() async {
+    if(widget.campaignId != '') {
+      final String? currentUserUid = FirebaseAuth.instance.currentUser?.uid;
+      if (currentUserUid != null) {
+        final docRef = FirebaseFirestore.instance
+            .collection('campaigns')
+            .doc(campaignId);
+
+        try {
+          await docRef.set({
+            'Rolls': diceValues,
+            'Total': diceValues.reduce((value, element) => value + element),
+            'timestamp': FieldValue.serverTimestamp(), // Add timestamp
+            'userId': currentUserUid, // Store the user who rolled
+          }, SetOptions(merge: true));
+
+          print('Rolls successfully sent to campaign: $campaignId');
+        } catch (e) {
+          print('Error saving dice rolls: $e');
+        }
+      }
+    }
+  }
+
+
+  void showAdvantageDialog() {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text("Dice Roll Result"),
-          content: Text("Total: $total", style: const TextStyle(fontSize: 24)),
+          title: (advantage)
+              ? Text("Roll with Advantage")
+              : Text("Roll with Disadvantage"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text("Rolls: ${doubleRoll.join(', ')}"),
+              (advantage)
+                  ? Text("Total: ${doubleRoll.reduce(max)}")
+                  : Text("Total: ${doubleRoll.reduce(min)}"),
+            ],
+          ),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                setState(() => showDice = false);
-                diceValues.clear();
+                setState(() {
+                  showDice = false;
+                });
               },
-              child: const Text("OK"),
+              child: Text("OK"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void showRollResultDialog(int total) {
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Dice Roll Result"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text("Rolls: ${diceValues.join(', ')}"),
+              Text("Total: $total"),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  showDice = false;
+                });
+                Navigator.of(context).pop();
+              },
+              child: Text("OK"),
             ),
           ],
         );
@@ -131,6 +224,7 @@ class _DiceRollScreenState extends State<DiceRollScreen>
           decoration: BoxDecoration(
             border: Border.all(color: Colors.black),
             borderRadius: BorderRadius.circular(10),
+            color: Color(0xFF25291C)
           ),
           height: 150,
           width: 150,
@@ -146,7 +240,7 @@ class _DiceRollScreenState extends State<DiceRollScreen>
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white, // Ensure contrast
+                      color:onDiceColor, // Ensure contrast
                     ),
                   ),
                 ],
@@ -206,8 +300,6 @@ class _DiceRollScreenState extends State<DiceRollScreen>
     });
   }
 
-
-
   Widget rollDiceWidget() {
     return Stack(
       children: List.generate(diceValues.length, (index) {
@@ -264,7 +356,7 @@ class _DiceRollScreenState extends State<DiceRollScreen>
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: onDiceColor,
                       ),
                     ),
                   ],
@@ -370,7 +462,7 @@ class _DiceRollScreenState extends State<DiceRollScreen>
                       ),
                       ElevatedButton(
                           onPressed: () {
-                              rollDice();
+                            rollDice();
                           },
                           child: const Text("Roll Dice")),
                       ElevatedButton(
