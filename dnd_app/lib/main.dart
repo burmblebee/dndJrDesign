@@ -58,7 +58,7 @@ class HomePage extends StatelessWidget {
                       // Navigate to another screen
                     },
                     child: Container(
-                      height: 190,
+                      height: 170,
                       decoration: BoxDecoration(
                         image:DecorationImage(
                           image: AssetImage('assets/witch.jpg'),
@@ -77,7 +77,7 @@ class HomePage extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.white, fontSize: 13),
                   ),
-                  SizedBox(height: 50), // Increased space
+                  SizedBox(height: 40), // Increased space
                   Text(
                     "Upcoming Session",
                     textAlign: TextAlign.center,
@@ -89,7 +89,7 @@ class HomePage extends StatelessWidget {
                       // Navigate to another screen
                     },
                     child: Container(
-                      height: 190,
+                      height: 170,
                       decoration: BoxDecoration(
                         image: DecorationImage(
                           image: AssetImage('assets/dog.webp'),
