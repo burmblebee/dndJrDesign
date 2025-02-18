@@ -1,0 +1,40 @@
+import 'package:flutter/material.dart';
+
+class NavigationButton extends StatefulWidget {
+
+  const NavigationButton({
+    super.key,
+    required this.onPressed,
+    required this.textContent,
+    
+  });
+
+  final Function onPressed;
+  final String textContent;
+
+  @override
+  _NavigationButtonState createState() => _NavigationButtonState();
+}
+
+class _NavigationButtonState extends State<NavigationButton> {
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: FilledButton(
+        
+        onPressed: () {
+          widget.onPressed();
+        },
+        child: Text(widget.textContent),
+        style: ButtonStyle(
+          
+          padding: WidgetStateProperty.all(const EdgeInsets.all(10)),
+          minimumSize: WidgetStateProperty.all(Size(170, 50)),
+          backgroundColor:
+              WidgetStateProperty.all(const Color.fromARGB(255, 138, 28, 20)),
+        ),
+      ),
+    );
+  }
+}

@@ -90,11 +90,12 @@ class _CampaignScreenState extends State<CampaignScreen> {
                           children: [
                             const SizedBox(height: 20),
                             Center(
-                                child: Text(
-                                    'Campaign: ${campaign.title}',
-                                    style: const TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold))),
+                              child: Text(
+                                'Campaign: ${campaign.title}',
+                                style: const TextStyle(
+                                    fontSize: 18, fontWeight: FontWeight.bold),
+                              ),
+                            ),
                             GestureDetector(
                               onTap: () {
                                 // Handles the tap - will link to another page later
@@ -104,8 +105,8 @@ class _CampaignScreenState extends State<CampaignScreen> {
                                 height: 200,
                                 width: double.infinity,
                                 decoration: BoxDecoration(
-                                  border: Border.all(
-                                      color: Colors.black, width: 1),
+                                  border:
+                                      Border.all(color: Colors.black, width: 1),
                                   boxShadow: const [
                                     BoxShadow(
                                       spreadRadius: 2,
