@@ -80,6 +80,14 @@ flutter:
   assets:
     - assets/evocation-wizard-dnd-2024-2.webp
     - assets/Wizard_Lady.jpg
+    - assets/dice1.png
+    - assets/dice2.png
+    - assets/dice3.png
+    - assets/dice4.png
+    - assets/dice5.png
+    - assets/dice6.png
+    - assets/dragon.png
+    - assets/DragonIcon.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

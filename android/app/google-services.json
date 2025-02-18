@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "401164869188",
+    "project_id": "warlocks-of-the-beach",
+    "storage_bucket": "warlocks-of-the-beach.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:401164869188:android:f5d1c1bedcd97801a2e611",
+        "android_client_info": {
+          "package_name": "com.example.warlocks_of_the_beach"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwI9DDOyU0L3MhA3DK_hGr07VL-tb-tE4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

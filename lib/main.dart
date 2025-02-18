@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:warlocks_of_the_beach/dnd_character_creator/screens/dnd_forms/character_name.dart';
 import '../screens/campaign_screen.dart';
 
 void main() {
@@ -48,7 +49,7 @@ class MyApp extends StatelessWidget {
         iconTheme: const IconThemeData(
             color: Color(0xFFD4C097)), // Matching accent color for icons
       ),
-      home: CampaignScreen(),
+      home: CharacterName(),
     );
   }
 }
