@@ -1,80 +1,34 @@
-import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/character.dart';
 
-class CharacterProvider with ChangeNotifier {
-  String characterName = '';
-  String selectedRace = '';
-  String selectedClass = '';
-  String selectedBackground = '';
-  List<String> selectedProficiencies = [];
-  List<String> selectedLanguages = [];
-  Map<String, int> abilityScores = {};
-  Map<String, String> characterTraits = {};
+class CharacterNotifier extends StateNotifier<Character> {
+  CharacterNotifier() : super(Character(name: '', race: '', characterClass: '', background: '', picture: '', abilityScores: {}));
 
   void updateCharacterName(String name) {
-    characterName = name;
-    notifyListeners();
+    state = state.copyWith(name: name);
   }
 
   void updateSelectedRace(String race) {
-    selectedRace = race;
-    notifyListeners();
+    state = state.copyWith(race: race);
   }
 
   void updateSelectedClass(String className) {
-    selectedClass = className;
-    notifyListeners();
+    state = state.copyWith(characterClass: className);
   }
 
   void updateSelectedBackground(String background) {
-    selectedBackground = background;
-    notifyListeners();
+    state = state.copyWith(background: background);
   }
 
-  void updateSelectedProficiencies(List<String> proficiencies) {
-    selectedProficiencies = proficiencies;
-    notifyListeners();
+  void updateAbilityScores(Map<String, dynamic> scores) {
+    state = state.copyWith(abilityScores: scores);
   }
 
-  void updateSelectedLanguages(List<String> languages) {
-    selectedLanguages = languages;
-    notifyListeners();
-  }
-
-  void updateAbilityScores(Map<String, int> scores) {
-    abilityScores = scores;
-    notifyListeners();
-  }
-
-  void updateCharacterTraits(Map<String, String> traits) {
-    characterTraits = traits;
-    notifyListeners();
-  }
-
-  Future<void> saveCharacterData() async {
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        print('No user is signed in!');
-        return;
-      }
-      final docRef = FirebaseFirestore.instance
-          .collection('app_user_profiles')
-          .doc(user.uid)
-          .collection('characters')
-          .doc(characterName);
-
-      await docRef.set({
-        'character name': characterName,
-        'race': selectedRace,
-        'class': selectedClass,
-        'background': selectedBackground,
-        'proficiencies': selectedProficiencies,
-        'languages': selectedLanguages,
-        'abilityScores': abilityScores,
-        'characterTraits': characterTraits,
-      }, SetOptions(merge: true));
-    } catch (e) {
-      print('Error saving character data: $e');
-    }
+  void updatePicture(String picture) {
+    state = state.copyWith(picture: picture);
   }
 }
+
+final characterProvider = StateNotifierProvider<CharacterNotifier, Character>((ref) {
+  return CharacterNotifier();
+});
