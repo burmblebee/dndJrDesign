@@ -21,7 +21,7 @@ class StatsScreen extends StatefulWidget {
 }
 
 class _StatsScreenState extends State<StatsScreen> {
-  late String _selectedRace; // TODO: Fetch from firestore
+  late String _selectedRace; // Declare _selectedRace as late
   late Map<String, int> abilityScores = {
     'Strength': 8,
     'Dexterity': 8,
@@ -159,6 +159,7 @@ class _StatsScreenState extends State<StatsScreen> {
   @override
   void initState() {
     super.initState();
+    _selectedRace = widget.selectedRace; // Initialize _selectedRace in initState
     _rollDice();
     _getRace();
   }

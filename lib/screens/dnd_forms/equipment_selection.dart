@@ -1,18 +1,19 @@
+import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../screens/dnd_forms/character_trait_selection.dart';
-import '../../screens/dnd_forms/spell_selection.dart';
-import '../../widgets/loaders/weapon_data_loader.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../../widgets/loaders/alignment_data_loader.dart';
-import '../../widgets/main_drawer.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:warlocks_of_the_beach/rpg_awesome_icons.dart';
+import 'package:warlocks_of_the_beach/widgets/bottom_navbar.dart';
+import 'package:warlocks_of_the_beach/widgets/main_drawer.dart';
+import '../../data/weapon_data.dart';
+import '../../screens/dnd_forms/character_trait_selection.dart';
 import '../../widgets/buttons/navigation_button.dart';
-import '../../widgets/loaders/lifestyle_data_loader.dart';
 
 class EquipmentSelection extends StatefulWidget {
-  const EquipmentSelection({super.key, required this.characterName});
+  const EquipmentSelection({Key? key, required this.characterName})
+      : super(key: key);
 
-  final characterName;
+  final String characterName;
 
   @override
   _EquipmentSelectionState createState() => _EquipmentSelectionState();
@@ -20,7 +21,6 @@ class EquipmentSelection extends StatefulWidget {
 
 class _EquipmentSelectionState extends State<EquipmentSelection> {
   final List<String> simpleWeapons = [
-    'None',
     'Club',
     'Dagger',
     'Greatclub',
@@ -39,7 +39,6 @@ class _EquipmentSelectionState extends State<EquipmentSelection> {
   ];
 
   final List<String> martialWeapons = [
-    'None',
     'Battleaxe',
     'Flail',
     'Glaive',
@@ -58,305 +57,302 @@ class _EquipmentSelectionState extends State<EquipmentSelection> {
     'War Pick',
     'Warhammer',
     'Whip',
-    'Blowgun',
     'Hand Crossbow',
     'Heavy Crossbow',
     'Longbow',
     'Net',
   ];
 
-  late Widget mainContent;
-  late var weaponOne = "None";
-  late var weaponTwo = "None";
-  late var weaponThree = "None";
-  late var weaponFour = "None";
-  final customColor = const Color.fromARGB(255, 138, 28, 20);
+  late final List<String> allWeapons = (() {
+    final weapons = {...simpleWeapons, ...martialWeapons}.toList();
+    weapons.sort();
+    return weapons;
+  })();
 
-  final TextEditingController _firstWeaponController = TextEditingController();
-  final TextEditingController _secondWeaponController = TextEditingController();
-  final TextEditingController _thirdWeaponController = TextEditingController();
-  final TextEditingController _fourthWeaponController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
+  String searchQuery = '';
 
-  String _currentSection = 'Weapon 1';
+  List<String> selectedWeapons = [];
 
-  void _saveSelections() async {
-    final String? currentUserUid = FirebaseAuth.instance.currentUser?.uid;
-    if (currentUserUid != null) {
-      final docRef = FirebaseFirestore.instance
-          .collection('app_user_profiles')
-          .doc(currentUserUid)
-          .collection('characters')
-          .doc(widget.characterName); // Use the UID directly
+  // Using customColor for icons; the overlay will now use gray tones.
+  final Color customColor = const Color.fromARGB(255, 138, 28, 20);
 
-      try {
-        await docRef.set({
-          'weaponOne': weaponOne,
-          'weaponTwo': weaponTwo,
-          'weaponThree': weaponThree,
-          'weaponFour': weaponFour,
-          'name': widget.characterName,
-        }, SetOptions(merge: true)); // Merge ensures only this field is updated
-      } catch (e) {
-        print('Error saving weapons: $e');
+  // GlobalKey to measure the bottom overlay’s height.
+  final GlobalKey _selectedOverlayKey = GlobalKey();
+
+  // This variable holds the measured height of the selected overlay.
+  double _selectedOverlayHeight = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(() {
+      setState(() {
+        searchQuery = _searchController.text;
+      });
+    });
+    // Delay measurement until after the first frame.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _updateOverlayHeight());
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  // Call this method to measure the overlay's height.
+  void _updateOverlayHeight() {
+    final context = _selectedOverlayKey.currentContext;
+    if (context != null) {
+      final newHeight = context.size?.height ?? 0;
+      if (newHeight != _selectedOverlayHeight) {
+        setState(() {
+          _selectedOverlayHeight = newHeight;
+        });
       }
     }
   }
 
-  Widget weaponOneScreen() {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Weapon 1',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-            const SizedBox(height: 10),
-            DropdownButton<String>(
-              value: weaponOne,
-              hint: Text('Select a weapon'),
-              items: simpleWeapons.map((String weapon) {
-                return DropdownMenuItem<String>(
-                  value: weapon,
-                  child: Text(weapon),
-                );
-              }).toList(),
-              onChanged: (String? newValue) {
-                setState(() {
-                  weaponOne = newValue ?? "None";
-                });
-              },
-            ),
-            if (weaponOne.isNotEmpty)
-              WeaponDataLoader(
-                weaponName: weaponOne,
-                WeaponType: "SimpleWeapons",
-              ),
-            const SizedBox(height: 35),
-          ],
-        ),
-      ),
-    );
+  IconData _getWeaponIcon(String weapon) {
+    final lower = weapon.toLowerCase();
+    if (lower.contains('sword') ||
+        lower.contains('rapier') ||
+        lower.contains('scimitar') ||
+        lower.contains('shortsword') ||
+        lower.contains('longsword') ||
+        lower.contains('greatsword')) {
+      return RpgAwesomeIcons.crossedSwords;
+    } else if (lower.contains('axe')) {
+      return RpgAwesomeIcons.batteredAxe;
+    } else if (lower.contains('bow') || lower.contains('crossbow')) {
+      return RpgAwesomeIcons.arrowCluster;
+    } else if (lower.contains('dagger')) {
+      return RpgAwesomeIcons.knife;
+    } else if (lower.contains('club') ||
+        lower.contains('mace') ||
+        lower.contains('hammer') ||
+        lower.contains('flail')) {
+      return FontAwesomeIcons.hammer;
+    } else if (lower.contains('spear') || lower.contains('javelin')) {
+      return FontAwesomeIcons.solidCircle; // placeholder
+    }
+    return FontAwesomeIcons.crosshairs; // fallback
   }
 
-  Widget weaponTwoScreen() {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Weapon 2',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-            const SizedBox(height: 10),
-            DropdownButton<String>(
-              value: weaponTwo,
-              hint: Text('Select a weapon'),
-              items: simpleWeapons.map((String weapon) {
-                return DropdownMenuItem<String>(
-                  value: weapon,
-                  child: Text(weapon),
-                );
-              }).toList(),
-              onChanged: (String? newValue) {
-                setState(() {
-                  weaponTwo = newValue ?? "None";
-                });
-              },
-            ),
-            if (weaponTwo.isNotEmpty)
-              WeaponDataLoader(
-                weaponName: weaponTwo,
-                WeaponType: "SimpleWeapons",
-              ),
-            const SizedBox(height: 35),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget weaponThreeScreen() {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Weapon 3',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-            const SizedBox(height: 10),
-            DropdownButton<String>(
-              value: weaponThree,
-              hint: Text('Select a weapon'),
-              items: martialWeapons.map((String weapon) {
-                return DropdownMenuItem<String>(
-                  value: weapon,
-                  child: Text(weapon),
-                );
-              }).toList(),
-              onChanged: (String? newValue) {
-                setState(() {
-                  weaponThree = newValue ?? "None";
-                });
-              },
-            ),
-            if (weaponThree.isNotEmpty)
-              WeaponDataLoader(
-                weaponName: weaponThree,
-                WeaponType: "MartialWeapons",
-              ),
-            const SizedBox(height: 35),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget weaponFourScreen() {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Weapon 4',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-            const SizedBox(height: 10),
-            DropdownButton<String>(
-              value: weaponFour,
-              hint: Text('Select a weapon'),
-              items: martialWeapons.map((String weapon) {
-                return DropdownMenuItem<String>(
-                  value: weapon,
-                  child: Text(weapon),
-                );
-              }).toList(),
-              onChanged: (String? newValue) {
-                setState(() {
-                  weaponFour = newValue ?? "None";
-                });
-              },
-            ),
-            if (weaponFour.isNotEmpty)
-              WeaponDataLoader(
-                weaponName: weaponFour,
-                WeaponType: "MartialWeapons",
-              ),
-            const SizedBox(height: 35),
-          ],
-        ),
-      ),
-    );
+  Future<void> _saveSelections() async {
+    try {
+      final firestore = FirebaseFirestore.instance;
+      final docRef =
+          firestore.collection('characters').doc(widget.characterName);
+      await docRef.set({
+        'name': widget.characterName,
+        'weapons': selectedWeapons,
+      }, SetOptions(merge: true));
+    } catch (e) {
+      print('Error saving weapons: $e');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_currentSection == 'Weapon 1') {
-      mainContent = weaponOneScreen();
-    } else if (_currentSection == 'Weapon 2') {
-      mainContent = weaponTwoScreen();
-    } else if (_currentSection == 'Weapon 3') {
-      mainContent = weaponThreeScreen();
-    } else if (_currentSection == 'Weapon 4') {
-      mainContent = weaponFourScreen();
-    } else {
-      mainContent = Container();
-    }
+    // Re-measure the overlay each build in case the content changed.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _updateOverlayHeight());
+
+    final List<String> filteredWeapons = allWeapons.where((weapon) {
+      return weapon.toLowerCase().contains(searchQuery.toLowerCase());
+    }).toList();
+
     return Scaffold(
-      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: const Text("Equipment"),
-        iconTheme: const IconThemeData(color: Colors.white),
-        backgroundColor: customColor,foregroundColor: Colors.white,
+        backgroundColor: customColor,
+        foregroundColor: Colors.white,
       ),
       drawer: const MainDrawer(),
-      bottomNavigationBar: Row(
+      bottomNavigationBar: MainBottomNavBar(),
+      body: Stack(
         children: [
-          NavigationButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            textContent: 'Back',
-          ),
-          const SizedBox(width: 30),
-          NavigationButton(
-            textContent: "Next",
-            onPressed: () {
-              _saveSelections();
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => CharacterTraitScreen(characterName: widget.characterName), // Pass characterName
+          // Main content area; the bottom padding equals the overlay's height.
+          Padding(
+            padding:
+                EdgeInsets.fromLTRB(16.0, 16.0, 16.0, _selectedOverlayHeight),
+            child: Column(
+              children: [
+                TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Search Weapons',
+                    prefixIcon: const Icon(Icons.search),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                  ),
                 ),
-              );
-            },
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(height: 20),
-            SegmentedButton<String>(
-              style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.resolveWith<Color>(
-                  (states) {
-                    if (states.contains(WidgetState.selected)) {
-                      return customColor;
-                    }
-                    return Colors.grey;
-                  },
-                ),
-                foregroundColor: const WidgetStatePropertyAll(Colors.white),
-              ),
-              showSelectedIcon: false,
-              segments: const <ButtonSegment<String>>[
-                ButtonSegment<String>(
-                  value: 'Weapon 1',
-                  label: Center(child: Text('Weapon 1')),
-                ),
-                ButtonSegment<String>(
-                  value: 'Weapon 2',
-                  label: Center(child: Text('Weapon 2')),
-                ),
-                ButtonSegment<String>(
-                  value: 'Weapon 3',
-                  label: Center(child: Text('Weapon 3')),
-                ),
-                ButtonSegment<String>(
-                  value: 'Weapon 4',
-                  label: Center(child: Text('Weapon 4')),
+                const SizedBox(height: 20),
+                Expanded(
+                  child: filteredWeapons.isNotEmpty
+                      ? ListView.separated(
+                          itemCount: filteredWeapons.length,
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(height: 8),
+                          itemBuilder: (context, index) {
+                            final weapon = filteredWeapons[index];
+                            final String group = simpleWeapons.contains(weapon)
+                                ? "SimpleWeapons"
+                                : "MartialWeapons";
+                            final details =
+                                WeaponData.Weapons[group]?[weapon] ??
+                                    {
+                                      "damage_die": "N/A",
+                                      "gold_cost": "N/A",
+                                      "damage_type": "N/A",
+                                      "properties": ["N/A"],
+                                      "weight": "N/A",
+                                    };
+
+                            return Card(
+                              elevation: 2,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: ListTile(
+                                leading: FaIcon(
+                                  _getWeaponIcon(weapon),
+                                  color: customColor,
+                                ),
+                                title: Text(
+                                  weapon,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                subtitle: Text(
+                                  'Cost: ${details["gold_cost"]} | Damage: ${details["damage_die"]} (${details["damage_type"]}) | ${group == "SimpleWeapons" ? "Simple" : "Martial"}',
+                                ),
+                                trailing: IconButton(
+                                  icon: Icon(Icons.add, color: customColor),
+                                  onPressed: () {
+                                    if (!selectedWeapons.contains(weapon)) {
+                                      setState(() {
+                                        selectedWeapons.add(weapon);
+                                      });
+                                    } else {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          content:
+                                              Text('$weapon already added!'),
+                                        ),
+                                      );
+                                    }
+                                  },
+                                ),
+                              ),
+                            );
+                          },
+                        )
+                      : const Center(
+                          child: Text('No weapons match your search.'),
+                        ),
                 ),
               ],
-              selected: {_currentSection},
-              emptySelectionAllowed: false,
-              onSelectionChanged: (Set<String> newSelection) {
-                setState(() {
-                  _currentSection = newSelection.first;
-                });
-              },
             ),
-            mainContent,
-          ],
-        ),
+          ),
+          // Bottom overlay for selected weapons with a blur effect.
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: ClipRRect(
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(16)),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                child: Container(
+                  key: _selectedOverlayKey,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 8.0,
+                  ),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.grey[800]!,
+                        Colors.grey[400]!,
+                      ],
+                      begin: Alignment.bottomCenter,
+                      end: Alignment.topCenter,
+                    ),
+                  ),
+                  child: selectedWeapons.isNotEmpty
+                      ? Wrap(
+                          spacing: 8.0,
+                          runSpacing: 4.0,
+                          children: selectedWeapons.map((weapon) {
+                            return Chip(
+                              backgroundColor: Theme.of(context).cardColor,
+                              avatar: FaIcon(
+                                _getWeaponIcon(weapon),
+                                color: customColor,
+                                size: 16,
+                              ),
+                              label: Text(weapon),
+                              deleteIcon: const Icon(Icons.close),
+                              onDeleted: () {
+                                setState(() {
+                                  selectedWeapons.remove(weapon);
+                                });
+                              },
+                            );
+                          }).toList(),
+                        )
+                      : Center(
+                          child: Text(
+                            'No weapons selected.',
+                            style: TextStyle(
+                              color: customColor,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                ),
+              ),
+            ),
+          ),
+          
+        ],
       ),
     );
   }
 }
+
+
+// Container(
+//             padding:
+//                 const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+//             color: Colors.white,
+//             child: Row(
+//               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//               children: [
+//                 NavigationButton(
+//                   onPressed: () => Navigator.pop(context),
+//                   textContent: 'Back',
+//                 ),
+//                 NavigationButton(
+//                   textContent: "Next",
+//                   onPressed: () {
+//                     _saveSelections();
+//                     Navigator.push(
+//                       context,
+//                       MaterialPageRoute(
+//                         builder: (context) => CharacterTraitScreen(
+//                           characterName: widget.characterName,
+//                         ),
+//                       ),
+//                     );
+//                   },
+//                 ),
+//               ],
+//             ),
+//           ),

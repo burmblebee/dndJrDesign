@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../Screens/dnd_forms/race_selection.dart';
+import '../../screens/dnd_forms/race_selection.dart';
 
 class CharacterName extends StatefulWidget {
-
-
   const CharacterName({super.key});
 
   @override
@@ -33,19 +31,29 @@ class _CharacterNameState extends State<CharacterName> {
         print('No user is signed in!');
         return;
       }
+      final docRef = FirebaseFirestore.instance
+          .collection('app_user_profiles')
+          .doc(user.uid)
+          .collection('characters')
+          .doc(_characterName);
+
+      await docRef.set({
+        'character name': _characterName,
+      }, SetOptions(merge: true));
     } catch (e) {
       print('Error saving character name: $e');
     }
   }
 
-  //set up save character name to send a map with the character name to the firestore
+  // Set up save character name to send a map with the character name to Firestore
   final customColor = const Color.fromARGB(255, 138, 28, 20);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: customColor,foregroundColor: Colors.white,
+        backgroundColor: customColor,
+        foregroundColor: Colors.white,
         title: const Text('Character Name'),
       ),
       body: Padding(

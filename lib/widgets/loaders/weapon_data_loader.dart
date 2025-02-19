@@ -1,19 +1,19 @@
-import '../../data/weapon_data.dart';
 import 'package:flutter/material.dart';
 
 class WeaponDataLoader extends StatelessWidget {
-  const WeaponDataLoader(
-      {super.key, required this.weaponName, required this.WeaponType});
+  const WeaponDataLoader({
+    Key? key,
+    required this.weaponName,
+    required this.weaponType,
+    required this.details,
+  }) : super(key: key);
 
   final String weaponName;
-  final String WeaponType;
+  final String weaponType;
+  final Map<String, dynamic> details;
 
   @override
   Widget build(BuildContext context) {
-    // String daggerDamageDie = WeaponData.Weapons["SimpleWeapons"]?["Dagger"]?["damage_die"] ?? "Unknown";
-    
-    final weaponData = WeaponData.Weapons[WeaponType]?[weaponName];
-
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -28,35 +28,39 @@ class WeaponDataLoader extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 10),
-          
           _buildAttributeRow(
-              label: 'Damage Die',
-              value: weaponData!['damage_die'] ?? 'N/A',
-              icon: Icons.design_services),
+            label: 'Damage Die',
+            value: details['damage_die'] ?? 'N/A',
+            icon: Icons.opacity,
+          ),
           _buildAttributeRow(
-              label: 'Gold Cost',
-              value: weaponData['gold_cost'] ?? 'N/A',
-              icon: Icons.monetization_on),
+            label: 'Gold Cost',
+            value: details['gold_cost'] ?? 'N/A',
+            icon: Icons.monetization_on,
+          ),
           _buildAttributeRow(
-              label: 'Damage Type',
-              value: weaponData['damage_type'] ?? 'N/A',
-              icon: Icons.language),
+            label: 'Damage Type',
+            value: details['damage_type'] ?? 'N/A',
+            icon: Icons.flash_on,
+          ),
           _buildAttributeRow(
-              label: 'Properties',
-              value: _listToString(weaponData['properties']),
-              icon: Icons.construction),
+            label: 'Properties',
+            value: _listToString(details['properties']),
+            icon: Icons.info_outline,
+          ),
           _buildAttributeRow(
-              label: 'Weight',
-              value: weaponData['weight'] ?? 'N/A',
-              icon: Icons.shopping_bag),
+            label: 'Weight',
+            value: details['weight'] ?? 'N/A',
+            icon: Icons.line_weight,
+          ),
         ],
       ),
     );
   }
 
   String _listToString(dynamic value) {
-    if (value.isNotEmpty) {
-      if (value is List) {
+    if (value != null) {
+      if (value is List && value.isNotEmpty) {
         return value.join(', ');
       }
       return value.toString();
@@ -80,14 +84,13 @@ class WeaponDataLoader extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (label != 'Description')
-                  Text(
-                    label,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
                   ),
+                ),
                 Text(
                   value,
                   softWrap: true,

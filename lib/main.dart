@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:warlocks_of_the_beach/screens/dnd_forms/character_name.dart';
 import 'firebase_options.dart'; // Ensure this file is generated properly
-import 'package:warlocks_of_the_beach/dnd_character_creator/screens/dnd_forms/character_name.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Ensure this is the first line
