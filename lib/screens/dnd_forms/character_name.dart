@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:warlocks_of_the_beach/widgets/bottom_navbar.dart';
+import 'package:warlocks_of_the_beach/widgets/main_appbar.dart';
+import 'package:warlocks_of_the_beach/widgets/main_drawer.dart';
 import '../../screens/dnd_forms/race_selection.dart';
 
 class CharacterName extends StatefulWidget {
@@ -13,13 +16,12 @@ class CharacterName extends StatefulWidget {
 }
 
 class _CharacterNameState extends State<CharacterName> {
-  String _characterName = '';
+  final TextEditingController _characterNameController = TextEditingController();
 
-  // Update character name as user types
-  void updateCharacterName(String name) {
-    setState(() {
-      _characterName = name;
-    });
+  @override
+  void dispose() {
+    _characterNameController.dispose();
+    super.dispose();
   }
 
   // Function to save character name to Firestore
@@ -35,10 +37,10 @@ class _CharacterNameState extends State<CharacterName> {
           .collection('app_user_profiles')
           .doc(user.uid)
           .collection('characters')
-          .doc(_characterName);
+          .doc(_characterNameController.text);
 
       await docRef.set({
-        'character name': _characterName,
+        'character name': _characterNameController.text,
       }, SetOptions(merge: true));
     } catch (e) {
       print('Error saving character name: $e');
@@ -51,11 +53,9 @@ class _CharacterNameState extends State<CharacterName> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: customColor,
-        foregroundColor: Colors.white,
-        title: const Text('Character Name'),
-      ),
+      appBar: MainAppbar(),
+      bottomNavigationBar: MainBottomNavBar(),
+      drawer: MainDrawer(),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -74,7 +74,7 @@ class _CharacterNameState extends State<CharacterName> {
             ),
             const SizedBox(height: 20),
             TextField(
-              onChanged: updateCharacterName,
+              controller: _characterNameController,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 labelText: 'Character Name',
@@ -92,22 +92,31 @@ class _CharacterNameState extends State<CharacterName> {
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    if (_characterName.isNotEmpty) {
-                      // Save the character name to Firestore
-                      await saveCharacterName();
+                    if (_characterNameController.text.isNotEmpty) {
+                      try {
+                        // Save the character name to Firestore
+                        await saveCharacterName();
 
-                      // Navigate to the next screen with characterID as characterName
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => RaceSelection(
-                            characterName: _characterName, // Pass character name
+                        // Navigate to the next screen with characterID as characterName
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => RaceSelection(
+                              characterName: _characterNameController.text, // Pass character name
+                            ),
                           ),
-                        ),
-                      );
+                        );
+                      } catch (e) {
+                        print('Error navigating to RaceSelection: $e');
+                      }
                     } else {
                       // Show an error message if the character name is empty
                       print('Character name cannot be empty!');
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Character name cannot be empty!'),
+                        ),
+                      );
                     }
                   },
                   child: const Text('Next'),

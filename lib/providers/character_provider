@@ -1,0 +1,80 @@
+import 'package:flutter/material.dart';
+
+class CharacterProvider with ChangeNotifier {
+  String characterName = '';
+  String selectedRace = '';
+  String selectedClass = '';
+  String selectedBackground = '';
+  List<String> selectedProficiencies = [];
+  List<String> selectedLanguages = [];
+  Map<String, int> abilityScores = {};
+  Map<String, String> characterTraits = {};
+
+  void updateCharacterName(String name) {
+    characterName = name;
+    notifyListeners();
+  }
+
+  void updateSelectedRace(String race) {
+    selectedRace = race;
+    notifyListeners();
+  }
+
+  void updateSelectedClass(String className) {
+    selectedClass = className;
+    notifyListeners();
+  }
+
+  void updateSelectedBackground(String background) {
+    selectedBackground = background;
+    notifyListeners();
+  }
+
+  void updateSelectedProficiencies(List<String> proficiencies) {
+    selectedProficiencies = proficiencies;
+    notifyListeners();
+  }
+
+  void updateSelectedLanguages(List<String> languages) {
+    selectedLanguages = languages;
+    notifyListeners();
+  }
+
+  void updateAbilityScores(Map<String, int> scores) {
+    abilityScores = scores;
+    notifyListeners();
+  }
+
+  void updateCharacterTraits(Map<String, String> traits) {
+    characterTraits = traits;
+    notifyListeners();
+  }
+
+  Future<void> saveCharacterData() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        print('No user is signed in!');
+        return;
+      }
+      final docRef = FirebaseFirestore.instance
+          .collection('app_user_profiles')
+          .doc(user.uid)
+          .collection('characters')
+          .doc(characterName);
+
+      await docRef.set({
+        'character name': characterName,
+        'race': selectedRace,
+        'class': selectedClass,
+        'background': selectedBackground,
+        'proficiencies': selectedProficiencies,
+        'languages': selectedLanguages,
+        'abilityScores': abilityScores,
+        'characterTraits': characterTraits,
+      }, SetOptions(merge: true));
+    } catch (e) {
+      print('Error saving character data: $e');
+    }
+  }
+}

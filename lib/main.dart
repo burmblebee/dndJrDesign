@@ -10,7 +10,7 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  runApp(const MyApp()); // Run app AFTER Firebase initializes
+  runApp(const MyApp(),); // Run app AFTER Firebase initializes
 }
 
 class MyApp extends StatelessWidget {

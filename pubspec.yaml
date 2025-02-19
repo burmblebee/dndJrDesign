@@ -53,6 +53,7 @@ dependencies:
   logger: ^2.5.0
   flutter_secure_storage: ^9.2.4
   lottie: ^3.3.1
+  provider: ^6.1.2
 
 dev_dependencies:
   flutter_test:

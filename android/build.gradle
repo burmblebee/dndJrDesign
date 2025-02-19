@@ -1,15 +1,3 @@
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:7.4.2'  // Ensure this version is correct
-        classpath 'com.google.gms:google-services:4.4.2'  // Ensure this is correct
-        classpath 'dev.flutter:flutter-gradle-plugin:1.0.0'  // Check the Flutter plugin version
-    }
-}
-
 allprojects {
     repositories {
         google()
@@ -17,6 +5,14 @@ allprojects {
     }
 }
 
-task clean(type: Delete) {
+rootProject.buildDir = "../build"
+subprojects {
+    project.buildDir = "${rootProject.buildDir}/${project.name}"
+}
+subprojects {
+    project.evaluationDependsOn(":app")
+}
+
+tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }
