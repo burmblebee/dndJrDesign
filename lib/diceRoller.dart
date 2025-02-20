@@ -32,6 +32,8 @@ class _DiceRollScreenState extends State<DiceRollScreen>
     0,
     0
   ]; // d4, d6, d8, d10, d12, d20, d100
+  late int width;
+  late int height;
 
   List<int> doubleRoll = [0, 0];
 
@@ -94,8 +96,8 @@ class _DiceRollScreenState extends State<DiceRollScreen>
         for (int j = 0; j < activeDice.length; j++) {
           diceValues[j] = random.nextInt(activeDice[j].sides) + 1;
           dicePositions[j] = Offset(
-            random.nextInt(300).toDouble(),
-            50 + random.nextInt(600).toDouble(),
+            random.nextInt(width-50).toDouble(),
+            random.nextInt(height-150).toDouble() + 20,
           );
           diceRotations[j] = random.nextDouble() * 2 * pi;
         }
@@ -404,7 +406,10 @@ class _DiceRollScreenState extends State<DiceRollScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+      width = MediaQuery.of(context).size.width.toInt();
+      height = MediaQuery.of(context).size.height.toInt();
+
+      return Scaffold(
       appBar: AppBar(title: Text("Dice Roller")),
       body: Stack(
         children: [

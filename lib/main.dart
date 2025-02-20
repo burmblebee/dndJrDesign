@@ -2,8 +2,10 @@ import 'package:dnd_jr_design/diceRoller.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
+import 'combatScreen.dart';
+
 Future<void> main() async {
-  runApp(MaterialApp(home: DiceRollScreen(campaignId: '15',), theme: ThemeData(
+  runApp(MaterialApp(home: CombatScreen(campaignId: '15',), theme: ThemeData(
     brightness: Brightness.dark,
     primaryColor: const Color(0xFF464538), // Dark olive green
     scaffoldBackgroundColor: const Color(0xFF464538), // Deep earthy green
