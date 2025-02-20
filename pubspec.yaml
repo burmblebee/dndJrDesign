@@ -54,6 +54,8 @@ dependencies:
   flutter_secure_storage: ^9.2.4
   lottie: ^3.3.1
   provider: ^6.1.2
+  hexagon: ^0.2.0
+  google_sign_in: ^6.2.2
 
 dev_dependencies:
   flutter_test:
@@ -89,6 +91,8 @@ flutter:
     - assets/dice6.png
     - assets/dragon.png
     - assets/DragonIcon.png
+    - assets/witch.jpg
+    - assets/dog.webp
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

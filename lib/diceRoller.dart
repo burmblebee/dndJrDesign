@@ -1,0 +1,618 @@
+import 'dart:async';
+import 'dart:math';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:hexagon/hexagon.dart';
+import 'package:warlocks_of_the_beach/widgets/bottom_navbar.dart';
+import 'package:warlocks_of_the_beach/widgets/main_drawer.dart';
+
+import 'die.dart';
+
+class DiceRollScreen extends StatefulWidget {
+  DiceRollScreen({this.campaignId = '', super.key});
+
+  String? campaignId;
+
+  @override
+  _DiceRollScreenState createState() => _DiceRollScreenState();
+}
+
+class _DiceRollScreenState extends State<DiceRollScreen>
+    with TickerProviderStateMixin {
+  final Random _random = Random();
+  List<int> diceValues = [];
+  List<Offset> dicePositions = [Offset(50, 300), Offset(200, 300)];
+  Timer? _timer;
+  List<Die> activeDice = [];
+  List<int> diceToRoll = [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ]; // d4, d6, d8, d10, d12, d20, d100
+
+  List<int> doubleRoll = [0, 0];
+
+  late AnimationController _animationController;
+  List<double> diceRotations = [];
+
+  bool showDice = false;
+  bool advantage = false;
+  bool disadvantage = false;
+  Color advantageButtonColor = Color(0xFF25291C);
+  Color disadvantageButtonColor = Color(0xFF25291C);
+  Color diceColor = Color.fromARGB(255, 243, 241, 230);
+  Color onDiceColor = Color(0xFF464538);
+
+  String? get campaignId => widget.campaignId;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: 1),
+    )..repeat(reverse: true); // Keep it animating while rolling
+  }
+
+  void rollDice() {
+    setState(() {
+      activeDice.clear();
+      diceValues.clear();
+      dicePositions.clear();
+      diceRotations.clear();
+      doubleRoll = [0, 0];
+
+      for (int i = 0; i < diceToRoll.length; i++) {
+        if (diceToRoll[i] > 0) {
+          for (int j = 0; j < diceToRoll[i]; j++) {
+            int sides = [4, 6, 8, 10, 12, 20, 100][i];
+            activeDice.add(Die(sides));
+            diceValues.add(1); // Placeholder before rolling
+            dicePositions
+                .add(Offset(100 + j * 50, 300)); // Random start positions
+            diceRotations.add(0); // Start rotations at 0
+          }
+        }
+      }
+
+      if (activeDice.isNotEmpty) {
+        showDice = true;
+        roll();
+      }
+    });
+  }
+
+  void roll() async {
+    Random random = Random();
+    int rollCount = 10;
+
+    for (int i = 0; i < rollCount; i++) {
+      setState(() {
+        for (int j = 0; j < activeDice.length; j++) {
+          diceValues[j] = random.nextInt(activeDice[j].sides) + 1;
+          dicePositions[j] = Offset(
+            random.nextInt(300).toDouble(),
+            50 + random.nextInt(600).toDouble(),
+          );
+          diceRotations[j] = random.nextDouble() * 2 * pi;
+        }
+      });
+
+      await Future.delayed(Duration(milliseconds: 100));
+    }
+
+    _animationController.stop(); // Stop animation
+    int total = diceValues.fold(0, (sum, value) => sum + value);
+
+    if (advantage || disadvantage) {
+      if (doubleRoll[0] == 0) {
+        doubleRoll[0] = total; // Store first roll
+        await Future.delayed(Duration(milliseconds: 500));
+        _animationController.repeat(); // Start animation again
+        roll(); // Trigger second roll
+        return; // Prevent the dialog from showing yet
+      } else {
+        doubleRoll[1] = total; // Store second roll
+        sendToCampaign();
+        showAdvantageDialog();
+      }
+    } else {
+      sendToCampaign();
+      showRollResultDialog(total);
+    }
+  }
+
+  void sendToCampaign() async {
+    // if(widget.campaignId != '') {
+    //   final String? currentUserUid = FirebaseAuth.instance.currentUser?.uid;
+    //   if (currentUserUid != null) {
+    //     final docRef = FirebaseFirestore.instance
+    //         .collection('campaigns')
+    //         .doc(campaignId);
+    //
+    //     try {
+    //       await docRef.set({
+    //         'Rolls': diceValues,
+    //         'Total': diceValues.reduce((value, element) => value + element),
+    //         'timestamp': FieldValue.serverTimestamp(), // Add timestamp
+    //         'userId': currentUserUid, // Store the user who rolled
+    //       }, SetOptions(merge: true));
+    //
+    //       print('Rolls successfully sent to campaign: $campaignId');
+    //     } catch (e) {
+    //       print('Error saving dice rolls: $e');
+    //     }
+    //   }
+    // }
+  }
+
+  void showAdvantageDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: (advantage)
+              ? Text("Roll with Advantage")
+              : Text("Roll with Disadvantage"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text("Rolls: ${doubleRoll.join(', ')}"),
+              (advantage)
+                  ? Text("Total: ${doubleRoll.reduce(max)}")
+                  : Text("Total: ${doubleRoll.reduce(min)}"),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                setState(() {
+                  showDice = false;
+                });
+              },
+              child: Text("OK"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void showRollResultDialog(int total) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Dice Roll Result"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text("Rolls: ${diceValues.join(', ')}"),
+              Text("Total: $total"),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  showDice = false;
+                });
+                Navigator.of(context).pop();
+              },
+              child: Text("OK"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget buildDice(String label, Widget shape, int index) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          decoration: BoxDecoration(
+              border: Border.all(color: Colors.black),
+              borderRadius: BorderRadius.circular(10),
+              color: Color(0xFF25291C)),
+          height: 150,
+          width: 150,
+          child: Column(
+            children: [
+              Spacer(),
+              Stack(
+                alignment: Alignment.center, // Centers the text
+                children: [
+                  shape, // Draws the dice shape
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: onDiceColor, // Ensure contrast
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 10),
+              Row(
+                children: [
+                  Spacer(),
+                  IconButton(
+                    onPressed: () {
+                      if (diceToRoll[index] > 0) {
+                        setState(() {
+                          diceToRoll[index]--;
+                        });
+                      }
+                    },
+                    icon: const Icon(Icons.arrow_downward),
+                  ),
+                  Text(
+                    diceToRoll[index].toString(),
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        diceToRoll[index]++;
+                      });
+                    },
+                    icon: const Icon(Icons.arrow_upward),
+                  ),
+                  Spacer()
+                ],
+              ),
+              Spacer()
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  void advantageToggle() {
+    setState(() {
+      advantage = !advantage;
+      disadvantage = false;
+      advantageButtonColor = advantage ? Colors.green : Color(0xFF25291C);
+      disadvantageButtonColor = Color(0xFF25291C);
+    });
+  }
+
+  void disadvantageToggle() {
+    setState(() {
+      disadvantage = !disadvantage;
+      advantage = false;
+      disadvantageButtonColor = disadvantage ? Colors.red : Color(0xFF25291C);
+      advantageButtonColor = Color(0xFF25291C);
+    });
+  }
+
+  Widget rollDiceWidget() {
+    return Stack(
+      children: List.generate(diceValues.length, (index) {
+        int value = diceValues[index];
+        int diceType = activeDice.isNotEmpty ? activeDice[index].sides : 6;
+
+        Widget shapeWidget;
+        switch (diceType) {
+          case 4:
+            shapeWidget = CustomPaint(
+                painter: TrianglePainter(diceColor), size: Size(50, 50));
+            break;
+          case 6:
+            shapeWidget = Container(color: diceColor, width: 50, height: 50);
+            break;
+          case 8:
+            shapeWidget = Transform.rotate(
+                angle: pi / 4,
+                child: Container(color: diceColor, width: 50, height: 50));
+            break;
+          case 10:
+          case 100:
+            shapeWidget = CustomPaint(
+                painter: DecagonPainter(diceColor), size: Size(55, 55));
+            break;
+          case 12:
+            shapeWidget = CustomPaint(
+                painter: PentagonPainter(diceColor), size: Size(55, 55));
+            break;
+          case 20:
+            shapeWidget = HexagonWidget.pointy(width: 55, color: diceColor);
+            break;
+          default:
+            shapeWidget = Container();
+        }
+
+        return AnimatedPositioned(
+          duration: Duration(milliseconds: 100),
+          curve: Curves.easeOut,
+          left: dicePositions[index].dx,
+          top: dicePositions[index].dy,
+          child: AnimatedBuilder(
+            animation: _animationController,
+            builder: (context, child) {
+              return Transform.rotate(
+                angle:
+                    diceRotations[index] + _animationController.value * 2 * pi,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    shapeWidget,
+                    Text(
+                      '$value',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: onDiceColor,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        );
+      }),
+    );
+  }
+
+  Widget removeDiceContainer() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          decoration: BoxDecoration(
+              border: Border.all(color: Colors.black),
+              borderRadius: BorderRadius.circular(10),
+              color: Color(0xFF25291C)),
+          height: 150,
+          width: 150,
+          child: Column(
+            children: [
+              Spacer(),
+              Icon(Icons.cancel_outlined, size: 75, color: diceColor),
+              SizedBox(height: 10),
+              Row(
+                children: [
+                  Spacer(),
+                  ElevatedButton(onPressed: removeDice(), child: Text("Remove Dice", style: TextStyle(color: Colors.white))),
+                  Spacer(),
+                ],
+              ),
+              Spacer()
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Dice Roller")),
+      drawer: MainDrawer(),
+      bottomNavigationBar: MainBottomNavBar(),
+      body: Stack(
+        children: [
+          if (showDice) rollDiceWidget(),
+          if (!showDice)
+            Center(
+              child: Column(
+                mainAxisSize:
+                    MainAxisSize.min, // Prevents unnecessary expansion
+                children: [
+                  SizedBox(height: 15), // Added spacing
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      buildDice(
+                          "d4",
+                          CustomPaint(
+                              painter: TrianglePainter(diceColor),
+                              size: Size(75, 75)),
+                          0),
+                      buildDice(
+                          "d6",
+                          Container(color: diceColor, width: 75, height: 75),
+                          1),
+                    ],
+                  ),
+                  SizedBox(height: 15), // Added spacing
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      buildDice(
+                          "d8",
+                          Transform.rotate(
+                              angle: pi / 4,
+                              child: Container(
+                                  color: diceColor, width: 65, height: 65)),
+                          2),
+                      buildDice(
+                          "d10",
+                          CustomPaint(
+                              painter: DecagonPainter(diceColor),
+                              size: Size(80, 80)),
+                          3),
+                    ],
+                  ),
+                  SizedBox(height: 15),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      buildDice(
+                          "d12",
+                          CustomPaint(
+                              painter: PentagonPainter(diceColor),
+                              size: Size(75, 75)),
+                          4),
+                      buildDice(
+                          "d20",
+                          HexagonWidget.pointy(
+                            width: 60,
+                            color: diceColor,
+                          ),
+                          5),
+                    ],
+                  ),
+                  SizedBox(height: 5),
+                  Row(
+                    children: [
+                      Spacer(),
+                      buildDice(
+                          "d100",
+                          CustomPaint(
+                              painter: DecagonPainter(diceColor),
+                              size: Size(80, 80)),
+                          6),
+                      Spacer(),
+                      removeDiceContainer(),
+                      Spacer(),
+                    ],
+                  ),
+                  SizedBox(height: 5),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton(
+                        onPressed: advantageToggle,
+                        style: ButtonStyle(
+                            backgroundColor:
+                                WidgetStateProperty.all(advantageButtonColor)),
+                        child: Text("Advantage",
+                            style: TextStyle(
+                                color: ((advantage)
+                                    ? Color(0xFF25291C)
+                                    : Colors.white))),
+                      ),
+                      ElevatedButton(
+                          onPressed: () {
+                            rollDice();
+                          },
+                          child: const Text("Roll Dice", style: TextStyle(color: Colors.white))),
+                      ElevatedButton(
+                        onPressed: disadvantageToggle,
+                        style: ButtonStyle(
+                            backgroundColor: WidgetStateProperty.all(
+                                disadvantageButtonColor)),
+                        child: Text("Disadvantage",
+                            style: TextStyle(
+                                color: ((disadvantage)
+                                    ? Color(0xFF25291C)
+                                    : Colors.white))),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 25),
+                ],
+              ),
+            )
+        ],
+      ),
+    );
+  }
+
+  removeDice() {
+    return () {
+      setState(() {
+        diceToRoll = [0, 0, 0, 0, 0, 0, 0];
+      });
+    };
+  }
+}
+
+class TrianglePainter extends CustomPainter {
+  final Color color;
+  TrianglePainter(this.color);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint paint = Paint()..color = color;
+    final Path path = Path()
+      ..moveTo(size.width / 2, 0)
+      ..lineTo(0, size.height)
+      ..lineTo(size.width, size.height)
+      ..close();
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant TrianglePainter oldDelegate) {
+    return oldDelegate.color != color;
+  }
+}
+
+class DecagonPainter extends CustomPainter {
+  final Color color;
+  DecagonPainter(this.color);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint paint = Paint()..color = color;
+    final Path path = Path();
+    for (int i = 0; i < 10; i++) {
+      double angle = (pi / 5) * i;
+      double x = size.width / 2 + cos(angle) * size.width / 2;
+      double y = size.height / 2 + sin(angle) * size.height / 2;
+      if (i == 0) {
+        path.moveTo(x, y);
+      } else {
+        path.lineTo(x, y);
+      }
+    }
+    path.close();
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant DecagonPainter oldDelegate) {
+    return oldDelegate.color != color;
+  }
+}
+
+class PentagonPainter extends CustomPainter {
+  final Color color;
+  PentagonPainter(this.color);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint paint = Paint()..color = color;
+    final Path path = Path();
+    for (int i = 0; i < 5; i++) {
+      double angle = (pi * 2 / 5) * i - pi / 2;
+      double x = size.width / 2 + cos(angle) * size.width / 2;
+      double y = size.height / 2 + sin(angle) * size.height / 2;
+
+      if (i == 0) {
+        path.moveTo(x, y);
+      } else {
+        path.lineTo(x, y);
+      }
+    }
+    path.close();
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant PentagonPainter oldDelegate) {
+    return oldDelegate.color != color;
+  }
+}

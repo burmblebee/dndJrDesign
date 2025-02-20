@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:warlocks_of_the_beach/home_screen.dart';
+import 'package:warlocks_of_the_beach/login_screen.dart';
 import 'package:warlocks_of_the_beach/screens/campaign_screen.dart';
 import 'package:warlocks_of_the_beach/screens/dnd_forms/character_name.dart';
 import 'firebase_options.dart'; 
@@ -58,7 +60,7 @@ class MyApp extends StatelessWidget {
           color: Color(0xFFD4C097), // Matching accent color for icons
         ),
       ),
-      home: const CampaignScreen(),
+      home: const HomePage(),
     );
   }
 }
