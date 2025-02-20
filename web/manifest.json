@@ -1,6 +1,6 @@
 {
-    "name": "dnd_jr_design",
-    "short_name": "dnd_jr_design",
+    "name": "login_screen",
+    "short_name": "login_screen",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
