@@ -10,6 +10,7 @@ class DMCombatScreen extends StatefulWidget {
   State<StatefulWidget> createState() => _DMCombatScreenState();
 }
 
+
 class _DMCombatScreenState extends State<DMCombatScreen> {
   late Color oddItemColor;
   late Color evenItemColor;
@@ -35,7 +36,15 @@ class _DMCombatScreenState extends State<DMCombatScreen> {
         name: 'Character 13', health: 160, maxHealth: 160, armorClass: 19),
     Character(name: 'Character 14', health: 30, maxHealth: 30, armorClass: 6),
   ];
-//help?
+
+  //TODO: Figure out how to have a little pop up anytime someone rolls within the campaign
+  //TODO: New combat button
+  //TODO: New character button
+  //TODO: Attack/Heal button
+  //TODO: Edit health button
+  //TODO: Figure out providers and ChangeNotifier to update across devices
+
+
   Widget currentTurnOrder() {
     return SizedBox(
       height: 450, // Ensures it has a defined height
