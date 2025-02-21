@@ -1,133 +1,262 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'character.dart';
 import 'diceRoller.dart';
+import 'combat_provider.dart'; // Import your provider
 
-class DMCombatScreen extends StatefulWidget {
+class DMCombatScreen extends ConsumerWidget {
   const DMCombatScreen({super.key, required this.campaignId});
   final String campaignId;
 
-  @override
-  State<StatefulWidget> createState() => _DMCombatScreenState();
-}
+  void attackBottomSheet(BuildContext context, List<Character> characters, WidgetRef ref) {
+    int damage = 0;
+    String? selectedCharacter;
 
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Allows it to resize with the keyboard
+      backgroundColor: Colors.transparent, // Prevents weird gaps
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            List<String> characterNames = characters.map((character) => character.name).toList();
 
-class _DMCombatScreenState extends State<DMCombatScreen> {
-  late Color oddItemColor;
-  late Color evenItemColor;
-  List<Character> characters = [
-    Character(
-        name: 'Character 1111111111111111111111111111111111111111111111',
-        health: 100,
-        maxHealth: 100,
-        armorClass: 10),
-    Character(name: 'Character 2', health: 80, maxHealth: 80, armorClass: 12),
-    Character(name: 'Character 3', health: 120, maxHealth: 120, armorClass: 15),
-    Character(name: 'Character 4', health: 90, maxHealth: 90, armorClass: 14),
-    Character(name: 'Character 5', health: 110, maxHealth: 110, armorClass: 13),
-    Character(name: 'Character 6', health: 70, maxHealth: 70, armorClass: 11),
-    Character(name: 'Character 7', health: 130, maxHealth: 130, armorClass: 16),
-    Character(name: 'Character 8', health: 60, maxHealth: 60, armorClass: 9),
-    Character(name: 'Character 9', health: 140, maxHealth: 140, armorClass: 17),
-    Character(name: 'Character 10', health: 50, maxHealth: 50, armorClass: 8),
-    Character(
-        name: 'Character 11', health: 150, maxHealth: 150, armorClass: 18),
-    Character(name: 'Character 12', health: 40, maxHealth: 40, armorClass: 7),
-    Character(
-        name: 'Character 13', health: 160, maxHealth: 160, armorClass: 19),
-    Character(name: 'Character 14', health: 30, maxHealth: 30, armorClass: 6),
-  ];
-
-  //TODO: Figure out how to have a little pop up anytime someone rolls within the campaign
-  //TODO: New combat button
-  //TODO: New character button
-  //TODO: Attack/Heal button
-  //TODO: Edit health button
-  //TODO: Figure out providers and ChangeNotifier to update across devices
-
-
-  Widget currentTurnOrder() {
-    return SizedBox(
-      height: 450, // Ensures it has a defined height
-      child: ReorderableListView(
-        padding: const EdgeInsets.symmetric(horizontal: 40),
-        children: [
-          for (int index = 0; index < characters.length; index++)
-            Container(
-              key: ValueKey(characters[index]), // Ensure unique key
-              decoration: BoxDecoration(
-                color: index.isEven ? evenItemColor : oddItemColor, // Apply background color
-                borderRadius: BorderRadius.circular(8), // Optional: Add border radius for rounded corners
-              ),
-              child: ListTile(
-                contentPadding: EdgeInsets.zero, // Remove padding for more control
-                title: Row(
+            return Padding(
+              padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Color.fromARGB(255, 159, 158, 154),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                ),
+                child: Wrap( // Automatically sizes to content
                   children: [
-                    // Use Expanded for better flexibility
-                    Expanded(
-                      child: Text(
-                        characters[index].name,
-                        style: TextStyle(
-                          color: Theme.of(context).textTheme.bodyMedium?.color,
-                          overflow: TextOverflow.ellipsis, // Handle overflow
-                          fontWeight: FontWeight.bold,
-                        ),
-                        maxLines: 1,
-                      ),
-                    ),
-                    const SizedBox(width: 5),
-                    // Character Health
-                    Text(
-                      '${characters[index].health}/${characters[index].maxHealth}',
-                      style: TextStyle(
-                        color: Theme.of(context).textTheme.bodyMedium?.color,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    // Character Armor Class
-                    Text(
-                      '${characters[index].armorClass}',
-                      style: TextStyle(
-                        color: Theme.of(context).textTheme.bodyMedium?.color,
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const Text(
+                            'Attack',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          DropdownButton<String>(
+                            hint: const Text("Select a Character"),
+                            value: selectedCharacter,
+                            items: characterNames.map((name) {
+                              return DropdownMenuItem<String>(
+                                value: name,
+                                child: Text(name),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                selectedCharacter = value;
+                              });
+                            },
+                          ),
+                          const SizedBox(height: 20),
+                          TextField(
+                            decoration: const InputDecoration(
+                              labelText: 'Damage',
+                              border: OutlineInputBorder(),
+                            ),
+                            keyboardType: TextInputType.number,
+                            onChanged: (value) {
+                              damage = int.tryParse(value) ?? 0;
+                            },
+                          ),
+                          const SizedBox(height: 20),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              ElevatedButton(
+                                onPressed: () {
+                                  if (selectedCharacter != null) {
+                                    int newHealth = characters
+                                        .firstWhere((char) => char.name == selectedCharacter)
+                                        .health - damage;
+                                    ref.read(combatProvider.notifier).updateHealth(selectedCharacter!, newHealth);
+                                    Navigator.pop(context);
+                                  } else {
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) => AlertDialog(
+                                        title: const Text('No Character Selected'),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                            child: const Text('OK'),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  }
+                                },
+                                child: const Text('Attack'),
+                              ),
+                              ElevatedButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                child: const Text('Cancel'),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-                trailing: ReorderableDragStartListener(
-                  index: index,
-                  child: const Icon(Icons.drag_handle), // Drag handle icon
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void healBottomSheet(BuildContext context, List<Character> characters, WidgetRef ref) {
+    String? selectedCharacter; // Moved outside so it doesn't reset
+    int healedAmount = 0;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Padding(
+              padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom + 20),
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Color.fromARGB(255, 159, 158, 154),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                ),
+                child: Wrap(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text(
+                            'Heal Options',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          DropdownButton<String>(
+                            hint: const Text("Select a Character"),
+                            value: selectedCharacter,
+                            items: characters.map((character) {
+                              return DropdownMenuItem<String>(
+                                value: character.name,
+                                child: Text(character.name),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                selectedCharacter = value;
+                              });
+                            },
+                          ),
+                          const SizedBox(height: 20),
+                          TextField(
+                            decoration: const InputDecoration(
+                              labelText: 'Healing Amount',
+                              border: OutlineInputBorder(),
+                            ),
+                            keyboardType: TextInputType.number,
+                            onChanged: (value) {
+                              setState(() {
+                                healedAmount = int.tryParse(value) ?? 0;
+                              });
+                            },
+                          ),
+                          const SizedBox(height: 20),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              ElevatedButton(
+                                onPressed: () {
+                                  if (selectedCharacter != null) {
+                                    Character character = characters.firstWhere((char) => char.name == selectedCharacter);
+                                    int newHealth = character.health + healedAmount;
+
+                                    // Cap healing at max health
+                                    newHealth = newHealth > character.maxHealth ? character.maxHealth : newHealth;
+
+                                    ref.read(combatProvider.notifier).updateHealth(selectedCharacter!, newHealth);
+                                    Navigator.pop(context);
+                                  } else {
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) => AlertDialog(
+                                        title: const Text('No Character Selected'),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                            child: const Text('OK'),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  }
+                                },
+                                child: const Text('Heal'),
+                              ),
+                              ElevatedButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                child: const Text('Cancel'),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-        ],
-        onReorder: (int oldIndex, int newIndex) {
-          setState(() {
-            if (oldIndex < newIndex) {
-              newIndex -= 1;
-            }
-            final Character character = characters.removeAt(oldIndex);
-            characters.insert(newIndex, character);
-          });
-        },
-      ),
+            );
+          },
+        );
+      },
     );
   }
 
 
+
   @override
-  Widget build(BuildContext context) {
-    // Initialize colors based on theme
-    oddItemColor = Theme.of(context).canvasColor;
-    evenItemColor = Theme.of(context).hoverColor;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final characters = ref.watch(combatProvider);
+
+    final oddItemColor = Theme.of(context).canvasColor;
+    final evenItemColor = Colors.white.withOpacity(0.2);
+
     return Scaffold(
       appBar: AppBar(title: const Text('Combat Screen')),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Navigate to DiceRoller and pass the campaignId
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) =>
-                  DiceRollScreen(campaignId: widget.campaignId),
+              builder: (context) => DiceRollScreen(campaignId: campaignId),
             ),
           );
         },
@@ -141,20 +270,14 @@ class _DMCombatScreenState extends State<DMCombatScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ElevatedButton(
-                  onPressed: () {
-                    // Add new character logic
-                    setState(() {
-                      characters.add(Character(name: 'New Character'));
-                    });
-                  },
-                  child: const Text('Add New Character'),
-                ),
+                    onPressed: () {
+                      attackBottomSheet(context, characters, ref);
+                    },
+                    child: const Text('Attack')),
                 const SizedBox(width: 20),
-                ElevatedButton(
-                  onPressed: () {
-                  },
-                  child: const Text('Attack/Heal Character'),
-                ),
+                ElevatedButton(onPressed: () {
+                  healBottomSheet(context, characters, ref);
+                }, child: const Text('Heal')),
               ],
             ),
             const SizedBox(height: 20),
@@ -162,60 +285,82 @@ class _DMCombatScreenState extends State<DMCombatScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ElevatedButton(
-                  onPressed: () {
-
-                  },
-                  child: const Text('Edit Health'),
-                ),
+                    onPressed: () {}, child: const Text('Add Character')),
                 const SizedBox(width: 20),
                 ElevatedButton(
-                  onPressed: () {
-
-                  },
-                  child: const Text('Start New Combat'),
-                ),
+                    onPressed: () {}, child: const Text('Start New Combat')),
               ],
             ),
             const SizedBox(height: 20),
-            Container(
-              padding: const EdgeInsets.all(10),
-              color: Theme.of(context).canvasColor,
-              child: Text('Current Turn Order',
-                  style: TextStyle(
-                      color: Theme.of(context).textTheme.bodyMedium?.color,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20)),
-            ),
-            const SizedBox(height: 20),
-            Row(
-              children: [
-                const SizedBox(width: 40), // For alignment
-                Text('Character Name',
-                    style: TextStyle(
-                        color: Theme.of(context).textTheme.bodyMedium?.color,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16)),
-                const Spacer(),
-                Text('HP',
-                    style: TextStyle(
-                        color: Theme.of(context).textTheme.bodyMedium?.color,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16)),
-                const SizedBox(width: 30), // For alignment
-                Text('AC',
-                    style: TextStyle(
-                        color: Theme.of(context).textTheme.bodyMedium?.color,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16)),
-                const SizedBox(width: 100),
-              ],
-            ),
-            currentTurnOrder(),
+            // Pass the context to the currentTurnOrder method
+            currentTurnOrder(
+                context, characters, oddItemColor, evenItemColor, ref),
             const Spacer(),
-
-
           ],
         ),
+      ),
+    );
+  }
+
+  // Accept BuildContext as a parameter
+  Widget currentTurnOrder(BuildContext context, List<Character> characters,
+      Color oddItemColor, Color evenItemColor, WidgetRef ref) {
+    return SizedBox(
+      height: 500,
+      child: ReorderableListView(
+        padding: const EdgeInsets.symmetric(horizontal: 40),
+        children: [
+          for (int index = 0; index < characters.length; index++)
+            Container(
+              key: ValueKey(characters[index]),
+              decoration: BoxDecoration(
+                color: index.isEven ? evenItemColor : oddItemColor,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        characters[index].name,
+                        style: TextStyle(
+                          color: Theme.of(context).textTheme.bodyMedium?.color,
+                          overflow: TextOverflow.ellipsis,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 1,
+                      ),
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      '${characters[index].health}/${characters[index].maxHealth}',
+                      style: TextStyle(
+                        color: Theme.of(context).textTheme.bodyMedium?.color,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      '${characters[index].armorClass}',
+                      style: TextStyle(
+                        color: Theme.of(context).textTheme.bodyMedium?.color,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                trailing: ReorderableDragStartListener(
+                  index: index,
+                  child: const Icon(Icons.drag_handle),
+                ),
+              ),
+            ),
+        ],
+        onReorder: (int oldIndex, int newIndex) {
+          ref
+              .read(combatProvider.notifier)
+              .reorderCharacters(oldIndex, newIndex);
+        },
       ),
     );
   }

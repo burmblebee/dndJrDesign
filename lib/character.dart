@@ -1,13 +1,27 @@
-class Character{
-  String name;
-  int health;
-  int maxHealth;
-  int armorClass;
+class Character {
+  final String name;
+  final int health;
+  final int maxHealth;
+  final int armorClass;
 
   Character({
     required this.name,
-    this.health = 100,
-    this.maxHealth = 100,
-    this.armorClass = 10,
+    required this.health,
+    required this.maxHealth,
+    required this.armorClass,
   });
+
+  Character copyWith({
+    String? name,
+    int? health,
+    int? maxHealth,
+    int? armorClass,
+  }) {
+    return Character(
+      name: name ?? this.name,
+      health: health ?? this.health,
+      maxHealth: maxHealth ?? this.maxHealth,
+      armorClass: armorClass ?? this.armorClass,
+    );
+  }
 }
