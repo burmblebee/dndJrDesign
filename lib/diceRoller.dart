@@ -8,7 +8,7 @@ import 'package:hexagon/hexagon.dart';
 import 'die.dart';
 
 class DiceRollScreen extends StatefulWidget {
-  DiceRollScreen({this.campaignId = '', super.key});
+  DiceRollScreen({this.campaignId, super.key});
 
   String? campaignId;
 
@@ -96,8 +96,8 @@ class _DiceRollScreenState extends State<DiceRollScreen>
         for (int j = 0; j < activeDice.length; j++) {
           diceValues[j] = random.nextInt(activeDice[j].sides) + 1;
           dicePositions[j] = Offset(
-            random.nextInt(width-50).toDouble(),
-            random.nextInt(height-150).toDouble() + 20,
+            random.nextInt(width - 50).toDouble(),
+            random.nextInt(height - 150).toDouble() + 20,
           );
           diceRotations[j] = random.nextDouble() * 2 * pi;
         }
@@ -128,27 +128,30 @@ class _DiceRollScreenState extends State<DiceRollScreen>
   }
 
   void sendToCampaign() async {
-    // if(widget.campaignId != '') {
-    //   final String? currentUserUid = FirebaseAuth.instance.currentUser?.uid;
-    //   if (currentUserUid != null) {
-    //     final docRef = FirebaseFirestore.instance
-    //         .collection('campaigns')
-    //         .doc(campaignId);
-    //
-    //     try {
-    //       await docRef.set({
-    //         'Rolls': diceValues,
-    //         'Total': diceValues.reduce((value, element) => value + element),
-    //         'timestamp': FieldValue.serverTimestamp(), // Add timestamp
-    //         'userId': currentUserUid, // Store the user who rolled
-    //       }, SetOptions(merge: true));
-    //
-    //       print('Rolls successfully sent to campaign: $campaignId');
-    //     } catch (e) {
-    //       print('Error saving dice rolls: $e');
-    //     }
-    //   }
-    // }
+    if (widget.campaignId != '') {
+      //  final String? currentUserUid = FirebaseAuth.instance.currentUser?.uid;
+      //    if (currentUserUid != null) {
+      final docRef = FirebaseFirestore.instance
+          .collection('campaigns')
+          .doc(campaignId)
+          .collection('rolls');
+
+      try {
+        await docRef.add(
+          {
+            'Rolls': diceValues,
+            'Total': diceValues.reduce((value, element) => value + element),
+            'timestamp': FieldValue.serverTimestamp(), // Add timestamp
+            //      'userId': currentUserUid,
+          },
+        );
+
+        print('Rolls successfully sent to campaign: $campaignId');
+      } catch (e) {
+        print('Error saving dice rolls: $e');
+      }
+      // }
+    }
   }
 
   void showAdvantageDialog() {
@@ -173,6 +176,7 @@ class _DiceRollScreenState extends State<DiceRollScreen>
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
+                sendToCampaign();
                 setState(() {
                   showDice = false;
                 });
@@ -386,7 +390,10 @@ class _DiceRollScreenState extends State<DiceRollScreen>
               Row(
                 children: [
                   Spacer(),
-                  ElevatedButton(onPressed: removeDice(), child: Text("Remove Dice", style: TextStyle(color: Colors.white))),
+                  ElevatedButton(
+                      onPressed: removeDice(),
+                      child: Text("Remove Dice",
+                          style: TextStyle(color: Colors.white))),
                   Spacer(),
                 ],
               ),
@@ -406,10 +413,10 @@ class _DiceRollScreenState extends State<DiceRollScreen>
 
   @override
   Widget build(BuildContext context) {
-      width = MediaQuery.of(context).size.width.toInt();
-      height = MediaQuery.of(context).size.height.toInt();
+    width = MediaQuery.of(context).size.width.toInt();
+    height = MediaQuery.of(context).size.height.toInt();
 
-      return Scaffold(
+    return Scaffold(
       appBar: AppBar(title: Text("Dice Roller")),
       body: Stack(
         children: [
@@ -508,7 +515,8 @@ class _DiceRollScreenState extends State<DiceRollScreen>
                           onPressed: () {
                             rollDice();
                           },
-                          child: const Text("Roll Dice", style: TextStyle(color: Colors.white))),
+                          child: const Text("Roll Dice",
+                              style: TextStyle(color: Colors.white))),
                       ElevatedButton(
                         onPressed: disadvantageToggle,
                         style: ButtonStyle(

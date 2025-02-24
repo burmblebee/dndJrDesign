@@ -1,10 +1,15 @@
 import 'package:dnd_jr_design/diceRoller.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart'; // Import Riverpod
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'DMcombatScreen.dart';
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(); // Make sure Firebase is initialized
+
   runApp(
     ProviderScope( // Wrap with ProviderScope
       child: MaterialApp(
@@ -33,7 +38,7 @@ Future<void> main() async {
           ),
           elevatedButtonTheme: ElevatedButtonThemeData(
             style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all<Color>(
+              backgroundColor: MaterialStateProperty.all<Color>(
                   const Color(0xFF25291C)), // The darker gray color
             ),
           ),
