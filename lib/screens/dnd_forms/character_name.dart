@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:warlocks_of_the_beach/widgets/bottom_navbar.dart';
-import 'package:warlocks_of_the_beach/widgets/main_appbar.dart';
-import 'package:warlocks_of_the_beach/widgets/main_drawer.dart';
-import '../../screens/dnd_forms/race_selection.dart';
+import 'package:warlocks_of_the_beach/home_screen.dart';
+import 'package:warlocks_of_the_beach/widgets/navigation/bottom_navbar.dart';
+import 'package:warlocks_of_the_beach/widgets/navigation/main_appbar.dart';
+import 'package:warlocks_of_the_beach/widgets/navigation/main_drawer.dart';
+import 'race_selection.dart';
 
 class CharacterName extends StatefulWidget {
   const CharacterName({super.key});
@@ -16,7 +17,8 @@ class CharacterName extends StatefulWidget {
 }
 
 class _CharacterNameState extends State<CharacterName> {
-  final TextEditingController _characterNameController = TextEditingController();
+  final TextEditingController _characterNameController =
+      TextEditingController();
 
   @override
   void dispose() {
@@ -25,30 +27,27 @@ class _CharacterNameState extends State<CharacterName> {
   }
 
   // Function to save character name to Firestore
-  Future<void> saveCharacterName() async {
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        // If no user is signed in, print an error
-        print('No user is signed in!');
-        return;
-      }
-      final docRef = FirebaseFirestore.instance
-          .collection('app_user_profiles')
-          .doc(user.uid)
-          .collection('characters')
-          .doc(_characterNameController.text);
+  // Future<void> saveCharacterName() async {
+  //   try {
+  //     final user = FirebaseAuth.instance.currentUser;
+  //     if (user == null) {
+  //       // If no user is signed in, print an error
+  //       print('No user is signed in!');
+  //       return;
+  //     }
+  //     final docRef = FirebaseFirestore.instance
+  //         .collection('app_user_profiles')
+  //         .doc(user.uid)
+  //         .collection('characters')
+  //         .doc(_characterNameController.text);
 
-      await docRef.set({
-        'character name': _characterNameController.text,
-      }, SetOptions(merge: true));
-    } catch (e) {
-      print('Error saving character name: $e');
-    }
-  }
-
-  // Set up save character name to send a map with the character name to Firestore
-  final customColor = const Color.fromARGB(255, 138, 28, 20);
+  //     await docRef.set({
+  //       'character name': _characterNameController.text,
+  //     }, SetOptions(merge: true));
+  //   } catch (e) {
+  //     print('Error saving character name: $e');
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -86,40 +85,25 @@ class _CharacterNameState extends State<CharacterName> {
               children: [
                 ElevatedButton(
                   onPressed: () {
-                    Navigator.pop(context); // Navigate back
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => HomePage(),
+                      ),
+                    ); // Navigate back
                   },
                   child: const Text('Back'),
                 ),
                 ElevatedButton(
-                  onPressed: () async {
-                    if (_characterNameController.text.isNotEmpty) {
-                      try {
-                        // Save the character name to Firestore
-                        await saveCharacterName();
-
-                        // Navigate to the next screen with characterID as characterName
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => RaceSelection(
-                              characterName: _characterNameController.text, // Pass character name
-                            ),
-                          ),
-                        );
-                      } catch (e) {
-                        print('Error navigating to RaceSelection: $e');
-                      }
-                    } else {
-                      // Show an error message if the character name is empty
-                      print('Character name cannot be empty!');
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Character name cannot be empty!'),
-                        ),
-                      );
-                    }
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => RaceSelection(characterName: _characterNameController.text,),
+                      ),
+                    ); // Navigate back
                   },
-                  child: const Text('Next'),
+                  child: const Text('Back'),
                 ),
               ],
             ),

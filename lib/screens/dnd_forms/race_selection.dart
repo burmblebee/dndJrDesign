@@ -1,10 +1,10 @@
-import 'package:warlocks_of_the_beach/widgets/bottom_navbar.dart';
+import 'package:warlocks_of_the_beach/widgets/navigation/bottom_navbar.dart';
 import 'package:warlocks_of_the_beach/widgets/buttons/button_with_padding.dart';
 import 'package:warlocks_of_the_beach/widgets/buttons/navigation_button.dart';
 import 'package:warlocks_of_the_beach/widgets/dnd_form_widgets/race_data_loader.dart';
-import 'package:warlocks_of_the_beach/widgets/main_appbar.dart';
+import 'package:warlocks_of_the_beach/widgets/navigation/main_appbar.dart';
 
-import '../../widgets/main_drawer.dart';
+import '../../widgets/navigation/main_drawer.dart';
 import 'package:flutter/material.dart';
 
 import '../../Screens/dnd_forms/class_selection.dart';

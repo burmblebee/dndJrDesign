@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../data/alignment_data.dart';
+import '../../data/character creator data/alignment_data.dart';
 
 
 class AlignmentDataWidget extends StatefulWidget {

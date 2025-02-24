@@ -4,8 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hexagon/hexagon.dart';
-import 'package:warlocks_of_the_beach/widgets/bottom_navbar.dart';
-import 'package:warlocks_of_the_beach/widgets/main_drawer.dart';
+import 'package:warlocks_of_the_beach/widgets/navigation/bottom_navbar.dart';
+import 'package:warlocks_of_the_beach/widgets/navigation/main_drawer.dart';
 
 import 'die.dart';
 

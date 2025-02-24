@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'specifics_screen.dart';
-import '../../data/background_data.dart';
+import '../../data/character creator data/background_data.dart';
 import '../../widgets/loaders/background_data_loader.dart';
 import '../../widgets/buttons/navigation_button.dart';
-import '../../widgets/main_drawer.dart';
+import '../../widgets/navigation/main_drawer.dart';
 
 class BackgroundScreen extends StatefulWidget {
   const BackgroundScreen({super.key, required this.characterName, required this.className, required this.raceName});

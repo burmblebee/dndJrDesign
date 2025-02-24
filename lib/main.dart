@@ -60,7 +60,13 @@ class MyApp extends StatelessWidget {
           color: Color(0xFFD4C097), // Matching accent color for icons
         ),
       ),
-      home: const HomePage(),
+      routes: {
+        '/home': (context) => const HomePage(),
+        '/login': (context) => const LoginScreen(),
+        '/character_creator': (context) => const CharacterName(),
+        '/campaign': (context) => const CampaignScreen(),
+      },
+      home: CharacterName(),
     );
   }
 }

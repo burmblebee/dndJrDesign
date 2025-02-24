@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:warlocks_of_the_beach/widgets/bottom_navbar.dart';
-import 'package:warlocks_of_the_beach/widgets/main_appbar.dart';
-import 'package:warlocks_of_the_beach/widgets/main_drawer.dart';
+import 'package:warlocks_of_the_beach/widgets/navigation/bottom_navbar.dart';
+import 'package:warlocks_of_the_beach/widgets/navigation/main_appbar.dart';
+import 'package:warlocks_of_the_beach/widgets/navigation/main_drawer.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

@@ -1,11 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../screens/dnd_forms/stats_screen.dart';
-import '../../widgets/main_drawer.dart';
+import '../../widgets/navigation/main_drawer.dart';
 import 'package:flutter/material.dart';
 
-import '../../data/background_data.dart';
-import '../../data/class_data.dart';
-import '../../data/race_data.dart';
+import '../../data/character creator data/background_data.dart';
+import '../../data/character creator data/class_data.dart';
+import '../../data/character creator data/race_data.dart';
 import '../../widgets/buttons/navigation_button.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 

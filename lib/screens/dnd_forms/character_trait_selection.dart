@@ -1,7 +1,8 @@
+import 'package:warlocks_of_the_beach/widgets/navigation/main_drawer.dart';
+
 import '../../screens/dnd_forms/image_generator.dart';
 import 'package:flutter/material.dart';
 import '../../widgets/loaders/alignment_data_loader.dart';
-import '../../widgets/main_drawer.dart';
 import '../../widgets/buttons/navigation_button.dart';
 import '../../widgets/loaders/lifestyle_data_loader.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -490,12 +491,12 @@ backgroundColor: customColor,foregroundColor: Colors.white,      ),
             textContent: "Next",
             onPressed: () {
               _saveSelections();
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ImageGenerator(characterName: widget.characterName,)
-                  ),
-                );
+              // Navigator.push(
+              //     context,
+              //     MaterialPageRoute(
+              //       builder: (context) => ImageGenerator(characterName: widget.characterName,)
+              //     ),
+              //   );
             },
           ),
         ],

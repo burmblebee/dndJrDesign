@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../../data/weapon_data.dart';
+import '../../data/character creator data/weapon_data.dart';
 
 class CharacterEquipment extends StatefulWidget {
   const CharacterEquipment({Key? key, required this.characterName})

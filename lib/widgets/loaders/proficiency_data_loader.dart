@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:warlocks_of_the_beach/data/background_data.dart';
-import 'package:warlocks_of_the_beach/data/class_data.dart';
+import 'package:warlocks_of_the_beach/data/character%20creator%20data/background_data.dart';
+import 'package:warlocks_of_the_beach/data/character%20creator%20data/class_data.dart';
 
 
 class ProficiencyDataWidget extends StatefulWidget {

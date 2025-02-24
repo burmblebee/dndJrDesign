@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../data/lifestyle_data.dart';
+import '../../data/character creator data/lifestyle_data.dart';
 
 
 class LifestyleDataWidget extends StatefulWidget {

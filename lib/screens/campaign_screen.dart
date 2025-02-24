@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../widgets/main_appbar.dart';
-import '../widgets/main_drawer.dart';
-import '../widgets/bottom_navbar.dart';
+import '../widgets/navigation/main_appbar.dart';
+import '../widgets/navigation/main_drawer.dart';
+import '../widgets/navigation/bottom_navbar.dart';
 import '../models/campaign.dart';
 import 'new_campaign_screen.dart';
 

@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:warlocks_of_the_beach/widgets/navigation/main_drawer.dart';
 import '../../screens/dnd_forms/character_trait_selection.dart';
 import '../../widgets/buttons/navigation_button.dart';
-import '../../widgets/main_drawer.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 

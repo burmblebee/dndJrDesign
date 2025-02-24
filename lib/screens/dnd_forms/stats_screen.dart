@@ -7,8 +7,8 @@ import 'dart:math';
 import '../../widgets/buttons/navigation_button.dart';
 
 import '../../widgets/buttons/expandable_fab.dart';
-import '../../data/race_data.dart';
-import '../../widgets/main_drawer.dart';
+import '../../data/character creator data/race_data.dart';
+import '../../widgets/navigation/main_drawer.dart';
 class StatsScreen extends StatefulWidget {
   const StatsScreen(
       {super.key, required this.characterName, required this.selectedRace});

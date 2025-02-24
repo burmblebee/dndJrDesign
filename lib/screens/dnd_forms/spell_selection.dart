@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:warlocks_of_the_beach/widgets/navigation/main_drawer.dart';
 import '../../widgets/loaders/cantrip_data_loader.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../../widgets/main_drawer.dart';
 import '../../widgets/buttons/navigation_button.dart';
 
 class CantripSelection extends StatefulWidget {

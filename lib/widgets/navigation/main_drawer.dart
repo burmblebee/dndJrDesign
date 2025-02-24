@@ -28,6 +28,13 @@ class MainDrawer extends StatelessWidget{
             },
           ),
           const Divider(),
+          ListTile(
+            leading: const Icon(Icons.group),
+            title: const Text('Character Creator', style: TextStyle(color: Colors.white),),
+            onTap: () {
+              Navigator.of(context).pushReplacementNamed('/character_creator');
+            },
+          ),
           const Spacer(),
           const Divider(),
           ListTile(
@@ -48,7 +55,7 @@ class MainDrawer extends StatelessWidget{
                   leading: const Icon(Icons.logout),
                   title: const Text('Logout', style: TextStyle(color: Colors.white),),
                   onTap: () {
-                    Navigator.of(context).pushReplacementNamed('/');
+                    Navigator.of(context).pushReplacementNamed('/login');
                   },
                 ),
                 const Divider(),

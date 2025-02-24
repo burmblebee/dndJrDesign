@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:warlocks_of_the_beach/widgets/navigation/main_drawer.dart';
 import '../../screens/dnd_forms/character_equipment_user_screen.dart';
 import '../../screens/dnd_forms/character_other.dart';
-import '../../widgets/main_drawer.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_radar_chart/flutter_radar_chart.dart';

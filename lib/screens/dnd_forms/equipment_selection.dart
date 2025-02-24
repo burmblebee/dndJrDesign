@@ -3,9 +3,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:warlocks_of_the_beach/rpg_awesome_icons.dart';
-import 'package:warlocks_of_the_beach/widgets/bottom_navbar.dart';
-import 'package:warlocks_of_the_beach/widgets/main_drawer.dart';
-import '../../data/weapon_data.dart';
+import 'package:warlocks_of_the_beach/widgets/navigation/bottom_navbar.dart';
+import 'package:warlocks_of_the_beach/widgets/navigation/main_drawer.dart';
+import '../../data/character creator data/weapon_data.dart';
 import '../../screens/dnd_forms/character_trait_selection.dart';
 import '../../widgets/buttons/navigation_button.dart';
 

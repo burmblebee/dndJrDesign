@@ -1,8 +1,8 @@
 // import 'package:dnd_character_creator/Screens/dnd_forms/specifics_selection.dart';
 import 'package:warlocks_of_the_beach/widgets/buttons/navigation_button.dart';
 import 'package:warlocks_of_the_beach/widgets/dnd_form_widgets/class_data_loader.dart';
+import 'package:warlocks_of_the_beach/widgets/navigation/main_drawer.dart';
 import '../../screens/dnd_forms/background_selection.dart';
-import '../../widgets/main_drawer.dart';
 import 'package:flutter/material.dart';
 import '../../widgets/buttons/button_with_padding.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
