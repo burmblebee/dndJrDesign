@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:warlocks_of_the_beach/home_screen.dart';
 import '../google_sign_in.dart';
 
 
@@ -17,6 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (userCredential != null) {
       print("Google Sign-In Successful: ${userCredential.user?.displayName}");
       // Navigate to next screen (e.g., home screen)
+      Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
     } else {
       print("Google Sign-In Canceled");
     }
@@ -28,7 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
       appBar: AppBar(title: const Text('Login')),
       body: Center(
         child: ElevatedButton.icon(
-          icon: Image.asset('assets/google_logo.png', height: 24), // Ensure asset exists
+          icon: Image.asset('assets/google_logo.png', height: 24), // dndJrDesign/assets/google_logo.png
           label: const Text("Sign in with Google"),
           onPressed: _handleGoogleSignIn,
         ),

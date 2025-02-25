@@ -60,7 +60,7 @@ class MyApp extends StatelessWidget {
           color: Color(0xFFD4C097), // Matching accent color for icons
         ),
       ),
-      home: const HomePage(),
+      home: const LoginScreen(),
     );
   }
 }
