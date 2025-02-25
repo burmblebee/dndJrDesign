@@ -1,10 +1,10 @@
-import 'package:dnd_jr_design/diceRoller.dart';
+import 'package:dnd_jr_design/dice/diceRoller.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'DMcombatScreen.dart';
+import 'combat/DMcombatScreen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

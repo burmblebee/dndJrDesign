@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'character.dart';
-import 'diceRoller.dart';
+import '../dice/diceRoller.dart';
 import 'combat_provider.dart';
 
 class DMCombatScreen extends ConsumerWidget {
@@ -547,14 +547,7 @@ class DMCombatScreen extends ConsumerWidget {
             const SizedBox(height: 20),
             currentTurn(context, characters, currentTurnIndex, ref),
             const Spacer(),
-            ElevatedButton(
-              onPressed: () {
-                ref
-                    .read(combatProvider.notifier)
-                    .nextTurn(); // Advance turn order
-              },
-              child: Text('Advance Turn'),
-            ),
+
 
             const SizedBox(height: 20),
           ],
@@ -630,6 +623,7 @@ class DMCombatScreen extends ConsumerWidget {
       context, List<Character> characters, int currentTurnIndex, WidgetRef ref) {
     return Container(
       padding: const EdgeInsets.all(8.0),
+      height: 300,
       decoration: BoxDecoration(
         color: Colors.grey[800],
         borderRadius: BorderRadius.circular(8),
@@ -662,7 +656,16 @@ class DMCombatScreen extends ConsumerWidget {
                   child: const Text('Heal')),
             ],
           ),
-
+          Spacer(),
+          ElevatedButton(
+            onPressed: () {
+              ref
+                  .read(combatProvider.notifier)
+                  .nextTurn(); // Advance turn order
+            },
+            child: Text('Advance Turn'),
+          ),
+          const SizedBox(width: 20),
         ],
       ),
     );
