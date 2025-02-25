@@ -1,0 +1,2 @@
+C:/Users/Matth/OneDrive/Desktop/Flutter_Projects/Warlocks_of_the_beach/dndJrDesign/android/app/.cxx/Debug/2q2e3o46/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/Matth/OneDrive/Desktop/Flutter_Projects/Warlocks_of_the_beach/dndJrDesign/android/app/.cxx/Debug/2q2e3o46/armeabi-v7a/CMakeFiles/rebuild_cache.dir

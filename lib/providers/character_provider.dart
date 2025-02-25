@@ -1,0 +1,61 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../models/character.dart';
+
+class CharacterNotifier extends StateNotifier<Character> {
+  CharacterNotifier() : super(Character(name: '', race: '', characterClass: '', background: '', picture: '', abilityScores: {}, weapons: {}, spells: {}, specifics: {}));
+
+  void updateCharacterName(String name) {
+    state = state.copyWith(name: name);
+  }
+
+  void updateSelectedRace(String race) {
+    state = state.copyWith(race: race);
+  }
+
+  void updateSelectedClass(String className) {
+    state = state.copyWith(characterClass: className);
+  }
+
+  void updateSelectedBackground(String background) {
+    state = state.copyWith(background: background);
+  }
+
+  void updateAbilityScores(Map<String, dynamic> scores) {
+    state = state.copyWith(abilityScores: scores);
+  }
+
+  void updateWeapons(Map<String, dynamic> weapons) {
+    state = state.copyWith(weapons: weapons);
+  }
+
+  void updateSpells(Map<String, dynamic> spells) {
+    state = state.copyWith(spells: spells);
+  }
+
+  void updateSpecifics(Map<String, dynamic> specifics) {
+    state = state.copyWith(specifics: specifics);
+  }
+
+  void updatePicture(String picture) {
+    state = state.copyWith(picture: picture);
+  }
+
+  Future<void> saveCharacterToFirestore(String userId) async {
+    try {
+      final docRef = FirebaseFirestore.instance
+          .collection('app_user_profiles')
+          .doc(userId)
+          .collection('characters')
+          .doc(state.name);
+
+      await docRef.set(state.toMap(), SetOptions(merge: true));
+    } catch (e) {
+      print('Error saving character: $e');
+    }
+  }
+}
+
+final characterProvider = StateNotifierProvider<CharacterNotifier, Character>((ref) {
+  return CharacterNotifier();
+});
