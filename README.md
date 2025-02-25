@@ -1,4 +1,4 @@
-# dnd_jr_design
+# warlocks_of_the_beach
 
 A new Flutter project.
 

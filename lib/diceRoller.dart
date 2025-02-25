@@ -1,13 +1,16 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hexagon/hexagon.dart';
+import 'package:warlocks_of_the_beach/widgets/navigation/bottom_navbar.dart';
+import 'package:warlocks_of_the_beach/widgets/navigation/main_drawer.dart';
 
 import 'die.dart';
 
 class DiceRollScreen extends StatefulWidget {
-  DiceRollScreen({this.campaignId, super.key});
+  DiceRollScreen({this.campaignId = '', super.key});
 
   String? campaignId;
 
@@ -19,7 +22,7 @@ class _DiceRollScreenState extends State<DiceRollScreen>
     with TickerProviderStateMixin {
   final Random _random = Random();
   List<int> diceValues = [];
-  List<Offset> dicePositions = [const Offset(50, 300), const Offset(200, 300)];
+  List<Offset> dicePositions = [Offset(50, 300), Offset(200, 300)];
   Timer? _timer;
   List<Die> activeDice = [];
   List<int> diceToRoll = [
@@ -31,8 +34,6 @@ class _DiceRollScreenState extends State<DiceRollScreen>
     0,
     0
   ]; // d4, d6, d8, d10, d12, d20, d100
-  late int width;
-  late int height;
 
   List<int> doubleRoll = [0, 0];
 
@@ -42,10 +43,10 @@ class _DiceRollScreenState extends State<DiceRollScreen>
   bool showDice = false;
   bool advantage = false;
   bool disadvantage = false;
-  Color advantageButtonColor = const Color(0xFF25291C);
-  Color disadvantageButtonColor = const Color(0xFF25291C);
-  Color diceColor = const Color.fromARGB(255, 243, 241, 230);
-  Color onDiceColor = const Color(0xFF464538);
+  Color advantageButtonColor = Color(0xFF25291C);
+  Color disadvantageButtonColor = Color(0xFF25291C);
+  Color diceColor = Color.fromARGB(255, 243, 241, 230);
+  Color onDiceColor = Color(0xFF464538);
 
   String? get campaignId => widget.campaignId;
 
@@ -54,7 +55,7 @@ class _DiceRollScreenState extends State<DiceRollScreen>
     super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 1),
+      duration: Duration(seconds: 1),
     )..repeat(reverse: true); // Keep it animating while rolling
   }
 
@@ -95,14 +96,14 @@ class _DiceRollScreenState extends State<DiceRollScreen>
         for (int j = 0; j < activeDice.length; j++) {
           diceValues[j] = random.nextInt(activeDice[j].sides) + 1;
           dicePositions[j] = Offset(
-            random.nextInt(width - 50).toDouble(),
-            random.nextInt(height - 150).toDouble() + 20,
+            random.nextInt(300).toDouble(),
+            50 + random.nextInt(600).toDouble(),
           );
           diceRotations[j] = random.nextDouble() * 2 * pi;
         }
       });
 
-      await Future.delayed(const Duration(milliseconds: 100));
+      await Future.delayed(Duration(milliseconds: 100));
     }
 
     _animationController.stop(); // Stop animation
@@ -111,7 +112,7 @@ class _DiceRollScreenState extends State<DiceRollScreen>
     if (advantage || disadvantage) {
       if (doubleRoll[0] == 0) {
         doubleRoll[0] = total; // Store first roll
-        await Future.delayed(const Duration(milliseconds: 500));
+        await Future.delayed(Duration(milliseconds: 500));
         _animationController.repeat(); // Start animation again
         roll(); // Trigger second roll
         return; // Prevent the dialog from showing yet
@@ -127,30 +128,27 @@ class _DiceRollScreenState extends State<DiceRollScreen>
   }
 
   void sendToCampaign() async {
-    if (widget.campaignId != '') {
-      //  final String? currentUserUid = FirebaseAuth.instance.currentUser?.uid;
-      //    if (currentUserUid != null) {
-      final docRef = FirebaseFirestore.instance
-          .collection('campaigns')
-          .doc(campaignId)
-          .collection('rolls');
-
-      try {
-        await docRef.add(
-          {
-            'Rolls': diceValues,
-            'Total': diceValues.reduce((value, element) => value + element),
-            'timestamp': FieldValue.serverTimestamp(), // Add timestamp
-            //      'userId': currentUserUid,
-          },
-        );
-
-        print('Rolls successfully sent to campaign: $campaignId');
-      } catch (e) {
-        print('Error saving dice rolls: $e');
-      }
-      // }
-    }
+    // if(widget.campaignId != '') {
+    //   final String? currentUserUid = FirebaseAuth.instance.currentUser?.uid;
+    //   if (currentUserUid != null) {
+    //     final docRef = FirebaseFirestore.instance
+    //         .collection('campaigns')
+    //         .doc(campaignId);
+    //
+    //     try {
+    //       await docRef.set({
+    //         'Rolls': diceValues,
+    //         'Total': diceValues.reduce((value, element) => value + element),
+    //         'timestamp': FieldValue.serverTimestamp(), // Add timestamp
+    //         'userId': currentUserUid, // Store the user who rolled
+    //       }, SetOptions(merge: true));
+    //
+    //       print('Rolls successfully sent to campaign: $campaignId');
+    //     } catch (e) {
+    //       print('Error saving dice rolls: $e');
+    //     }
+    //   }
+    // }
   }
 
   void showAdvantageDialog() {
@@ -160,8 +158,8 @@ class _DiceRollScreenState extends State<DiceRollScreen>
       builder: (BuildContext context) {
         return AlertDialog(
           title: (advantage)
-              ? const Text("Roll with Advantage")
-              : const Text("Roll with Disadvantage"),
+              ? Text("Roll with Advantage")
+              : Text("Roll with Disadvantage"),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -175,12 +173,11 @@ class _DiceRollScreenState extends State<DiceRollScreen>
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                sendToCampaign();
                 setState(() {
                   showDice = false;
                 });
               },
-              child: const Text("OK"),
+              child: Text("OK"),
             ),
           ],
         );
@@ -194,7 +191,7 @@ class _DiceRollScreenState extends State<DiceRollScreen>
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text("Dice Roll Result"),
+          title: Text("Dice Roll Result"),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -210,7 +207,7 @@ class _DiceRollScreenState extends State<DiceRollScreen>
                 });
                 Navigator.of(context).pop();
               },
-              child: const Text("OK"),
+              child: Text("OK"),
             ),
           ],
         );
@@ -226,12 +223,12 @@ class _DiceRollScreenState extends State<DiceRollScreen>
           decoration: BoxDecoration(
               border: Border.all(color: Colors.black),
               borderRadius: BorderRadius.circular(10),
-              color: const Color(0xFF25291C)),
+              color: Color(0xFF25291C)),
           height: 150,
           width: 150,
           child: Column(
             children: [
-              const Spacer(),
+              Spacer(),
               Stack(
                 alignment: Alignment.center, // Centers the text
                 children: [
@@ -246,10 +243,10 @@ class _DiceRollScreenState extends State<DiceRollScreen>
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
+              SizedBox(height: 10),
               Row(
                 children: [
-                  const Spacer(),
+                  Spacer(),
                   IconButton(
                     onPressed: () {
                       if (diceToRoll[index] > 0) {
@@ -262,7 +259,7 @@ class _DiceRollScreenState extends State<DiceRollScreen>
                   ),
                   Text(
                     diceToRoll[index].toString(),
-                    style: const TextStyle(fontSize: 16),
+                    style: TextStyle(fontSize: 16),
                   ),
                   IconButton(
                     onPressed: () {
@@ -272,10 +269,10 @@ class _DiceRollScreenState extends State<DiceRollScreen>
                     },
                     icon: const Icon(Icons.arrow_upward),
                   ),
-                  const Spacer()
+                  Spacer()
                 ],
               ),
-              const Spacer()
+              Spacer()
             ],
           ),
         ),
@@ -287,8 +284,8 @@ class _DiceRollScreenState extends State<DiceRollScreen>
     setState(() {
       advantage = !advantage;
       disadvantage = false;
-      advantageButtonColor = advantage ? Colors.green : const Color(0xFF25291C);
-      disadvantageButtonColor = const Color(0xFF25291C);
+      advantageButtonColor = advantage ? Colors.green : Color(0xFF25291C);
+      disadvantageButtonColor = Color(0xFF25291C);
     });
   }
 
@@ -296,8 +293,8 @@ class _DiceRollScreenState extends State<DiceRollScreen>
     setState(() {
       disadvantage = !disadvantage;
       advantage = false;
-      disadvantageButtonColor = disadvantage ? Colors.red : const Color(0xFF25291C);
-      advantageButtonColor = const Color(0xFF25291C);
+      disadvantageButtonColor = disadvantage ? Colors.red : Color(0xFF25291C);
+      advantageButtonColor = Color(0xFF25291C);
     });
   }
 
@@ -311,7 +308,7 @@ class _DiceRollScreenState extends State<DiceRollScreen>
         switch (diceType) {
           case 4:
             shapeWidget = CustomPaint(
-                painter: TrianglePainter(diceColor), size: const Size(50, 50));
+                painter: TrianglePainter(diceColor), size: Size(50, 50));
             break;
           case 6:
             shapeWidget = Container(color: diceColor, width: 50, height: 50);
@@ -324,11 +321,11 @@ class _DiceRollScreenState extends State<DiceRollScreen>
           case 10:
           case 100:
             shapeWidget = CustomPaint(
-                painter: DecagonPainter(diceColor), size: const Size(55, 55));
+                painter: DecagonPainter(diceColor), size: Size(55, 55));
             break;
           case 12:
             shapeWidget = CustomPaint(
-                painter: PentagonPainter(diceColor), size: const Size(55, 55));
+                painter: PentagonPainter(diceColor), size: Size(55, 55));
             break;
           case 20:
             shapeWidget = HexagonWidget.pointy(width: 55, color: diceColor);
@@ -338,7 +335,7 @@ class _DiceRollScreenState extends State<DiceRollScreen>
         }
 
         return AnimatedPositioned(
-          duration: const Duration(milliseconds: 100),
+          duration: Duration(milliseconds: 100),
           curve: Curves.easeOut,
           left: dicePositions[index].dx,
           top: dicePositions[index].dy,
@@ -347,7 +344,7 @@ class _DiceRollScreenState extends State<DiceRollScreen>
             builder: (context, child) {
               return Transform.rotate(
                 angle:
-                diceRotations[index] + _animationController.value * 2 * pi,
+                    diceRotations[index] + _animationController.value * 2 * pi,
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
@@ -378,25 +375,22 @@ class _DiceRollScreenState extends State<DiceRollScreen>
           decoration: BoxDecoration(
               border: Border.all(color: Colors.black),
               borderRadius: BorderRadius.circular(10),
-              color: const Color(0xFF25291C)),
+              color: Color(0xFF25291C)),
           height: 150,
           width: 150,
           child: Column(
             children: [
-              const Spacer(),
+              Spacer(),
               Icon(Icons.cancel_outlined, size: 75, color: diceColor),
-              const SizedBox(height: 10),
+              SizedBox(height: 10),
               Row(
                 children: [
-                  const Spacer(),
-                  ElevatedButton(
-                      onPressed: removeDice(),
-                      child: const Text("Remove Dice",
-                          style: TextStyle(color: Colors.white))),
-                  const Spacer(),
+                  Spacer(),
+                  ElevatedButton(onPressed: removeDice(), child: Text("Remove Dice", style: TextStyle(color: Colors.white))),
+                  Spacer(),
                 ],
               ),
-              const Spacer()
+              Spacer()
             ],
           ),
         ),
@@ -412,128 +406,139 @@ class _DiceRollScreenState extends State<DiceRollScreen>
 
   @override
   Widget build(BuildContext context) {
-    width = MediaQuery.of(context).size.width.toInt();
-    height = MediaQuery.of(context).size.height.toInt();
-
     return Scaffold(
-      appBar: AppBar(title: const Text("Dice Roller")),
-      body: Stack(
-        children: [
-          if (showDice) rollDiceWidget(),
-          if (!showDice)
-            Center(
-              child: Column(
-                mainAxisSize:
-                MainAxisSize.min, // Prevents unnecessary expansion
-                children: [
-                  const SizedBox(height: 15), // Added spacing
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      buildDice(
-                          "d4",
-                          CustomPaint(
-                              painter: TrianglePainter(diceColor),
-                              size: const Size(75, 75)),
-                          0),
-                      buildDice(
-                          "d6",
-                          Container(color: diceColor, width: 75, height: 75),
-                          1),
-                    ],
-                  ),
-                  const SizedBox(height: 15), // Added spacing
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      buildDice(
-                          "d8",
-                          Transform.rotate(
-                              angle: pi / 4,
-                              child: Container(
-                                  color: diceColor, width: 65, height: 65)),
-                          2),
-                      buildDice(
-                          "d10",
-                          CustomPaint(
-                              painter: DecagonPainter(diceColor),
-                              size: const Size(80, 80)),
-                          3),
-                    ],
-                  ),
-                  const SizedBox(height: 15),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      buildDice(
-                          "d12",
-                          CustomPaint(
-                              painter: PentagonPainter(diceColor),
-                              size: const Size(75, 75)),
-                          4),
-                      buildDice(
-                          "d20",
-                          HexagonWidget.pointy(
-                            width: 60,
-                            color: diceColor,
-                          ),
-                          5),
-                    ],
-                  ),
-                  const SizedBox(height: 15),
-                  Row(
-                    children: [
-                      const Spacer(),
-                      buildDice(
-                          "d100",
-                          CustomPaint(
-                              painter: DecagonPainter(diceColor),
-                              size: const Size(80, 80)),
-                          6),
-                      const Spacer(),
-                      removeDiceContainer(),
-                      const Spacer(),
-                    ],
-                  ),
-                  const SizedBox(height: 15),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      ElevatedButton(
-                        onPressed: advantageToggle,
-                        style: ButtonStyle(
-                            backgroundColor:
-                            WidgetStateProperty.all(advantageButtonColor)),
-                        child: Text("Advantage",
-                            style: TextStyle(
-                                color: ((advantage)
-                                    ? const Color(0xFF25291C)
-                                    : Colors.white))),
-                      ),
-                      ElevatedButton(
-                          onPressed: () {
-                            rollDice();
-                          },
-                          child: const Text("Roll Dice",
-                              style: TextStyle(color: Colors.white))),
-                      ElevatedButton(
-                        onPressed: disadvantageToggle,
-                        style: ButtonStyle(
-                            backgroundColor: WidgetStateProperty.all(
-                                disadvantageButtonColor)),
-                        child: Text("Disadvantage",
-                            style: TextStyle(
-                                color: ((disadvantage)
-                                    ? const Color(0xFF25291C)
-                                    : Colors.white))),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 25),
-                ],
+      appBar: AppBar(title: Text("Dice Roller")),
+      drawer: MainDrawer(),
+      bottomNavigationBar: MainBottomNavBar(),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: constraints.maxHeight,
               ),
-            )
-        ],
+              child: IntrinsicHeight(
+                child: Stack(
+                  children: [
+                    if (showDice) rollDiceWidget(),
+                    if (!showDice)
+                      Center(
+                        child: Column(
+                          mainAxisSize:
+                              MainAxisSize.min, // Prevents unnecessary expansion
+                          children: [
+                            SizedBox(height: 15), // Added spacing
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                buildDice(
+                                    "d4",
+                                    CustomPaint(
+                                        painter: TrianglePainter(diceColor),
+                                        size: Size(75, 75)),
+                                    0),
+                                buildDice(
+                                    "d6",
+                                    Container(color: diceColor, width: 75, height: 75),
+                                    1),
+                              ],
+                            ),
+                            SizedBox(height: 15), // Added spacing
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                buildDice(
+                                    "d8",
+                                    Transform.rotate(
+                                        angle: pi / 4,
+                                        child: Container(
+                                            color: diceColor, width: 65, height: 65)),
+                                    2),
+                                buildDice(
+                                    "d10",
+                                    CustomPaint(
+                                        painter: DecagonPainter(diceColor),
+                                        size: Size(80, 80)),
+                                    3),
+                              ],
+                            ),
+                            SizedBox(height: 15),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                buildDice(
+                                    "d12",
+                                    CustomPaint(
+                                        painter: PentagonPainter(diceColor),
+                                        size: Size(75, 75)),
+                                    4),
+                                buildDice(
+                                    "d20",
+                                    HexagonWidget.pointy(
+                                      width: 60,
+                                      color: diceColor,
+                                    ),
+                                    5),
+                              ],
+                            ),
+                            SizedBox(height: 5),
+                            Row(
+                              children: [
+                                Spacer(),
+                                buildDice(
+                                    "d100",
+                                    CustomPaint(
+                                        painter: DecagonPainter(diceColor),
+                                        size: Size(80, 80)),
+                                    6),
+                                Spacer(),
+                                removeDiceContainer(),
+                                Spacer(),
+                              ],
+                            ),
+                            SizedBox(height: 5),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                ElevatedButton(
+                                  onPressed: advantageToggle,
+                                  style: ButtonStyle(
+                                      backgroundColor:
+                                          MaterialStateProperty.all(advantageButtonColor)),
+                                  child: Text("Advantage",
+                                      style: TextStyle(
+                                          color: ((advantage)
+                                              ? Color(0xFF25291C)
+                                              : Colors.white))),
+                                ),
+                                ElevatedButton(
+                                    onPressed: () {
+                                      rollDice();
+                                    },
+                                    child: const Text("Roll Dice", style: TextStyle(color: Colors.white))),
+                                ElevatedButton(
+                                  onPressed: disadvantageToggle,
+                                  style: ButtonStyle(
+                                      backgroundColor: MaterialStateProperty.all(
+                                          disadvantageButtonColor)),
+                                  child: Text("Disadvantage",
+                                      style: TextStyle(
+                                          color: ((disadvantage)
+                                              ? Color(0xFF25291C)
+                                              : Colors.white))),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 25),
+                          ],
+                        ),
+                      )
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
