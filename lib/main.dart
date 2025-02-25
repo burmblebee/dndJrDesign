@@ -1,4 +1,6 @@
 import 'package:dnd_jr_design/dice/diceRoller.dart';
+import 'package:dnd_jr_design/npc/npc_creator.dart';
+import 'package:dnd_jr_design/npc/npc_list.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,7 +15,8 @@ Future<void> main() async {
   runApp(
     ProviderScope( // Wrap with ProviderScope
       child: MaterialApp(
-        home: DMCombatScreen(campaignId: '15'),
+        home: NPCListScreen(),
+        //DMCombatScreen(campaignId: '15'),
         theme: ThemeData(
           brightness: Brightness.dark,
           primaryColor: const Color(0xFF464538), // Dark olive green

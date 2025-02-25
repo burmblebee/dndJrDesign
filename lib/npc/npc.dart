@@ -6,8 +6,10 @@ class AttackOption {
 }
 
 class NPC {
+  String id;
   String name;
   List<AttackOption> attacks;
 
-  NPC({required this.name, required this.attacks});
+  NPC({required this.id, required this.name, required this.attacks});
 }
+
