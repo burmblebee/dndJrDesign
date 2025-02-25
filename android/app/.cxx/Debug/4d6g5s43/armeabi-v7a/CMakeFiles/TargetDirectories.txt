@@ -1,0 +1,2 @@
+C:/Users/mike9/Desktop/JuniorDesign/loginScreenAttempt3/dndJrDesign/android/app/.cxx/Debug/4d6g5s43/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/mike9/Desktop/JuniorDesign/loginScreenAttempt3/dndJrDesign/android/app/.cxx/Debug/4d6g5s43/armeabi-v7a/CMakeFiles/rebuild_cache.dir
