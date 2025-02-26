@@ -66,7 +66,7 @@ class MyApp extends StatelessWidget {
           '/character_creator': (context) => const CharacterName(),
 
         },
-        home: const CharacterName(),
+        home: const CampaignScreen(),
       ),
     );
   }

@@ -30,7 +30,7 @@ class _ButtonWithPaddingState extends State<ButtonWithPadding> {
           padding: WidgetStateProperty.all(const EdgeInsets.all(10)),
           minimumSize: WidgetStateProperty.all(Size(120, 50)),
           backgroundColor:
-              WidgetStateProperty.all(const Color.fromARGB(255, 138, 28, 20)),
+              WidgetStateProperty.all(const Color(0xFF25291C)), //the new gray color
         ),
       ),
     );

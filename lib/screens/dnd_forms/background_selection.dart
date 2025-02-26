@@ -1,52 +1,61 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'specifics_screen.dart';
 import '../../data/character creator data/background_data.dart';
 import '../../widgets/loaders/background_data_loader.dart';
 import '../../widgets/buttons/navigation_button.dart';
 import '../../widgets/navigation/main_drawer.dart';
+import 'package:warlocks_of_the_beach/providers/character_provider.dart';
 
-class BackgroundScreen extends StatefulWidget {
-  const BackgroundScreen({super.key, required this.characterName, required this.className, required this.raceName});
-  final String characterName;
-  final String className;
-  final String raceName;
+class BackgroundScreen extends ConsumerStatefulWidget {
+  const BackgroundScreen({super.key});
 
   @override
-  State<StatefulWidget> createState() => _BackgroundScreenState();
+  _BackgroundScreenState createState() => _BackgroundScreenState();
 }
 
-class _BackgroundScreenState extends State<BackgroundScreen> {
+class _BackgroundScreenState extends ConsumerState<BackgroundScreen> {
+  
   final backgrounds = BackgroundData;
   final Color customColor = const Color.fromARGB(255, 138, 28, 20);
   String _selectedBackground = 'Acolyte';
 
   // Save selection to Firebase
-  void _saveSelections() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      print('User not authenticated');
-      return;
-    }
-    final userId = user.uid;
-    final docRef = FirebaseFirestore.instance.collection('app_user_profiles').doc(userId);
+  // void _saveSelections() async {
+  //   final user = FirebaseAuth.instance.currentUser;
+  //   if (user == null) {
+  //     print('User not authenticated');
+  //     return;
+  //   }
+  //   final userId = user.uid;
+  //   final docRef = FirebaseFirestore.instance.collection('app_user_profiles').doc(userId);
 
-    try {
-      await docRef.set({
-        'background': _selectedBackground,
-        'name': widget.characterName,
-      }, SetOptions(merge: true));
-    } catch (e) {
-      print('Error saving background: $e');
-    }
+  //   try {
+  //     await docRef.set({
+  //       'background': _selectedBackground,
+  //       'name': widget.characterName,
+  //     }, SetOptions(merge: true));
+  //   } catch (e) {
+  //     print('Error saving background: $e');
+  //   }
+  // }\
+  void updateSelectedBackground (String background) {
+    setState(() {
+      // _selectedBackground = background;
+      ref.read(characterProvider.notifier).updateSelectedBackground(background);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final characterName = ref.watch(characterProvider).name;
+
+
     return Scaffold(
       appBar: AppBar(
-        title: Text("Background for ${widget.characterName}"),
+        title: Text("Background for ${characterName}"),
         backgroundColor: customColor,
         foregroundColor: Colors.white,
       ),
@@ -63,16 +72,11 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
             NavigationButton(
               textContent: "Next",
               onPressed: () {
-                _saveSelections();
+                updateSelectedBackground(_selectedBackground);
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => SpecificsScreen(
-                      characterName: widget.characterName,
-                      className: widget.className,
-                      raceName: widget.raceName,
-                      backgroundName: _selectedBackground,
-                    ),
+                    builder: (context) => SpecificsScreen(),
                   ),
                 );
               },

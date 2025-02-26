@@ -189,7 +189,7 @@ class _CharacterNameState extends ConsumerState<CharacterName> {
                       MaterialPageRoute(
                         builder: (context) => const HomePage(),
                       ),
-                    ); // Navigate back
+                    ); // Navigate backgit
                   },
                   child: const Text('Back'),
                 ),

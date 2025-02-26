@@ -1,27 +1,24 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:warlocks_of_the_beach/providers/character_provider.dart';
 import '../../screens/dnd_forms/equipment_selection.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../../widgets/buttons/button_with_padding.dart';
 import 'dart:math';
 import '../../widgets/buttons/navigation_button.dart';
-
 import '../../widgets/buttons/expandable_fab.dart';
 import '../../data/character creator data/race_data.dart';
 import '../../widgets/navigation/main_drawer.dart';
-class StatsScreen extends StatefulWidget {
-  const StatsScreen(
-      {super.key, required this.characterName, required this.selectedRace});
 
-  final characterName;
-  final selectedRace;
+class StatsScreen extends ConsumerStatefulWidget {
+  const StatsScreen({super.key});
 
   @override
-  State<StatsScreen> createState() => _StatsScreenState();
+  _StatsScreenState createState() => _StatsScreenState();
 }
 
-class _StatsScreenState extends State<StatsScreen> {
-  late String _selectedRace; // Declare _selectedRace as late
+class _StatsScreenState extends ConsumerState<StatsScreen> {
+  late String _selectedRace;
+
   late Map<String, int> abilityScores = {
     'Strength': 8,
     'Dexterity': 8,
@@ -108,41 +105,6 @@ class _StatsScreenState extends State<StatsScreen> {
     });
   }
 
-  Future<void> _getRace() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      print('User not authenticated');
-      return;
-    }
-    final userId = user.uid;
-
-    try {
-      final firestore = FirebaseFirestore.instance;
-      final docRef = firestore
-          .collection('app_user_profiles')
-          .doc(userId)
-          .collection('characters')
-          .doc(widget.characterName);
-
-      final docSnapshot = await docRef.get();
-      if (docSnapshot.exists) {
-        final data = docSnapshot.data();
-        if (data != null && data.containsKey('race')) {
-          final race = data['race'];
-          setState(() {
-            _selectedRace = race;
-          });
-        } else {
-          print('Race field does not exist in the document');
-        }
-      } else {
-        print('Document does not exist');
-      }
-    } catch (e) {
-      print('Error getting race: $e');
-    }
-  }
-
   void _decrementSkill(String skill) {
     final score = baseScores[skill]! - 1;
     final cost = (baseScores[skill]! <= 14) ? 1 : 2;
@@ -159,9 +121,10 @@ class _StatsScreenState extends State<StatsScreen> {
   @override
   void initState() {
     super.initState();
-    _selectedRace = widget.selectedRace; // Initialize _selectedRace in initState
+    _selectedRace = ref
+        .read(characterProvider)
+        .race; // Initialize _selectedRace in initState
     _rollDice();
-    _getRace();
   }
 
   void _rollDice() {
@@ -251,8 +214,8 @@ class _StatsScreenState extends State<StatsScreen> {
     final scoresToUse = index == 0
         ? baseScores
         : index == 1
-        ? rolledScores
-        : standardScores;
+            ? rolledScores
+            : standardScores;
     final finalScores = _applyRaceBonuses(scoresToUse);
 
     // Display the final scores
@@ -270,15 +233,11 @@ class _StatsScreenState extends State<StatsScreen> {
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
-              //TODO: Send final scores to firestore
-              _saveSelections();
-              //TODO: Push next screen
-              // Navigator.push(context, MaterialPageRoute(builder: (context) => EquipmentSelection(characterName: widget.characterName, selectedRace: widget.selectedRace, abilityScores: finalScores)));
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => EquipmentSelection(
-                          characterName: widget.characterName)));
+              // Navigate to EquipmentSelection
+              // Navigator.push(
+              //     context,
+              //     MaterialPageRoute(
+              //         builder: (context) => const EquipmentSelection()));
             },
             child: const Text("OK"),
           ),
@@ -290,7 +249,11 @@ class _StatsScreenState extends State<StatsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Stats"), backgroundColor: customColor,foregroundColor: Colors.white,),
+      appBar: AppBar(
+        title: const Text("Stats"),
+        backgroundColor: customColor,
+        foregroundColor: Colors.white,
+      ),
       drawer: const MainDrawer(),
       bottomNavigationBar: Row(
         children: [
@@ -301,16 +264,16 @@ class _StatsScreenState extends State<StatsScreen> {
           const SizedBox(width: 30),
           NavigationButton(
             onPressed: (index == 2 &&
-                !(readyStatuses[0] &&
-                    readyStatuses[1] &&
-                    readyStatuses[2] &&
-                    readyStatuses[3] &&
-                    readyStatuses[4] &&
-                    readyStatuses[5]))
+                    !(readyStatuses[0] &&
+                        readyStatuses[1] &&
+                        readyStatuses[2] &&
+                        readyStatuses[3] &&
+                        readyStatuses[4] &&
+                        readyStatuses[5]))
                 ? () {
-              showSnackbar(
-                  'You haven\'t picked a skill for each option!');
-            }
+                    showSnackbar(
+                        'You haven\'t picked a skill for each option!');
+                  }
                 : _showFinalScores,
             textContent: 'Next',
           ),
@@ -393,7 +356,7 @@ class _StatsScreenState extends State<StatsScreen> {
                       child: const Center(
                         child: Text('15',
                             style:
-                            TextStyle(color: Colors.black, fontSize: 50)),
+                                TextStyle(color: Colors.black, fontSize: 50)),
                       ),
                     ),
                     DropdownButton(
@@ -458,7 +421,7 @@ class _StatsScreenState extends State<StatsScreen> {
                       child: const Center(
                         child: Text('14',
                             style:
-                            TextStyle(color: Colors.black, fontSize: 50)),
+                                TextStyle(color: Colors.black, fontSize: 50)),
                       ),
                     ),
                     DropdownButton(
@@ -523,7 +486,7 @@ class _StatsScreenState extends State<StatsScreen> {
                       child: const Center(
                         child: Text('13',
                             style:
-                            TextStyle(color: Colors.black, fontSize: 50)),
+                                TextStyle(color: Colors.black, fontSize: 50)),
                       ),
                     ),
                     DropdownButton(
@@ -594,7 +557,7 @@ class _StatsScreenState extends State<StatsScreen> {
                       child: const Center(
                         child: Text('12',
                             style:
-                            TextStyle(color: Colors.black, fontSize: 50)),
+                                TextStyle(color: Colors.black, fontSize: 50)),
                       ),
                     ),
                     DropdownButton(
@@ -659,7 +622,7 @@ class _StatsScreenState extends State<StatsScreen> {
                       child: const Center(
                         child: Text('10',
                             style:
-                            TextStyle(color: Colors.black, fontSize: 50)),
+                                TextStyle(color: Colors.black, fontSize: 50)),
                       ),
                     ),
                     DropdownButton(
@@ -724,7 +687,7 @@ class _StatsScreenState extends State<StatsScreen> {
                       child: const Center(
                         child: Text('8',
                             style:
-                            TextStyle(color: Colors.black, fontSize: 50)),
+                                TextStyle(color: Colors.black, fontSize: 50)),
                       ),
                     ),
                     DropdownButton(
@@ -814,7 +777,7 @@ class _StatsScreenState extends State<StatsScreen> {
                             decoration: BoxDecoration(
                               color: customColor,
                               borderRadius:
-                              const BorderRadius.all(Radius.circular(10)),
+                                  const BorderRadius.all(Radius.circular(10)),
                             ),
                             height: 100,
                             width: 100,
@@ -849,69 +812,67 @@ class _StatsScreenState extends State<StatsScreen> {
     );
   }
 
-  Future<void> _saveSelections() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      print('User not authenticated');
-      return;
-    }
-    final userId = user.uid;
+  // Future<void> _saveSelections() async {
+  //   final user = FirebaseAuth.instance.currentUser;
+  //   if (user == null) {
+  //     print('User not authenticated');
+  //     return;
+  //   }
+  //   final userId = user.uid;
 
-    try {
-      final firestore = FirebaseFirestore.instance;
-      final docRef = firestore
-          .collection('app_user_profiles')
-          .doc(userId)
-          .collection('characters')
-          .doc(widget.characterName);
+  //   try {
+  //     final firestore = FirebaseFirestore.instance;
+  //     final docRef = firestore
+  //         .collection('app_user_profiles')
+  //         .doc(userId)
+  //         .collection('characters')
+  //         .doc(widget.characterName);
 
-      // Define all ability scores and default them to 0 if not set
-      final Map<String, int> defaultAbilityScores = {
-        'Strength': 8,
-        'Dexterity': 8,
-        'Constitution': 8,
-        'Intelligence': 8,
-        'Wisdom': 8,
-        'Charisma': 8,
-      };
+  //     // Define all ability scores and default them to 0 if not set
+  //     final Map<String, int> defaultAbilityScores = {
+  //       'Strength': 8,
+  //       'Dexterity': 8,
+  //       'Constitution': 8,
+  //       'Intelligence': 8,
+  //       'Wisdom': 8,
+  //       'Charisma': 8,
+  //     };
 
-    //   buildPointBuy(),
-    // buildDiceRoller(),
-    // buildStandardArray(),
+  //     //   buildPointBuy(),
+  //     // buildDiceRoller(),
+  //     // buildStandardArray(),
 
-      if(index == 0) {
-        abilityScores = baseScores;
-      } else if(index == 1) {
-        abilityScores = rolledScores;
-      } else {
-        abilityScores = standardScores;
-      }
+  //     if (index == 0) {
+  //       abilityScores = baseScores;
+  //     } else if (index == 1) {
+  //       abilityScores = rolledScores;
+  //     } else {
+  //       abilityScores = standardScores;
+  //     }
 
+  //     // Merge current abilityScores with defaults (ensures every score is included)
+  //     final updatedAbilityScores = {
+  //       for (final key in defaultAbilityScores.keys)
+  //         key: (abilityScores[key] ?? defaultAbilityScores[key])! +
+  //             ((RaceData[widget.selectedRace]?['abilityScoreIncrease']?[key]) ??
+  //                 0),
+  //     };
 
-      // Merge current abilityScores with defaults (ensures every score is included)
-      final updatedAbilityScores = {
-        for (final key in defaultAbilityScores.keys)
-          key: (abilityScores[key] ?? defaultAbilityScores[key])! +
-              ((RaceData[widget.selectedRace]?['abilityScoreIncrease']?[key]) ??
-                  0),
-      };
+  //     // Save to Firestore
+  //     await docRef.set(
+  //       {'abilityScores': updatedAbilityScores},
+  //       SetOptions(merge: true),
+  //     );
 
-      // Save to Firestore
-      await docRef.set(
-        {'abilityScores': updatedAbilityScores},
-        SetOptions(merge: true),
-      );
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Data saved successfully!")),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Failed to save data: $e")),
-      );
-    }
-  }
-
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(content: Text("Data saved successfully!")),
+  //     );
+  //   } catch (e) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text("Failed to save data: $e")),
+  //     );
+  //   }
+  // }
 
   // Future<void> _saveSelections() async {
   //   final user = FirebaseAuth.instance.currentUser;
@@ -1025,9 +986,9 @@ class _StatsScreenState extends State<StatsScreen> {
               value: _chosenAbility,
               items: rolledScores.keys
                   .map((key) => DropdownMenuItem(
-                value: key,
-                child: Text(key),
-              ))
+                        value: key,
+                        child: Text(key),
+                      ))
                   .toList(),
               onChanged: (value) => setState(() => _chosenAbility = value!),
             ),
