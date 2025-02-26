@@ -1,0 +1,8 @@
+<resources>
+    <string name="default_web_client_id">YOUR_WEB_CLIENT_ID</string>
+    <string name="ga_trackingId">YOUR_GA_TRACKING_ID</string>
+    <string name="gcm_defaultSenderId">YOUR_GCM_DEFAULT_SENDER_ID</string>
+    <string name="project_id">YOUR_PROJECT_ID</string>
+    <string name="application_id">YOUR_APPLICATION_ID</string>
+    <string name="api_key">YOUR_API_KEY</string>
+</resources>

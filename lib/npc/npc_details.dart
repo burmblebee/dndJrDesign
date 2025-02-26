@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'npc.dart';
 import 'npc_provider.dart';
 
 class NPCDetailScreen extends ConsumerWidget {
+  @override
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final npcState = ref.watch(npcProvider);
     final npc = npcState.selectedNPC;
 
+    // Handle the case where no NPC is selected
     if (npc == null) {
       return Scaffold(
         appBar: AppBar(title: Text('NPC Details')),
@@ -16,6 +19,17 @@ class NPCDetailScreen extends ConsumerWidget {
     }
 
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.save),
+        onPressed: () {
+          // Implement save functionality
+          ref.read(npcProvider.notifier).updateNPC(npc);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('NPC details saved!')),
+          );
+          Navigator.pop(context);
+        },
+      ),
       appBar: AppBar(
         title: Text(npc.name),
         actions: [
@@ -38,10 +52,12 @@ class NPCDetailScreen extends ConsumerWidget {
                 SizedBox(width: 20),
                 Text('Name: ${npc.name}', style: TextStyle(fontSize: 24)),
                 Spacer(),
-                IconButton(onPressed: (
-                    //option to edit name
-
-                    ){}, icon: Icon(Icons.edit))
+                IconButton(
+                    onPressed: () {
+                      final nameController = TextEditingController(text: npc.name);
+                      _editName(context, nameController, ref.read(npcProvider.notifier));
+                    },
+                    icon: Icon(Icons.edit)),
               ],
             ),
             SizedBox(height: 20),
@@ -57,23 +73,117 @@ class NPCDetailScreen extends ConsumerWidget {
                     trailing: IconButton(
                       icon: Icon(Icons.edit),
                       onPressed: () {
-                        // option to edit attack
+                        _editAttack(context, ref.read(npcProvider.notifier),
+                            attack, index);
                       },
                     ),
                   );
                 },
               ),
             ),
-            // SizedBox(height: 20),
-            // ElevatedButton(
-            //   onPressed: () {
-            //     Navigator.pushNamed(context, '/npcEditor');
-            //   },
-            //   child: Text('Edit NPC'),
-            // ),
           ],
         ),
       ),
+    );
+  }
+
+  void _editName(BuildContext context, TextEditingController nameController, NPCProvider npcNotifier) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Edit NPC Name'),
+        content: TextField(
+          controller: nameController,
+          decoration: InputDecoration(labelText: 'NPC Name'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (nameController.text.isNotEmpty) {
+                await npcNotifier.editNPCName(npcNotifier.state.selectedNPC!, nameController.text);
+                npcNotifier.updateNPC(npcNotifier.state.selectedNPC!);
+                Navigator.pop(context); // Close the dialog after updating
+              }
+            },
+            child: Text('Update'),
+          ),
+        ],
+      ),
+    );
+  }
+
+
+
+  void _editAttack(BuildContext context, NPCProvider npcNotifier,
+      AttackOption attack, int index) {
+    final attackNameController = TextEditingController(text: attack.name);
+    List<int> diceConfig = List.from(attack.diceConfig);
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Edit Attack Option'),
+        content: _attackForm(attackNameController, diceConfig),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (attackNameController.text.isNotEmpty) {
+                npcNotifier.updateAttackOption(
+                  index,
+                  AttackOption(
+                      name: attackNameController.text, diceConfig: diceConfig),
+                );
+                Navigator.pop(context);
+              }
+            },
+            child: const Text('Update'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _attackForm(
+      TextEditingController attackNameController, List<int> diceConfig) {
+    List<String> diceNames = ['d4', 'd6', 'd8', 'd10', 'd12', 'd20'];
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        TextField(
+          controller: attackNameController,
+          decoration: InputDecoration(labelText: 'Attack Name'),
+        ),
+        SizedBox(height: 10),
+        Text('Dice Configuration:', style: TextStyle(fontSize: 16)),
+        ...List.generate(6, (index) {
+          return Row(
+            children: [
+              Text('${diceNames[index]}: '),
+              Expanded(
+                  child: TextField(
+                controller:
+                    TextEditingController(text: diceConfig[index].toString()),
+                keyboardType: TextInputType.number,
+                onChanged: (value) {
+                  if (value.isNotEmpty) {
+                    diceConfig[index] = int.parse(value);
+                  } else {
+                    diceConfig[index] = 0;
+                  }
+                },
+              )),
+            ],
+          );
+        }),
+      ],
     );
   }
 
