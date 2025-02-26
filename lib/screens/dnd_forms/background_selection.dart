@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:warlocks_of_the_beach/widgets/main_appbar.dart';
+import 'package:warlocks_of_the_beach/widgets/navigation/bottom_navbar.dart';
 import 'specifics_screen.dart';
 import '../../data/character creator data/background_data.dart';
 import '../../widgets/loaders/background_data_loader.dart';
@@ -17,9 +19,8 @@ class BackgroundScreen extends ConsumerStatefulWidget {
 }
 
 class _BackgroundScreenState extends ConsumerState<BackgroundScreen> {
-  
   final backgrounds = BackgroundData;
-  final Color customColor = const Color.fromARGB(255, 138, 28, 20);
+  final Color customColor = const Color(0xFF25291C);
   String _selectedBackground = 'Acolyte';
 
   // Save selection to Firebase
@@ -41,7 +42,7 @@ class _BackgroundScreenState extends ConsumerState<BackgroundScreen> {
   //     print('Error saving background: $e');
   //   }
   // }\
-  void updateSelectedBackground (String background) {
+  void updateSelectedBackground(String background) {
     setState(() {
       // _selectedBackground = background;
       ref.read(characterProvider.notifier).updateSelectedBackground(background);
@@ -52,40 +53,41 @@ class _BackgroundScreenState extends ConsumerState<BackgroundScreen> {
   Widget build(BuildContext context) {
     final characterName = ref.watch(characterProvider).name;
 
-
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Background for ${characterName}"),
-        backgroundColor: customColor,
-        foregroundColor: Colors.white,
-      ),
+      appBar: MainAppbar(),
       drawer: const MainDrawer(),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            NavigationButton(
-              onPressed: () => Navigator.pop(context),
-              textContent: 'Back',
-            ),
-            NavigationButton(
-              textContent: "Next",
-              onPressed: () {
-                updateSelectedBackground(_selectedBackground);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => SpecificsScreen(),
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
+      bottomNavigationBar: MainBottomNavBar(),
+      // bottomNavigationBar: Padding("F"
+      //   padding: const EdgeInsets.all(16.0),
+      //   child: Row(
+      //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      //     children: [
+      //       NavigationButton(
+      //         onPressed: () => Navigator.pop(context),
+      //         textContent: 'Back',
+      //       ),
+      //       NavigationButton(
+      //         textContent: "Next",
+      //         onPressed: () {
+      //           updateSelectedBackground(_selectedBackground);
+      //           Navigator.push(
+      //             context,
+      //             MaterialPageRoute(
+      //               builder: (context) => SpecificsScreen(),
+      //             ),
+      //           );
+      //         },
+      //       ),
+      //     ],
+      //   ),
+      // ),
       body: Column(
         children: [
+          SizedBox(height: 20),
+          Text(
+            "Background Selection for $characterName",
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 20),
           const Text(
             'Pick your background',
@@ -95,26 +97,64 @@ class _BackgroundScreenState extends ConsumerState<BackgroundScreen> {
           const SizedBox(height: 20),
           DropdownButton<String>(
             value: _selectedBackground,
-            items: backgrounds.keys.map((background) => DropdownMenuItem(
-              value: background,
-              child: Text(background),
-            )).toList(),
+            items: backgrounds.keys
+                .map((background) => DropdownMenuItem(
+                      value: background,
+                      child: Text(background),
+                    ))
+                .toList(),
             onChanged: (value) => setState(() => _selectedBackground = value!),
           ),
           const SizedBox(height: 20),
           Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.black),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: SingleChildScrollView(
-                child: BackgroundDataLoader(
-                  backgroundName: _selectedBackground,
+            child: Center(
+              child: Container(
+                width: 350,
+                height: 350,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.black),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: SingleChildScrollView(
+                  child: BackgroundDataLoader(
+                    backgroundName: _selectedBackground,
+                  ),
                 ),
               ),
             ),
           ),
+          SizedBox(height: 15),
+          Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.arrow_back, color: Colors.white,),
+                  label: const Text("Back"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: customColor,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+                const SizedBox(width: 30),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SpecificsScreen(),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.arrow_forward, color: Colors.white,),
+                  label: const Text("Next"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: customColor,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ],
+            ),
         ],
       ),
     );
