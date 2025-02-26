@@ -17,7 +17,7 @@ class RaceSelection extends ConsumerStatefulWidget {
 
 class _RaceSelectionState extends ConsumerState<RaceSelection> {
   String _selectedRace = 'Elf'; // Default race
-  final Color customColor = const Color.fromARGB(255, 138, 28, 20);
+  final Color customColor = const Color(0xFF25291C);
 
   void _updateSelectedRace(String raceName) {
     setState(() {
@@ -40,7 +40,8 @@ class _RaceSelectionState extends ConsumerState<RaceSelection> {
             Center(
               child: Text(
                 'Race Selection for $characterName',
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
             const SizedBox(height: 20),
@@ -69,6 +70,7 @@ class _RaceSelectionState extends ConsumerState<RaceSelection> {
                   ButtonWithPadding(
                     onPressed: () => _updateSelectedRace(race),
                     textContent: race,
+                    color: Color(0xFF25291C),
                   ),
               ],
             ),
@@ -92,7 +94,7 @@ class _RaceSelectionState extends ConsumerState<RaceSelection> {
               children: [
                 ElevatedButton.icon(
                   onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.arrow_back),
+                  icon: const Icon(Icons.arrow_back, color: Colors.white,),
                   label: const Text("Back"),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: customColor,
@@ -105,14 +107,11 @@ class _RaceSelectionState extends ConsumerState<RaceSelection> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => ClassSelection(
-                          characterName: characterName,
-                          race: _selectedRace,
-                        ),
+                        builder: (context) => ClassSelection(),
                       ),
                     );
                   },
-                  icon: const Icon(Icons.arrow_forward),
+                  icon: const Icon(Icons.arrow_forward, color: Colors.white,),
                   label: const Text("Next"),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: customColor,
@@ -126,10 +125,7 @@ class _RaceSelectionState extends ConsumerState<RaceSelection> {
       ),
     );
   }
-} 
-
-
-
+}
 
 // import 'package:flutter/material.dart';
 // import 'package:flutter_riverpod/flutter_riverpod.dart';

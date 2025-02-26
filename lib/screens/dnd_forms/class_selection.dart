@@ -1,52 +1,24 @@
-// import 'package:dnd_character_creator/Screens/dnd_forms/specifics_selection.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:warlocks_of_the_beach/screens/dnd_forms/race_selection.dart';
+import 'package:warlocks_of_the_beach/widgets/buttons/button_with_padding.dart';
 import 'package:warlocks_of_the_beach/widgets/buttons/navigation_button.dart';
 import 'package:warlocks_of_the_beach/widgets/dnd_form_widgets/class_data_loader.dart';
 import 'package:warlocks_of_the_beach/widgets/navigation/main_drawer.dart';
-import '../../screens/dnd_forms/background_selection.dart';
-import 'package:flutter/material.dart';
-import '../../widgets/buttons/button_with_padding.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:warlocks_of_the_beach/widgets/navigation/main_appbar.dart';
+import 'package:warlocks_of_the_beach/widgets/navigation/bottom_navbar.dart';
+import 'package:warlocks_of_the_beach/providers/character_provider.dart';
+import 'background_selection.dart';
 
-
-
-
-class ClassSelection extends StatefulWidget {
-  final String characterName;
-  final String race; // Add characterName parameter
-
-  const ClassSelection({Key? key, required this.characterName, required this.race}) : super(key: key); // Update constructor
+class ClassSelection extends ConsumerStatefulWidget {
+  const ClassSelection({Key? key}) : super(key: key);
 
   @override
   _ClassSelectionState createState() => _ClassSelectionState();
 }
 
-class _ClassSelectionState extends State<ClassSelection> {
+class _ClassSelectionState extends ConsumerState<ClassSelection> {
   String selectedClassName = 'Sorcerer'; // Default class
-
-  // Method to save the selected class to Firebase
-  void _saveSelections() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      // Handle user not being authenticated
-      print('User not authenticated');
-      return;
-    }
-    final userId = user.uid;
-
-    final docRef = FirebaseFirestore.instance
-        .collection('app_user_profiles')
-        .doc(userId); // Use the authenticated user's ID
-
-    try {
-      await docRef.set({
-        'class': selectedClassName,
-        'name' : widget.characterName,
-      }, SetOptions(merge: true)); // Merge ensures only this field is updated
-    } catch (e) {
-      print('Error saving class: $e');
-    }
-  }
 
   // Updates the selected class and calls setState
   void updateSelectedClass(String className) {
@@ -55,128 +27,215 @@ class _ClassSelectionState extends State<ClassSelection> {
     });
   }
 
-  final customColor = const Color.fromARGB(255, 138, 28, 20);
+  final customColor = const Color(0xFF25291C);
 
   @override
   Widget build(BuildContext context) {
+    final characterName = ref.watch(characterProvider).name;
+    final race = ref.watch(characterProvider).race;
+
     return Scaffold(
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16.0, ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            NavigationButton(
-              textContent: "Back",
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-            NavigationButton(
-              textContent: 'Next',
-              onPressed: () {
-                _saveSelections(); // Save class selection before navigating
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => BackgroundScreen(
-                      // Pass characterName, className, and raceName
-                      characterName: widget.characterName, 
-                      className: selectedClassName, 
-                      raceName: widget.race,      // Pass selected class name
-                    ),
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
+      bottomNavigationBar: MainBottomNavBar(),
+      // bottomNavigationBar: Padding(
+      //   padding: const EdgeInsets.all(16.0),
+      //   child: Row(
+      //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      //     children: [
+      //       NavigationButton(
+      //         textContent: "Back",
+      //         onPressed: () {
+      //           Navigator.pop(context);
+      //         },
+      //       ),
+      //       NavigationButton(
+      //         textContent: 'Next',
+      //         onPressed: () {
+      //           ref.read(characterProvider.notifier).updateSelectedClass(selectedClassName);
+      //           Navigator.push(
+      //             context,
+      //             MaterialPageRoute(
+      //               builder: (context) => BackgroundScreen(
+      //                 characterName: characterName,
+      //                 className: selectedClassName,
+      //                 raceName: race,
+      //               ),
+      //             ),
+      //           );
+      //         },
+      //       ),
+      //     ],
+      //   ),
+      // ),
       appBar: AppBar(
-backgroundColor: customColor, foregroundColor: Colors.white,        title: Text(
-          'Class Selection for ${widget.characterName}', // Use characterName here
+        backgroundColor: customColor,
+        foregroundColor: Colors.white,
+        title: Text(
+          'Class Selection for $characterName',
           style: Theme.of(context).appBarTheme.titleTextStyle,
         ),
       ),
       drawer: MainDrawer(),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          const SizedBox(height: 15),
-          const Text(
-            'Pick your class',
-            style: TextStyle(fontSize: 18),
-          ),
-          const SizedBox(height: 20),
-          Wrap(
-            spacing: 10, // Space between buttons
-            runSpacing: 10, // Space between rows
-            children: <Widget>[
-              ButtonWithPadding(
-                onPressed: () => updateSelectedClass('Barbarian'),
-                textContent: 'Barbarian',
-              ),
-              ButtonWithPadding(
-                onPressed: () => updateSelectedClass('Bard'),
-                textContent: 'Bard',
-              ),
-              ButtonWithPadding(
-                onPressed: () => updateSelectedClass('Cleric'),
-                textContent: 'Cleric',
-              ),
-              ButtonWithPadding(
-                onPressed: () => updateSelectedClass('Druid'),
-                textContent: 'Druid',
-              ),
-              ButtonWithPadding(
-                onPressed: () => updateSelectedClass('Fighter'),
-                textContent: 'Fighter',
-              ),
-              ButtonWithPadding(
-                onPressed: () => updateSelectedClass('Monk'),
-                textContent: 'Monk',
-              ),
-              ButtonWithPadding(
-                onPressed: () => updateSelectedClass('Paladin'),
-                textContent: 'Paladin',
-              ),
-              ButtonWithPadding(
-                onPressed: () => updateSelectedClass('Ranger'),
-                textContent: 'Ranger',
-              ),
-              ButtonWithPadding(
-                onPressed: () => updateSelectedClass('Rogue'),
-                textContent: 'Rogue',
-              ),
-              ButtonWithPadding(
-                onPressed: () => updateSelectedClass('Sorcerer'),
-                textContent: 'Sorcerer',
-              ),
-              ButtonWithPadding(
-                onPressed: () => updateSelectedClass('Warlock'),
-                textContent: 'Warlock',
-              ),
-              ButtonWithPadding(
-                onPressed: () => updateSelectedClass('Wizard'),
-                textContent: 'Wizard',
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.black),
-              borderRadius: BorderRadius.circular(10),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const SizedBox(height: 15),
+            const Text(
+              'Pick your class',
+              style: TextStyle(fontSize: 18),
             ),
-            child: SizedBox(
-              height: 325,
-              width: 325,
-              child: SingleChildScrollView(
-                child: ClassDataWidget(className: selectedClassName),
+            const SizedBox(height: 20),
+            Center(
+              child: Wrap(
+                spacing: 10, // Space between buttons
+                runSpacing: 10, // Space between rows
+                children: <Widget>[
+                  ButtonWithPadding(
+                    onPressed: () => updateSelectedClass('Barbarian'),
+                    textContent: 'Barbarian',
+                    color: Color(0xFF25291C),
+                  ),
+                  ButtonWithPadding(
+                    onPressed: () => updateSelectedClass('Bard'),
+                    textContent: 'Bard',
+                    color: Color(0xFF25291C),
+                  ),
+                  ButtonWithPadding(
+                    onPressed: () => updateSelectedClass('Cleric'),
+                    textContent: 'Cleric',
+                    color: Color(0xFF25291C),
+                  ),
+                  ButtonWithPadding(
+                    onPressed: () => updateSelectedClass('Druid'),
+                    textContent: 'Druid',
+                    color: Color(0xFF25291C),
+                  ),
+                  ButtonWithPadding(
+                    onPressed: () => updateSelectedClass('Fighter'),
+                    textContent: 'Fighter',
+                    color: Color(0xFF25291C),
+                  ),
+                  ButtonWithPadding(
+                    onPressed: () => updateSelectedClass('Monk'),
+                    textContent: 'Monk',
+                    color: Color(0xFF25291C),
+                  ),
+                  ButtonWithPadding(
+                    onPressed: () => updateSelectedClass('Paladin'),
+                    textContent: 'Paladin',
+                    color: Color(0xFF25291C),
+                  ),
+                  ButtonWithPadding(
+                    onPressed: () => updateSelectedClass('Ranger'),
+                    textContent: 'Ranger',
+                    color: Color(0xFF25291C),
+                  ),
+                  ButtonWithPadding(
+                    onPressed: () => updateSelectedClass('Rogue'),
+                    textContent: 'Rogue',
+                    color: Color(0xFF25291C),
+                  ),
+                  ButtonWithPadding(
+                    onPressed: () => updateSelectedClass('Sorcerer'),
+                    textContent: 'Sorcerer',
+                    color: Color(0xFF25291C),
+                  ),
+                  ButtonWithPadding(
+                    onPressed: () => updateSelectedClass('Warlock'),
+                    textContent: 'Warlock',
+                    color: Color(0xFF25291C),
+                  ),
+                  ButtonWithPadding(
+                    onPressed: () => updateSelectedClass('Wizard'),
+                    textContent: 'Wizard',
+                    color: Color(0xFF25291C),
+                  ),
+                ],
               ),
             ),
-          ),
-          
-        ],
+            const SizedBox(height: 20),
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.black),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: SizedBox(
+                height: 325,
+                width: 325,
+                child: SingleChildScrollView(
+                  child: ClassDataWidget(className: selectedClassName),
+                ),
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () => Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => RaceSelection())),
+                  icon: const Icon(
+                    Icons.arrow_back,
+                    color: Colors.white,
+                  ),
+                  label: const Text("Back"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: customColor,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+                const SizedBox(width: 30),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => BackgroundScreen(),
+                      ),
+                    );
+                  },
+                  label: const Text("Next"),
+                  icon: const Icon(
+                    Icons.arrow_forward,
+                    color: Colors.white,
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: customColor,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            //   children: [
+            //     ElevatedButton(
+            //       onPressed: () {
+            //         Navigator.push(
+            //             context,
+            //             MaterialPageRoute(
+            //                 builder: (context) =>
+            //                     RaceSelection())); // Navigate backgit
+            //       },
+            //       child: const Text('Back'),
+            //     ),
+            //     ElevatedButton(
+            //       onPressed: () {
+            //         ref
+            //             .read(characterProvider.notifier)
+            //             .updateSelectedClass(selectedClassName);
+            //         Navigator.push(
+            //           context,
+            //           MaterialPageRoute(
+            //             builder: (context) => BackgroundScreen(),
+            //           ),
+            //         ); // Navigate to RaceSelection
+            //       },
+            //       child: const Text('Next'),
+            //     ),
+            //   ],
+            // ),
+          ],
+        ),
       ),
     );
   }

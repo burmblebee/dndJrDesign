@@ -20,7 +20,7 @@ class RaceDataLoader extends StatelessWidget {
             style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Colors.black,
+              color: Colors.white,
             ),
           ),
           const SizedBox(height: 10),
@@ -30,7 +30,7 @@ class RaceDataLoader extends StatelessWidget {
             RaceData[raceName]?['description'] ?? '',
             style: const TextStyle(
               fontSize: 16,
-              color: Colors.black87,
+              color: Colors.white,
             ),
           ),
           const SizedBox(height: 10),
