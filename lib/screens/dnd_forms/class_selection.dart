@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:warlocks_of_the_beach/screens/dnd_forms/race_selection.dart';
-import 'package:warlocks_of_the_beach/widgets/buttons/button_with_padding.dart';
-import 'package:warlocks_of_the_beach/widgets/buttons/navigation_button.dart';
 import 'package:warlocks_of_the_beach/widgets/dnd_form_widgets/class_data_loader.dart';
 import 'package:warlocks_of_the_beach/widgets/navigation/main_drawer.dart';
 import 'package:warlocks_of_the_beach/widgets/navigation/main_appbar.dart';
@@ -19,15 +17,21 @@ class ClassSelection extends ConsumerStatefulWidget {
 
 class _ClassSelectionState extends ConsumerState<ClassSelection> {
   String selectedClassName = 'Sorcerer'; // Default class
-
-  // Updates the selected class and calls setState
-  void updateSelectedClass(String className) {
-    setState(() {
-      selectedClassName = className;
-    });
-  }
-
   final customColor = const Color(0xFF25291C);
+  final List<String> classOptions = [
+    'Barbarian',
+    'Bard',
+    'Cleric',
+    'Druid',
+    'Fighter',
+    'Monk',
+    'Paladin',
+    'Ranger',
+    'Rogue',
+    'Sorcerer',
+    'Warlock',
+    'Wizard',
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -36,49 +40,17 @@ class _ClassSelectionState extends ConsumerState<ClassSelection> {
 
     return Scaffold(
       bottomNavigationBar: MainBottomNavBar(),
-      // bottomNavigationBar: Padding(
-      //   padding: const EdgeInsets.all(16.0),
-      //   child: Row(
-      //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      //     children: [
-      //       NavigationButton(
-      //         textContent: "Back",
-      //         onPressed: () {
-      //           Navigator.pop(context);
-      //         },
-      //       ),
-      //       NavigationButton(
-      //         textContent: 'Next',
-      //         onPressed: () {
-      //           ref.read(characterProvider.notifier).updateSelectedClass(selectedClassName);
-      //           Navigator.push(
-      //             context,
-      //             MaterialPageRoute(
-      //               builder: (context) => BackgroundScreen(
-      //                 characterName: characterName,
-      //                 className: selectedClassName,
-      //                 raceName: race,
-      //               ),
-      //             ),
-      //           );
-      //         },
-      //       ),
-      //     ],
-      //   ),
-      // ),
-      appBar: AppBar(
-        backgroundColor: customColor,
-        foregroundColor: Colors.white,
-        title: Text(
-          'Class Selection for $characterName',
-          style: Theme.of(context).appBarTheme.titleTextStyle,
-        ),
-      ),
+      appBar: MainAppbar(),
       drawer: MainDrawer(),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            const SizedBox(height: 15),
+            Text(
+              'Class Selection for $characterName',
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 15),
             const Text(
               'Pick your class',
@@ -86,71 +58,26 @@ class _ClassSelectionState extends ConsumerState<ClassSelection> {
             ),
             const SizedBox(height: 20),
             Center(
-              child: Wrap(
-                spacing: 10, // Space between buttons
-                runSpacing: 10, // Space between rows
-                children: <Widget>[
-                  ButtonWithPadding(
-                    onPressed: () => updateSelectedClass('Barbarian'),
-                    textContent: 'Barbarian',
-                    color: Color(0xFF25291C),
-                  ),
-                  ButtonWithPadding(
-                    onPressed: () => updateSelectedClass('Bard'),
-                    textContent: 'Bard',
-                    color: Color(0xFF25291C),
-                  ),
-                  ButtonWithPadding(
-                    onPressed: () => updateSelectedClass('Cleric'),
-                    textContent: 'Cleric',
-                    color: Color(0xFF25291C),
-                  ),
-                  ButtonWithPadding(
-                    onPressed: () => updateSelectedClass('Druid'),
-                    textContent: 'Druid',
-                    color: Color(0xFF25291C),
-                  ),
-                  ButtonWithPadding(
-                    onPressed: () => updateSelectedClass('Fighter'),
-                    textContent: 'Fighter',
-                    color: Color(0xFF25291C),
-                  ),
-                  ButtonWithPadding(
-                    onPressed: () => updateSelectedClass('Monk'),
-                    textContent: 'Monk',
-                    color: Color(0xFF25291C),
-                  ),
-                  ButtonWithPadding(
-                    onPressed: () => updateSelectedClass('Paladin'),
-                    textContent: 'Paladin',
-                    color: Color(0xFF25291C),
-                  ),
-                  ButtonWithPadding(
-                    onPressed: () => updateSelectedClass('Ranger'),
-                    textContent: 'Ranger',
-                    color: Color(0xFF25291C),
-                  ),
-                  ButtonWithPadding(
-                    onPressed: () => updateSelectedClass('Rogue'),
-                    textContent: 'Rogue',
-                    color: Color(0xFF25291C),
-                  ),
-                  ButtonWithPadding(
-                    onPressed: () => updateSelectedClass('Sorcerer'),
-                    textContent: 'Sorcerer',
-                    color: Color(0xFF25291C),
-                  ),
-                  ButtonWithPadding(
-                    onPressed: () => updateSelectedClass('Warlock'),
-                    textContent: 'Warlock',
-                    color: Color(0xFF25291C),
-                  ),
-                  ButtonWithPadding(
-                    onPressed: () => updateSelectedClass('Wizard'),
-                    textContent: 'Wizard',
-                    color: Color(0xFF25291C),
-                  ),
-                ],
+              child: DropdownButton<String>(
+                value: selectedClassName,
+                icon: const Icon(Icons.arrow_drop_down),
+                elevation: 16,
+                style: const TextStyle(color: Colors.white, fontSize: 16),
+                underline: Container(
+                  height: 2,
+                  color: customColor,
+                ),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    selectedClassName = newValue!;
+                  });
+                },
+                items: classOptions.map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
               ),
             ),
             const SizedBox(height: 20),
@@ -167,12 +94,15 @@ class _ClassSelectionState extends ConsumerState<ClassSelection> {
                 ),
               ),
             ),
+            const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ElevatedButton.icon(
-                  onPressed: () => Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => RaceSelection())),
+                  onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => RaceSelection())),
                   icon: const Icon(
                     Icons.arrow_back,
                     color: Colors.white,
@@ -186,6 +116,9 @@ class _ClassSelectionState extends ConsumerState<ClassSelection> {
                 const SizedBox(width: 30),
                 ElevatedButton.icon(
                   onPressed: () {
+                    ref
+                        .read(characterProvider.notifier)
+                        .updateSelectedClass(selectedClassName);
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -205,35 +138,6 @@ class _ClassSelectionState extends ConsumerState<ClassSelection> {
                 ),
               ],
             ),
-            // Row(
-            //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            //   children: [
-            //     ElevatedButton(
-            //       onPressed: () {
-            //         Navigator.push(
-            //             context,
-            //             MaterialPageRoute(
-            //                 builder: (context) =>
-            //                     RaceSelection())); // Navigate backgit
-            //       },
-            //       child: const Text('Back'),
-            //     ),
-            //     ElevatedButton(
-            //       onPressed: () {
-            //         ref
-            //             .read(characterProvider.notifier)
-            //             .updateSelectedClass(selectedClassName);
-            //         Navigator.push(
-            //           context,
-            //           MaterialPageRoute(
-            //             builder: (context) => BackgroundScreen(),
-            //           ),
-            //         ); // Navigate to RaceSelection
-            //       },
-            //       child: const Text('Next'),
-            //     ),
-            //   ],
-            // ),
           ],
         ),
       ),

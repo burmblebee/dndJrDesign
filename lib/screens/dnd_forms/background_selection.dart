@@ -139,6 +139,7 @@ class _BackgroundScreenState extends ConsumerState<BackgroundScreen> {
                 const SizedBox(width: 30),
                 ElevatedButton.icon(
                   onPressed: () {
+                    ref.read(characterProvider.notifier).updateSelectedBackground(_selectedBackground);
                     Navigator.push(
                       context,
                       MaterialPageRoute(
