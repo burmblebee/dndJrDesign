@@ -107,6 +107,59 @@ class NPCProvider extends StateNotifier<NPCState> {
       print("Error updating NPC: $e");
     }
   }
+
+  //edit npc name
+  Future<void> editNPCName(NPC npc, String newName) async {
+    try {
+      // Update Firestore
+      await _firestore.collection('npcs').doc(npc.id).update({
+        'name': newName,
+      });
+
+      // Update local state
+      final updatedNpcs = state.npcs.map((currNpc) {
+        if (currNpc.id == npc.id) {
+          return currNpc.copyWith(name: newName); // Use copyWith to create an updated NPC
+        }
+        return npc;
+      }).toList();
+
+      // Update the state with the modified NPC list
+      state = state.copyWith(npcs: updatedNpcs);
+    } catch (e) {
+      print("Error updating NPC name: $e");
+    }
+  }
+
+
+
+
+  Future<void> editAttackOption(String npcId, int attackIndex, AttackOption updatedAttack) async {
+    try {
+      final npcIndex = state.npcs.indexWhere((npc) => npc.id == npcId);
+      if (npcIndex == -1) return; // NPC not found
+
+      final updatedAttacks = List<AttackOption>.from(state.npcs[npcIndex].attacks);
+      updatedAttacks[attackIndex] = updatedAttack;
+
+      await _firestore.collection('npcs').doc(npcId).update({
+        'attacks': updatedAttacks.map((attack) => {
+          'name': attack.name,
+          'diceConfig': attack.diceConfig,
+        }).toList(),
+      });
+
+      // Update the local state with the new attacks
+      final updatedNpc = state.npcs[npcIndex].copyWith(attacks: updatedAttacks);
+      final updatedNpcs = [...state.npcs]..[npcIndex] = updatedNpc;
+
+      state = state.copyWith(npcs: updatedNpcs, selectedNPC: updatedNpc); // Update selectedNPC
+    } catch (e) {
+      print("Error updating attack option: $e");
+    }
+  }
+
+
   Future<void> deleteNPC(String npcId) async {
     try {
       await _firestore.collection('npcs').doc(npcId).delete();
@@ -129,10 +182,12 @@ class NPCProvider extends StateNotifier<NPCState> {
     state = state.copyWith(attackOptions: [...state.attackOptions, attack]);
   }
 
-  void updateAttackOption(int index, AttackOption updatedAttack) {
-    final updatedOptions = [...state.attackOptions];
-    updatedOptions[index] = updatedAttack;
-    state = state.copyWith(attackOptions: updatedOptions);
+  void updateAttackOption(int index, AttackOption newAttack) {
+    var currentNPC = state.selectedNPC;
+    if (currentNPC != null) {
+      currentNPC.attacks[index] = newAttack;
+      state = state.copyWith(selectedNPC: currentNPC);
+    }
   }
 
   void removeAttackOption(int index) {
