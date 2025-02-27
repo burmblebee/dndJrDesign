@@ -119,17 +119,23 @@ class NPCProvider extends StateNotifier<NPCState> {
       // Update local state
       final updatedNpcs = state.npcs.map((currNpc) {
         if (currNpc.id == npc.id) {
-          return currNpc.copyWith(name: newName); // Use copyWith to create an updated NPC
+          return currNpc.copyWith(name: newName);
         }
-        return npc;
+        return currNpc;
       }).toList();
 
-      // Update the state with the modified NPC list
-      state = state.copyWith(npcs: updatedNpcs);
+      // Ensure selected NPC is updated too
+      final updatedSelectedNPC = state.selectedNPC?.id == npc.id
+          ? state.selectedNPC!.copyWith(name: newName)
+          : state.selectedNPC;
+
+      // Update state
+      state = state.copyWith(npcs: updatedNpcs, selectedNPC: updatedSelectedNPC);
     } catch (e) {
       print("Error updating NPC name: $e");
     }
   }
+
 
 
 

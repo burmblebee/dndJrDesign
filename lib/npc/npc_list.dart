@@ -5,6 +5,8 @@ import 'npc_details.dart';
 import 'npc_provider.dart';
 
 class NPCListScreen extends ConsumerWidget {
+  const NPCListScreen({super.key});
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Fetch NPCs automatically when the screen is built
@@ -13,7 +15,7 @@ class NPCListScreen extends ConsumerWidget {
     final npcState = ref.watch(npcProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text('NPC List')),
+      appBar: AppBar(title: const Text('NPC List')),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
@@ -23,22 +25,24 @@ class NPCListScreen extends ConsumerWidget {
             ),
           );
         },
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
       body: npcState.npcs.isEmpty
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : ListView.builder(
+
         itemCount: npcState.npcs.length,
         itemBuilder: (context, index) {
           final npc = npcState.npcs[index];
           return ListTile(
+            selectedColor: Theme.of(context).canvasColor,
             title: Text(npc.name),
             onTap: () {
               ref.read(npcProvider.notifier).selectNPC(npc); // Select the NPC
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => NPCDetailScreen(), // Pass no parameters, fetch from the provider
+                  builder: (context) => const NPCDetailScreen(), // Pass no parameters, fetch from the provider
                 ),
               );
             },

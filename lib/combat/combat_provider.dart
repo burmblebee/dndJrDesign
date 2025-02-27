@@ -1,7 +1,6 @@
 import 'package:riverpod/riverpod.dart';
 import 'character.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class CombatState {
   final List<Character> characters;

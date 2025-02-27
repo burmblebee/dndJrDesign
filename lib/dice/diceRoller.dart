@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hexagon/hexagon.dart';
 
@@ -20,7 +19,7 @@ class _DiceRollScreenState extends State<DiceRollScreen>
     with TickerProviderStateMixin {
   final Random _random = Random();
   List<int> diceValues = [];
-  List<Offset> dicePositions = [Offset(50, 300), Offset(200, 300)];
+  List<Offset> dicePositions = [const Offset(50, 300), const Offset(200, 300)];
   Timer? _timer;
   List<Die> activeDice = [];
   List<int> diceToRoll = [
@@ -43,10 +42,10 @@ class _DiceRollScreenState extends State<DiceRollScreen>
   bool showDice = false;
   bool advantage = false;
   bool disadvantage = false;
-  Color advantageButtonColor = Color(0xFF25291C);
-  Color disadvantageButtonColor = Color(0xFF25291C);
-  Color diceColor = Color.fromARGB(255, 243, 241, 230);
-  Color onDiceColor = Color(0xFF464538);
+  Color advantageButtonColor = const Color(0xFF25291C);
+  Color disadvantageButtonColor = const Color(0xFF25291C);
+  Color diceColor = const Color.fromARGB(255, 243, 241, 230);
+  Color onDiceColor = const Color(0xFF464538);
 
   String? get campaignId => widget.campaignId;
 
@@ -55,7 +54,7 @@ class _DiceRollScreenState extends State<DiceRollScreen>
     super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: Duration(seconds: 1),
+      duration: const Duration(seconds: 1),
     )..repeat(reverse: true); // Keep it animating while rolling
   }
 
@@ -103,7 +102,7 @@ class _DiceRollScreenState extends State<DiceRollScreen>
         }
       });
 
-      await Future.delayed(Duration(milliseconds: 100));
+      await Future.delayed(const Duration(milliseconds: 100));
     }
 
     _animationController.stop(); // Stop animation
@@ -112,7 +111,7 @@ class _DiceRollScreenState extends State<DiceRollScreen>
     if (advantage || disadvantage) {
       if (doubleRoll[0] == 0) {
         doubleRoll[0] = total; // Store first roll
-        await Future.delayed(Duration(milliseconds: 500));
+        await Future.delayed(const Duration(milliseconds: 500));
         _animationController.repeat(); // Start animation again
         roll(); // Trigger second roll
         return; // Prevent the dialog from showing yet
@@ -161,8 +160,8 @@ class _DiceRollScreenState extends State<DiceRollScreen>
       builder: (BuildContext context) {
         return AlertDialog(
           title: (advantage)
-              ? Text("Roll with Advantage")
-              : Text("Roll with Disadvantage"),
+              ? const Text("Roll with Advantage")
+              : const Text("Roll with Disadvantage"),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -181,7 +180,7 @@ class _DiceRollScreenState extends State<DiceRollScreen>
                   showDice = false;
                 });
               },
-              child: Text("OK"),
+              child: const Text("OK"),
             ),
           ],
         );
@@ -195,7 +194,7 @@ class _DiceRollScreenState extends State<DiceRollScreen>
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Dice Roll Result"),
+          title: const Text("Dice Roll Result"),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -211,7 +210,7 @@ class _DiceRollScreenState extends State<DiceRollScreen>
                 });
                 Navigator.of(context).pop();
               },
-              child: Text("OK"),
+              child: const Text("OK"),
             ),
           ],
         );
@@ -227,12 +226,12 @@ class _DiceRollScreenState extends State<DiceRollScreen>
           decoration: BoxDecoration(
               border: Border.all(color: Colors.black),
               borderRadius: BorderRadius.circular(10),
-              color: Color(0xFF25291C)),
+              color: const Color(0xFF25291C)),
           height: 150,
           width: 150,
           child: Column(
             children: [
-              Spacer(),
+              const Spacer(),
               Stack(
                 alignment: Alignment.center, // Centers the text
                 children: [
@@ -247,10 +246,10 @@ class _DiceRollScreenState extends State<DiceRollScreen>
                   ),
                 ],
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Row(
                 children: [
-                  Spacer(),
+                  const Spacer(),
                   IconButton(
                     onPressed: () {
                       if (diceToRoll[index] > 0) {
@@ -263,7 +262,7 @@ class _DiceRollScreenState extends State<DiceRollScreen>
                   ),
                   Text(
                     diceToRoll[index].toString(),
-                    style: TextStyle(fontSize: 16),
+                    style: const TextStyle(fontSize: 16),
                   ),
                   IconButton(
                     onPressed: () {
@@ -273,10 +272,10 @@ class _DiceRollScreenState extends State<DiceRollScreen>
                     },
                     icon: const Icon(Icons.arrow_upward),
                   ),
-                  Spacer()
+                  const Spacer()
                 ],
               ),
-              Spacer()
+              const Spacer()
             ],
           ),
         ),
@@ -288,8 +287,8 @@ class _DiceRollScreenState extends State<DiceRollScreen>
     setState(() {
       advantage = !advantage;
       disadvantage = false;
-      advantageButtonColor = advantage ? Colors.green : Color(0xFF25291C);
-      disadvantageButtonColor = Color(0xFF25291C);
+      advantageButtonColor = advantage ? Colors.green : const Color(0xFF25291C);
+      disadvantageButtonColor = const Color(0xFF25291C);
     });
   }
 
@@ -297,8 +296,8 @@ class _DiceRollScreenState extends State<DiceRollScreen>
     setState(() {
       disadvantage = !disadvantage;
       advantage = false;
-      disadvantageButtonColor = disadvantage ? Colors.red : Color(0xFF25291C);
-      advantageButtonColor = Color(0xFF25291C);
+      disadvantageButtonColor = disadvantage ? Colors.red : const Color(0xFF25291C);
+      advantageButtonColor = const Color(0xFF25291C);
     });
   }
 
@@ -312,7 +311,7 @@ class _DiceRollScreenState extends State<DiceRollScreen>
         switch (diceType) {
           case 4:
             shapeWidget = CustomPaint(
-                painter: TrianglePainter(diceColor), size: Size(50, 50));
+                painter: TrianglePainter(diceColor), size: const Size(50, 50));
             break;
           case 6:
             shapeWidget = Container(color: diceColor, width: 50, height: 50);
@@ -325,11 +324,11 @@ class _DiceRollScreenState extends State<DiceRollScreen>
           case 10:
           case 100:
             shapeWidget = CustomPaint(
-                painter: DecagonPainter(diceColor), size: Size(55, 55));
+                painter: DecagonPainter(diceColor), size: const Size(55, 55));
             break;
           case 12:
             shapeWidget = CustomPaint(
-                painter: PentagonPainter(diceColor), size: Size(55, 55));
+                painter: PentagonPainter(diceColor), size: const Size(55, 55));
             break;
           case 20:
             shapeWidget = HexagonWidget.pointy(width: 55, color: diceColor);
@@ -339,7 +338,7 @@ class _DiceRollScreenState extends State<DiceRollScreen>
         }
 
         return AnimatedPositioned(
-          duration: Duration(milliseconds: 100),
+          duration: const Duration(milliseconds: 100),
           curve: Curves.easeOut,
           left: dicePositions[index].dx,
           top: dicePositions[index].dy,
@@ -379,25 +378,25 @@ class _DiceRollScreenState extends State<DiceRollScreen>
           decoration: BoxDecoration(
               border: Border.all(color: Colors.black),
               borderRadius: BorderRadius.circular(10),
-              color: Color(0xFF25291C)),
+              color: const Color(0xFF25291C)),
           height: 150,
           width: 150,
           child: Column(
             children: [
-              Spacer(),
+              const Spacer(),
               Icon(Icons.cancel_outlined, size: 75, color: diceColor),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Row(
                 children: [
-                  Spacer(),
+                  const Spacer(),
                   ElevatedButton(
                       onPressed: removeDice(),
-                      child: Text("Remove Dice",
+                      child: const Text("Remove Dice",
                           style: TextStyle(color: Colors.white))),
-                  Spacer(),
+                  const Spacer(),
                 ],
               ),
-              Spacer()
+              const Spacer()
             ],
           ),
         ),
@@ -417,7 +416,7 @@ class _DiceRollScreenState extends State<DiceRollScreen>
     height = MediaQuery.of(context).size.height.toInt();
 
     return Scaffold(
-      appBar: AppBar(title: Text("Dice Roller")),
+      appBar: AppBar(title: const Text("Dice Roller")),
       body: Stack(
         children: [
           if (showDice) rollDiceWidget(),
@@ -427,7 +426,7 @@ class _DiceRollScreenState extends State<DiceRollScreen>
                 mainAxisSize:
                     MainAxisSize.min, // Prevents unnecessary expansion
                 children: [
-                  SizedBox(height: 15), // Added spacing
+                  const SizedBox(height: 15), // Added spacing
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -435,7 +434,7 @@ class _DiceRollScreenState extends State<DiceRollScreen>
                           "d4",
                           CustomPaint(
                               painter: TrianglePainter(diceColor),
-                              size: Size(75, 75)),
+                              size: const Size(75, 75)),
                           0),
                       buildDice(
                           "d6",
@@ -443,7 +442,7 @@ class _DiceRollScreenState extends State<DiceRollScreen>
                           1),
                     ],
                   ),
-                  SizedBox(height: 15), // Added spacing
+                  const SizedBox(height: 15), // Added spacing
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -458,11 +457,11 @@ class _DiceRollScreenState extends State<DiceRollScreen>
                           "d10",
                           CustomPaint(
                               painter: DecagonPainter(diceColor),
-                              size: Size(80, 80)),
+                              size: const Size(80, 80)),
                           3),
                     ],
                   ),
-                  SizedBox(height: 15),
+                  const SizedBox(height: 15),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -470,7 +469,7 @@ class _DiceRollScreenState extends State<DiceRollScreen>
                           "d12",
                           CustomPaint(
                               painter: PentagonPainter(diceColor),
-                              size: Size(75, 75)),
+                              size: const Size(75, 75)),
                           4),
                       buildDice(
                           "d20",
@@ -481,22 +480,22 @@ class _DiceRollScreenState extends State<DiceRollScreen>
                           5),
                     ],
                   ),
-                  SizedBox(height: 15),
+                  const SizedBox(height: 15),
                   Row(
                     children: [
-                      Spacer(),
+                      const Spacer(),
                       buildDice(
                           "d100",
                           CustomPaint(
                               painter: DecagonPainter(diceColor),
-                              size: Size(80, 80)),
+                              size: const Size(80, 80)),
                           6),
-                      Spacer(),
+                      const Spacer(),
                       removeDiceContainer(),
-                      Spacer(),
+                      const Spacer(),
                     ],
                   ),
-                  SizedBox(height: 15),
+                  const SizedBox(height: 15),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -508,7 +507,7 @@ class _DiceRollScreenState extends State<DiceRollScreen>
                         child: Text("Advantage",
                             style: TextStyle(
                                 color: ((advantage)
-                                    ? Color(0xFF25291C)
+                                    ? const Color(0xFF25291C)
                                     : Colors.white))),
                       ),
                       ElevatedButton(
@@ -525,12 +524,12 @@ class _DiceRollScreenState extends State<DiceRollScreen>
                         child: Text("Disadvantage",
                             style: TextStyle(
                                 color: ((disadvantage)
-                                    ? Color(0xFF25291C)
+                                    ? const Color(0xFF25291C)
                                     : Colors.white))),
                       ),
                     ],
                   ),
-                  SizedBox(height: 25),
+                  const SizedBox(height: 25),
                 ],
               ),
             )

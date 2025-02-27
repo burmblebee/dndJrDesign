@@ -84,7 +84,7 @@ class DMCombatScreen extends ConsumerWidget {
                                         builder: (context) => DiceRollScreen(
                                             campaignId: campaignId)));
                               },
-                              child: Text('Roll for Damage')),
+                              child: const Text('Roll for Damage')),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
@@ -375,7 +375,7 @@ class DMCombatScreen extends ConsumerWidget {
                           ),
                           const SizedBox(height: 20),
 
-                          Text(
+                          const Text(
                             'OR Select a Character to Add.',
                             style: TextStyle(
                               color: Colors.black,
@@ -425,7 +425,7 @@ class DMCombatScreen extends ConsumerWidget {
                             ],
                           ),
                           const SizedBox(height: 20),
-                          Text(
+                          const Text(
                             'OR Select a Character to Remove.',
                             style: TextStyle(
                               color: Colors.black,
@@ -633,11 +633,11 @@ class DMCombatScreen extends ConsumerWidget {
 
               Text(
                 'Current Turn: ${characters[currentTurnIndex].name}',
-                style: TextStyle(color: Colors.white, fontSize: 22),
+                style: const TextStyle(color: Colors.white, fontSize: 22),
               ),
               Text(
                 'Health: ${characters[currentTurnIndex].health}/${characters[0].maxHealth}',
-                style: TextStyle(color: Colors.white, fontSize: 18),
+                style: const TextStyle(color: Colors.white, fontSize: 18),
               ),
           const SizedBox(height: 10),
           Row(
@@ -656,14 +656,14 @@ class DMCombatScreen extends ConsumerWidget {
                   child: const Text('Heal')),
             ],
           ),
-          Spacer(),
+          const Spacer(),
           ElevatedButton(
             onPressed: () {
               ref
                   .read(combatProvider.notifier)
                   .nextTurn(); // Advance turn order
             },
-            child: Text('Advance Turn'),
+            child: const Text('Advance Turn'),
           ),
           const SizedBox(width: 20),
         ],
