@@ -42,11 +42,7 @@ class NPCProvider extends StateNotifier<NPCState> {
     npcs: [],
     selectedNPC: null,
     diceToRoll: List.filled(7, 0),
-    attackOptions: [
-      AttackOption(name: 'Slash', diceConfig: [0, 1, 0, 0, 0, 0, 0]),  // 1d4
-      AttackOption(name: 'Bite', diceConfig: [0, 0, 1, 0, 0, 0, 0]),   // 1d6
-      AttackOption(name: 'Arrow Shot', diceConfig: [0, 0, 0, 1, 0, 0, 0]), // 1d8
-    ],
+    attackOptions: [],
   ));
 
   Future<void> addNPC(NPC npc, String npcId) async {
