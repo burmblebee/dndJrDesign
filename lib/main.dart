@@ -1,12 +1,7 @@
-import 'package:dnd_jr_design/dice/diceRoller.dart';
-import 'package:dnd_jr_design/npc/npc_creator.dart';
 import 'package:dnd_jr_design/npc/npc_list.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'combat/DMcombatScreen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,7 +10,7 @@ Future<void> main() async {
   runApp(
     ProviderScope( // Wrap with ProviderScope
       child: MaterialApp(
-        home: NPCListScreen(),
+        home: const NPCListScreen(),
         //DMCombatScreen(campaignId: '15'),
         theme: ThemeData(
           brightness: Brightness.dark,
@@ -41,7 +36,7 @@ Future<void> main() async {
           ),
           elevatedButtonTheme: ElevatedButtonThemeData(
             style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all<Color>(
+              backgroundColor: WidgetStateProperty.all<Color>(
                   const Color(0xFF25291C)), // The darker gray color
             ),
           ),

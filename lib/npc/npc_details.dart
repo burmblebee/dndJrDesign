@@ -4,6 +4,8 @@ import 'npc.dart';
 import 'npc_provider.dart';
 
 class NPCDetailScreen extends ConsumerWidget {
+  const NPCDetailScreen({super.key});
+
   @override
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -13,19 +15,19 @@ class NPCDetailScreen extends ConsumerWidget {
     // Handle the case where no NPC is selected
     if (npc == null) {
       return Scaffold(
-        appBar: AppBar(title: Text('NPC Details')),
-        body: Center(child: Text('No NPC selected')),
+        appBar: AppBar(title: const Text('NPC Details')),
+        body: const Center(child: Text('No NPC selected')),
       );
     }
 
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.save),
+        child: const Icon(Icons.save),
         onPressed: () {
           // Implement save functionality
           ref.read(npcProvider.notifier).updateNPC(npc);
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('NPC details saved!')),
+            const SnackBar(content: Text('NPC details saved!')),
           );
           Navigator.pop(context);
         },
@@ -34,7 +36,7 @@ class NPCDetailScreen extends ConsumerWidget {
         title: Text(npc.name),
         actions: [
           IconButton(
-            icon: Icon(Icons.delete),
+            icon: const Icon(Icons.delete),
             onPressed: () {
               ref.read(npcProvider.notifier).deleteNPC(npc.id);
               Navigator.pop(context);
@@ -43,25 +45,25 @@ class NPCDetailScreen extends ConsumerWidget {
         ],
       ),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                SizedBox(width: 20),
-                Text('Name: ${npc.name}', style: TextStyle(fontSize: 24)),
-                Spacer(),
+                const SizedBox(width: 20),
+                Text('Name: ${npc.name}', style: const TextStyle(fontSize: 24)),
+                const Spacer(),
                 IconButton(
                     onPressed: () {
                       final nameController = TextEditingController(text: npc.name);
                       _editName(context, nameController, ref.read(npcProvider.notifier));
                     },
-                    icon: Icon(Icons.edit)),
+                    icon: const Icon(Icons.edit)),
               ],
             ),
-            SizedBox(height: 20),
-            Text('Attack Options:', style: TextStyle(fontSize: 20)),
+            const SizedBox(height: 20),
+            const Text('Attack Options:', style: TextStyle(fontSize: 20)),
             Expanded(
               child: ListView.builder(
                 itemCount: npc.attacks.length,
@@ -71,7 +73,7 @@ class NPCDetailScreen extends ConsumerWidget {
                     title: Text(attack.name),
                     subtitle: Text(getDiceString(attack.diceConfig)),
                     trailing: IconButton(
-                      icon: Icon(Icons.edit),
+                      icon: const Icon(Icons.edit),
                       onPressed: () {
                         _editAttack(context, ref.read(npcProvider.notifier),
                             attack, index);
@@ -91,25 +93,26 @@ class NPCDetailScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Edit NPC Name'),
+        title: const Text('Edit NPC Name'),
         content: TextField(
           controller: nameController,
-          decoration: InputDecoration(labelText: 'NPC Name'),
+          decoration: const InputDecoration(labelText: 'NPC Name'),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancel'),
+            child: const Text('Cancel'),
           ),
           ElevatedButton(
             onPressed: () async {
               if (nameController.text.isNotEmpty) {
                 await npcNotifier.editNPCName(npcNotifier.state.selectedNPC!, nameController.text);
                 npcNotifier.updateNPC(npcNotifier.state.selectedNPC!);
+
                 Navigator.pop(context); // Close the dialog after updating
               }
             },
-            child: Text('Update'),
+            child: const Text('Update'),
           ),
         ],
       ),
@@ -159,10 +162,10 @@ class NPCDetailScreen extends ConsumerWidget {
       children: [
         TextField(
           controller: attackNameController,
-          decoration: InputDecoration(labelText: 'Attack Name'),
+          decoration: const InputDecoration(labelText: 'Attack Name'),
         ),
-        SizedBox(height: 10),
-        Text('Dice Configuration:', style: TextStyle(fontSize: 16)),
+        const SizedBox(height: 10),
+        const Text('Dice Configuration:', style: TextStyle(fontSize: 16)),
         ...List.generate(6, (index) {
           return Row(
             children: [
