@@ -16,6 +16,14 @@ class NPCListScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('NPC List')),
+      bottomNavigationBar: BottomAppBar(
+        color: const Color(0xFF25291C),
+        child: Container(
+          height: 50,
+          alignment: Alignment.center,
+          child: const Text('Bottom Navigation Bar', style: TextStyle(color: Colors.white)),
+        ),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
@@ -34,18 +42,28 @@ class NPCListScreen extends ConsumerWidget {
         itemCount: npcState.npcs.length,
         itemBuilder: (context, index) {
           final npc = npcState.npcs[index];
-          return ListTile(
-            selectedColor: Theme.of(context).canvasColor,
-            title: Text(npc.name),
-            onTap: () {
-              ref.read(npcProvider.notifier).selectNPC(npc); // Select the NPC
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const NPCDetailScreen(), // Pass no parameters, fetch from the provider
+          return Column(
+            children: [
+              const SizedBox(height: 10),
+              ListTile(
+                tileColor: const Color(0xFFD4C097).withOpacity(0.5),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
                 ),
-              );
-            },
+                visualDensity: const VisualDensity(vertical: 4),
+                title: Text(npc.name, style: const TextStyle(fontSize: 20)),
+                onTap: () {
+                  ref.read(npcProvider.notifier).selectNPC(npc); // Select the NPC
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const NPCDetailScreen(), // Pass no parameters, fetch from the provider
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 10),
+            ],
           );
 
         },
