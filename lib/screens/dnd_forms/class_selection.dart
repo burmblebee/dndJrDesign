@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:warlocks_of_the_beach/screens/dnd_forms/race_selection.dart';
-import 'package:warlocks_of_the_beach/widgets/dnd_form_widgets/class_data_loader.dart';
+import 'package:warlocks_of_the_beach/widgets/loaders/class_data_loader.dart';
+
 import 'package:warlocks_of_the_beach/widgets/navigation/main_drawer.dart';
 import 'package:warlocks_of_the_beach/widgets/navigation/main_appbar.dart';
 import 'package:warlocks_of_the_beach/widgets/navigation/bottom_navbar.dart';
@@ -90,7 +91,9 @@ class _ClassSelectionState extends ConsumerState<ClassSelection> {
                 height: 325,
                 width: 325,
                 child: SingleChildScrollView(
+                  
                   child: ClassDataWidget(className: selectedClassName),
+                
                 ),
               ),
             ),
