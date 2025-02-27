@@ -377,6 +377,41 @@ class _SpecificsScreenState extends ConsumerState<SpecificsScreen> {
                 ),
               ],
             ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  label: const Text("Back"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: customColor,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+                const SizedBox(width: 30),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    var languages = _selectedLanguages + _givenLanguages;
+                    var proficiencies = _selectedProficiencies + _givenProficiencies;
+                    ref.read(characterProvider.notifier).updateLanguages(languages);
+                    ref.read(characterProvider.notifier).updateProficiencies(proficiencies);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => StatsScreen(),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.arrow_forward, color: Colors.white),
+                  label: const Text("Next"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: customColor,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),

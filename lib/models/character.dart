@@ -7,7 +7,9 @@ class Character {
   final Map<String, dynamic> abilityScores;
   final Map<String, dynamic> weapons;
   final Map<String, dynamic> spells;
-  final Map<String, dynamic> specifics;
+
+  final List<String> proficiencies;
+  final List<String> languages;
 
   Character({
     required this.name,
@@ -18,7 +20,8 @@ class Character {
     required this.abilityScores,
     required this.weapons,
     required this.spells,
-    required this.specifics,
+    required this.proficiencies,
+    required this.languages,
   });
 
   factory Character.fromMap(Map<String, dynamic> data) {
@@ -31,7 +34,8 @@ class Character {
       abilityScores: data['abilityScores'] ?? {},
       weapons: data['weapons'] ?? {},
       spells: data['spells'] ?? {},
-      specifics: data['specifics'] ?? {},
+      proficiencies: List<String>.from(data['proficiencies'] ?? []),
+      languages: List<String>.from(data['languages'] ?? []),
     );
   }
 
@@ -45,7 +49,8 @@ class Character {
       'abilityScores': abilityScores,
       'weapons': weapons,
       'spells': spells,
-      'specifics': specifics,
+      'languages' : languages,
+      'proficiencies': proficiencies,
     };
   }
 
@@ -59,6 +64,8 @@ class Character {
     Map<String, dynamic>? weapons,
     Map<String, dynamic>? spells,
     Map<String, dynamic>? specifics,
+    List<String>? proficiencies,
+    List<String>? languages,
   }) {
     return Character(
       name: name ?? this.name,
@@ -69,7 +76,8 @@ class Character {
       abilityScores: abilityScores ?? this.abilityScores,
       weapons: weapons ?? this.weapons,
       spells: spells ?? this.spells,
-      specifics: specifics ?? this.specifics,
+      proficiencies: proficiencies ?? this.proficiencies,
+      languages: languages ?? this.languages,
     );
   }
 }

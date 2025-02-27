@@ -21,7 +21,7 @@ class BackgroundDataLoader extends StatelessWidget {
             style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Colors.black,
+              
             ),
           ),
           const SizedBox(height: 10),
