@@ -5,7 +5,7 @@ class Character {
   final String background;
   final String picture;
   final Map<String, dynamic> abilityScores;
-  final Map<String, dynamic> weapons;
+  final List<String> weapons;
   final Map<String, dynamic> spells;
 
   final List<String> proficiencies;
@@ -32,7 +32,7 @@ class Character {
       background: data['background'] ?? '',
       picture: data['picture'] ?? '',
       abilityScores: data['abilityScores'] ?? {},
-      weapons: data['weapons'] ?? {},
+      weapons: List<String>.from(data['weapons'] ?? []),
       spells: data['spells'] ?? {},
       proficiencies: List<String>.from(data['proficiencies'] ?? []),
       languages: List<String>.from(data['languages'] ?? []),
@@ -61,7 +61,7 @@ class Character {
     String? background,
     String? picture,
     Map<String, dynamic>? abilityScores,
-    Map<String, dynamic>? weapons,
+    List<String>? weapons,
     Map<String, dynamic>? spells,
     Map<String, dynamic>? specifics,
     List<String>? proficiencies,

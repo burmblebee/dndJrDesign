@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/character.dart';
 
 class CharacterNotifier extends StateNotifier<Character> {
-  CharacterNotifier() : super(Character(name: '', race: '', characterClass: '', background: '', picture: '', abilityScores: {}, weapons: {}, spells: {}, proficiencies: [], languages: []));
+  CharacterNotifier() : super(Character(name: '', race: '', characterClass: '', background: '', picture: '', abilityScores: {}, weapons: [], spells: {}, proficiencies: [], languages: []));
 
   void updateCharacterName(String name) {
     state = state.copyWith(name: name);
@@ -25,7 +25,7 @@ class CharacterNotifier extends StateNotifier<Character> {
     state = state.copyWith(abilityScores: scores);
   }
 
-  void updateWeapons(Map<String, dynamic> weapons) {
+  void updateWeapons(List<String> weapons) {
     state = state.copyWith(weapons: weapons);
   }
 

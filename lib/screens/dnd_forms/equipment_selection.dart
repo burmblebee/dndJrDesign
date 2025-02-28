@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:warlocks_of_the_beach/rpg_awesome_icons.dart';
+import 'package:warlocks_of_the_beach/screens/dnd_forms/spell_selection.dart';
+import 'package:warlocks_of_the_beach/widgets/main_appbar.dart';
 import 'package:warlocks_of_the_beach/widgets/navigation/bottom_navbar.dart';
 import 'package:warlocks_of_the_beach/widgets/navigation/main_drawer.dart';
 import '../../data/character creator data/weapon_data.dart';
@@ -138,15 +140,15 @@ class _EquipmentSelectionState extends ConsumerState<EquipmentSelection> {
     return FontAwesomeIcons.crosshairs; // fallback
   }
 
-  void _saveSelections() {
-    final characterNotifier = ref.read(characterProvider.notifier);
-    characterNotifier.updateWeapons({
-      'weapons': selectedWeapons,
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
+
+    final elevatedButtonColor = Theme.of(context)
+            .elevatedButtonTheme
+            .style
+            ?.backgroundColor
+            ?.resolve({}) ??
+        Colors.grey;
     // Re-measure the overlay each build in case the content changed.
     WidgetsBinding.instance.addPostFrameCallback((_) => _updateOverlayHeight());
 
@@ -155,11 +157,7 @@ class _EquipmentSelectionState extends ConsumerState<EquipmentSelection> {
     }).toList();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Equipment"),
-        backgroundColor: customColor,
-        foregroundColor: Colors.white,
-      ),
+      appBar: MainAppbar(),
       drawer: const MainDrawer(),
       bottomNavigationBar: MainBottomNavBar(),
       body: Stack(
@@ -310,6 +308,41 @@ class _EquipmentSelectionState extends ConsumerState<EquipmentSelection> {
               ),
             ),
           ),
+          Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  label: const Text("Back"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: elevatedButtonColor,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+                const SizedBox(width: 30),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    ref
+                        .read(characterProvider.notifier)
+                        .updateWeapons(selectedWeapons);
+                    
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CantripSelection(characterName: 'HARDCODED IN EQUIPMENT @ LINE 343'),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.arrow_forward, color: Colors.white),
+                  label: const Text("Next"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: elevatedButtonColor,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ],
+            ),
         ],
       ),
     );
