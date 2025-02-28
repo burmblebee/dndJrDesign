@@ -103,7 +103,7 @@ class _EditProfileState extends State<EditProfile> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 8),
+                  SizedBox(height: 10),
                   Row(
                     children: [
                       Expanded(
@@ -114,17 +114,21 @@ class _EditProfileState extends State<EditProfile> {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      Expanded(
+                      Flexible(
                         flex: 9,
-                        child: Text(
-                          'LuvleeGabs',
-                          style: Theme.of(context).textTheme.bodyMedium,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
+                        child: Container(
+                          constraints: BoxConstraints(maxWidth: 200), // Set max width
+                          child: const TextField(
+                            decoration: InputDecoration(
+                              hintText: 'Enter Username',
+                              contentPadding: EdgeInsets.all(10),
+                            ),
+                            
+                          ),
+                        ),),
                     ],
                   ),
-                  SizedBox(height: 8),
+                  SizedBox(height: 10),
                   Row(
                     children: [
                       Expanded(
@@ -135,17 +139,21 @@ class _EditProfileState extends State<EditProfile> {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      Expanded(
+                      Flexible(
                         flex: 9,
-                        child: Text(
-                          'gabs',
-                          style: Theme.of(context).textTheme.bodyMedium,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
+                        child: Container(
+                          constraints: BoxConstraints(maxWidth: 200), // Set max width
+                          child: const TextField(
+                            decoration: InputDecoration(
+                              hintText: 'Enter Name',
+                              contentPadding: EdgeInsets.all(10),
+                            ),
+                            
+                          ),
+                        ),),
                     ],
                   ),
-                  SizedBox(height: 8),
+                  SizedBox(height: 10),
                   Row(
                     children: [
                       Expanded(
@@ -156,38 +164,22 @@ class _EditProfileState extends State<EditProfile> {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      Expanded(
+                      Flexible(
                         flex: 9,
-                        child: Text(
-                          '951-224-5689',
-                          style: Theme.of(context).textTheme.bodyMedium,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
+                        child: Container(
+                          constraints: BoxConstraints(maxWidth: 200), // Set max width
+                          child: const TextField(
+                            decoration: InputDecoration(
+                              hintText: 'Enter Number',
+                              contentPadding: EdgeInsets.all(10),
+                            ),
+                            
+                          ),
+                        ),),
                     ],
                   ),
-                  SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        flex: 3,
-                        child: Text(
-                          'Phone:',
-                          style: Theme.of(context).textTheme.bodyLarge,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      Expanded(
-                        flex: 9,
-                        child: Text(
-                          '951-224-5689',
-                          style: Theme.of(context).textTheme.bodyMedium,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 8),
+                 
+                  SizedBox(height: 10),
                   Row(
                     children: [
                       Expanded(
@@ -198,21 +190,30 @@ class _EditProfileState extends State<EditProfile> {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      Expanded(
+                      Flexible(
                         flex: 9,
-                        child: Text(
-                          'gabriela.cisneros951@gmail.com',
-                          style: Theme.of(context).textTheme.bodyMedium,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
+                        child: Container(
+                          constraints: BoxConstraints(maxWidth: 200), // Set max width
+                          child: const TextField(
+                            decoration: InputDecoration(
+                              hintText: 'Enter Email',
+                              contentPadding: EdgeInsets.all(10),
+                            ),
+                            
+                          ),
+                        ),),
                     ],
                   ),
-                  SizedBox(height: 8),
+                  SizedBox(height: 10),
+                  Divider(
+                    color: Colors.grey,
+                    thickness: 1,
+                    endIndent: 20,
+                  ),
                   Row(
                     children: [
                       Expanded(
-                        flex: 3,
+                        flex: 4,
                         child: Text(
                           'password:',
                           style: Theme.of(context).textTheme.bodyLarge,
@@ -220,7 +221,7 @@ class _EditProfileState extends State<EditProfile> {
                         ),
                       ),
                       Expanded(
-                        flex: 9,
+                        flex: 10,
                         child: Text(
                           '*******',
                           style: Theme.of(context).textTheme.bodyMedium,
@@ -235,7 +236,7 @@ class _EditProfileState extends State<EditProfile> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 8),
+                  SizedBox(height: 10),
                   Row(
                     children: [
                       Expanded(
@@ -247,7 +248,7 @@ class _EditProfileState extends State<EditProfile> {
                         ),
                       ),
                       Expanded(
-                        flex: 6,
+                        flex: 8,
                         child: Text(
                           _savedGender, // Show saved gender
                           style: Theme.of(context).textTheme.bodyMedium,
@@ -262,8 +263,8 @@ class _EditProfileState extends State<EditProfile> {
                         },
                         child: Icon(
                           _isGenderExpanded
-                              ? Icons.arrow_drop_up
-                              : Icons.arrow_drop_down,
+                              ? Icons.arrow_downward
+                              : Icons.arrow_forward_ios,
                           size: 18,
                         ),
                       ),
@@ -334,6 +335,7 @@ class _EditProfileState extends State<EditProfile> {
                     thickness: 1,
                     endIndent: 20,
                   ),
+                  SizedBox(height: 10),
                   Center(
                     child: TextButton(
                       onPressed: _updateProfile,
