@@ -1,3 +1,7 @@
+import 'dart:ffi';
+import 'dart:typed_data';
+
+import 'package:dnd_app/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -10,18 +14,37 @@ class EditProfile extends StatefulWidget {
 }
 
 class _EditProfileState extends State<EditProfile> {
-  File? _image;
-  final ImagePicker _picker = ImagePicker();
+  Uint8List? _image;
 
-  Future<void> _pickImage() async {
-    final XFile? pickedImage =
-        await _picker.pickImage(source: ImageSource.gallery);
+  void selectImage() async {
+    Uint8List img = await pickImage(ImageSource.gallery);
+    setState(() {
+      _image = img;
+    });
+  }
 
-    if (pickedImage != null) {
-      setState(() {
-        _image = File(pickedImage.path);
-      });
-    }
+//female will temporarily be the default
+  bool _isGenderExpanded = false;
+  String _selectedGender = "Female";
+  String _savedGender = "Female";
+
+
+  void _updateProfile() {
+    setState(() {
+      _savedGender = _selectedGender; // Save the gender
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Profile updated successfully!"),
+        duration: Duration(seconds: 2),
+      ),
+    );
+
+    // Wait for the SnackBar to show, then navigate back
+    Future.delayed(Duration(seconds: 2), () {
+      Navigator.pop(context); // This will navigate back to the previous screen
+    });
   }
 
   @override
@@ -30,37 +53,30 @@ class _EditProfileState extends State<EditProfile> {
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            _image != null
-                ? Image.file(
-                    _image!,
-                    width: 100,
-                    height: 100,
-                    fit: BoxFit.cover,
-                  )
-                : Image.asset(
-                    'assets/profile.png',
-                    width: 100,
-                    fit: BoxFit.cover,
-                  ),
-            SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: _pickImage,
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 22, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Color(0xFF25291C),
-                  borderRadius: BorderRadius.circular(12),
+          children: [
+            Stack(
+              children: [
+                _image != null 
+                    ? CircleAvatar(
+                        radius: 65,
+                        backgroundImage: MemoryImage(_image!),
+                      )
+                    : // If no image is selected, show a default image
+                const CircleAvatar(
+                  radius: 65,
+                  backgroundImage:
+                      AssetImage('assets/profile.png'), // Default image
                 ),
-                child: Text(
-                  "Import Image",
-                  style: TextStyle(
-                    color: Colors.white,
+                Positioned(
+                  child: IconButton(
+                    onPressed: selectImage,
+                    icon: const Icon(Icons.add_a_photo),
                   ),
+                  bottom: -10,
+                  left: 80,
                 ),
-              ),
+              ],
             ),
-
             //divider + spacing
             SizedBox(height: 10),
             Divider(
@@ -70,17 +86,264 @@ class _EditProfileState extends State<EditProfile> {
               endIndent: 20,
             ),
             Padding(
-              padding: EdgeInsets.only(left: 10),
+              padding: EdgeInsets.only(left: 20),
               child: Column(
                 //makes it left aligned
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Information',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.bold,
-                      color: Color.fromARGB(255, 9, 0, 0),
+                  Row(
+                    children: [
+                      Text(
+                        'Profile Information',
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                          color: Color.fromARGB(255, 9, 0, 0),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 3,
+                        child: Text(
+                          'Username:',
+                          style: Theme.of(context).textTheme.bodyLarge,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Expanded(
+                        flex: 9,
+                        child: Text(
+                          'LuvleeGabs',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 3,
+                        child: Text(
+                          'Name:',
+                          style: Theme.of(context).textTheme.bodyLarge,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Expanded(
+                        flex: 9,
+                        child: Text(
+                          'gabs',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 3,
+                        child: Text(
+                          'Phone:',
+                          style: Theme.of(context).textTheme.bodyLarge,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Expanded(
+                        flex: 9,
+                        child: Text(
+                          '951-224-5689',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 3,
+                        child: Text(
+                          'Phone:',
+                          style: Theme.of(context).textTheme.bodyLarge,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Expanded(
+                        flex: 9,
+                        child: Text(
+                          '951-224-5689',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 3,
+                        child: Text(
+                          'Email:',
+                          style: Theme.of(context).textTheme.bodyLarge,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Expanded(
+                        flex: 9,
+                        child: Text(
+                          'gabriela.cisneros951@gmail.com',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 3,
+                        child: Text(
+                          'password:',
+                          style: Theme.of(context).textTheme.bodyLarge,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Expanded(
+                        flex: 9,
+                        child: Text(
+                          '*******',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const Expanded(
+                        child: Icon(
+                          Icons.arrow_forward_ios,
+                          size: 18,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 3,
+                        child: Text(
+                          'Gender:',
+                          style: Theme.of(context).textTheme.bodyLarge,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Expanded(
+                        flex: 6,
+                        child: Text(
+                          _savedGender, // Show saved gender
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _isGenderExpanded = !_isGenderExpanded;
+                          });
+                        },
+                        child: Icon(
+                          _isGenderExpanded
+                              ? Icons.arrow_drop_up
+                              : Icons.arrow_drop_down,
+                          size: 18,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (_isGenderExpanded)
+                    Padding(
+                      padding: EdgeInsets.only(left: 40, top: 5),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _selectedGender = "Female";
+                                _savedGender = "Female"; // Update immediately
+                                _isGenderExpanded = false;
+                              });
+                            },
+                            child: Text(
+                              "Female",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 5),
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _selectedGender = "Male";
+                                _savedGender = "Male"; // Update immediately
+                                _isGenderExpanded = false;
+                              });
+                            },
+                            child: Text(
+                              "Male",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 5),
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _selectedGender = "Other";
+                                _savedGender = "Other"; // Update immediately
+                                _isGenderExpanded = false;
+                              });
+                            },
+                            child: Text(
+                              "Other",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  SizedBox(height: 10),
+                  Divider(
+                    color: Colors.grey,
+                    thickness: 1,
+                    endIndent: 20,
+                  ),
+                  Center(
+                    child: TextButton(
+                      onPressed: _updateProfile,
+                      child: Text(
+                        'Update',
+                        style: TextStyle(
+                          fontSize: 17,
+                          color: const Color.fromARGB(255, 125, 255, 77),
+                        ),
+                      ),
                     ),
                   ),
                 ],
