@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
     return ProviderScope(
       child: MaterialApp(
         title: 'Warlocks of the Beach',
-        theme: ThemeData(
+        theme: ThemeData( 
           brightness: Brightness.dark,
           primaryColor: const Color(0xFF464538), // Dark olive green
           scaffoldBackgroundColor: const Color(0xFF464538), // Deep earthy green

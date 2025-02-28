@@ -222,7 +222,12 @@ class _SpecificsScreenState extends ConsumerState<SpecificsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final elevatedButtonColor = Theme.of(context).elevatedButtonTheme.style?.backgroundColor?.resolve({}) ?? Colors.grey;
+    final elevatedButtonColor = Theme.of(context)
+            .elevatedButtonTheme
+            .style
+            ?.backgroundColor
+            ?.resolve({}) ??
+        Colors.grey;
 
     return Scaffold(
       appBar: MainAppbar(),
@@ -235,7 +240,8 @@ class _SpecificsScreenState extends ConsumerState<SpecificsScreen> {
               'Specifics Selection for $characterName',
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-            Text("Delete me later: $characterClass + $background + $race"), //DELETE ME LATER
+            Text(
+                "Delete me later: $characterClass + $background + $race"), //DELETE ME LATER
             const SizedBox(height: 20),
             SegmentedButton<String>(
               style: ButtonStyle(
@@ -291,7 +297,8 @@ class _SpecificsScreenState extends ConsumerState<SpecificsScreen> {
                                   onPressed: () {
                                     if (_possibleProficiencies
                                             .contains(proficiency) ||
-                                        _givenProficiencies.contains(proficiency)) {
+                                        _givenProficiencies
+                                            .contains(proficiency)) {
                                       updateSelectedProficiency(proficiency);
                                     } else {
                                       showSnackbar(
@@ -301,9 +308,11 @@ class _SpecificsScreenState extends ConsumerState<SpecificsScreen> {
                                   textContent: proficiency,
                                   color: (_selectedProficiencies
                                               .contains(proficiency) ||
-                                          _givenProficiencies.contains(proficiency))
+                                          _givenProficiencies
+                                              .contains(proficiency))
                                       ? elevatedButtonColor
-                                      : _possibleProficiencies.contains(proficiency)
+                                      : _possibleProficiencies
+                                              .contains(proficiency)
                                           ? Colors.grey
                                           : Colors.blueGrey[800],
                                 ),
@@ -349,7 +358,8 @@ class _SpecificsScreenState extends ConsumerState<SpecificsScreen> {
                                     }
                                   },
                                   textContent: language,
-                                  color: (_selectedLanguages.contains(language) ||
+                                  color: (_selectedLanguages
+                                              .contains(language) ||
                                           _givenLanguages.contains(language))
                                       ? elevatedButtonColor
                                       : Colors.grey),
@@ -393,10 +403,11 @@ class _SpecificsScreenState extends ConsumerState<SpecificsScreen> {
                 const SizedBox(width: 30),
                 ElevatedButton.icon(
                   onPressed: () {
-                    var languages = _selectedLanguages + _givenLanguages;
-                    var proficiencies = _selectedProficiencies + _givenProficiencies;
-                    ref.read(characterProvider.notifier).updateLanguages(languages);
-                    ref.read(characterProvider.notifier).updateProficiencies(proficiencies);
+                    ref
+                        .read(characterProvider.notifier)
+                        .updateLanguages(_selectedLanguages + _givenLanguages);
+                    ref.read(characterProvider.notifier).updateProficiencies(
+                        _selectedProficiencies + _givenProficiencies);
                     Navigator.push(
                       context,
                       MaterialPageRoute(

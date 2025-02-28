@@ -1,6 +1,6 @@
 import 'dart:ui';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:warlocks_of_the_beach/rpg_awesome_icons.dart';
 import 'package:warlocks_of_the_beach/widgets/navigation/bottom_navbar.dart';
@@ -8,18 +8,16 @@ import 'package:warlocks_of_the_beach/widgets/navigation/main_drawer.dart';
 import '../../data/character creator data/weapon_data.dart';
 import '../../screens/dnd_forms/character_trait_selection.dart';
 import '../../widgets/buttons/navigation_button.dart';
+import 'package:warlocks_of_the_beach/providers/character_provider.dart';
 
-class EquipmentSelection extends StatefulWidget {
-  const EquipmentSelection({Key? key, required this.characterName})
-      : super(key: key);
-
-  final String characterName;
+class EquipmentSelection extends ConsumerStatefulWidget {
+  const EquipmentSelection({Key? key}) : super(key: key);
 
   @override
   _EquipmentSelectionState createState() => _EquipmentSelectionState();
 }
 
-class _EquipmentSelectionState extends State<EquipmentSelection> {
+class _EquipmentSelectionState extends ConsumerState<EquipmentSelection> {
   final List<String> simpleWeapons = [
     'Club',
     'Dagger',
@@ -140,18 +138,11 @@ class _EquipmentSelectionState extends State<EquipmentSelection> {
     return FontAwesomeIcons.crosshairs; // fallback
   }
 
-  Future<void> _saveSelections() async {
-    try {
-      final firestore = FirebaseFirestore.instance;
-      final docRef =
-          firestore.collection('characters').doc(widget.characterName);
-      await docRef.set({
-        'name': widget.characterName,
-        'weapons': selectedWeapons,
-      }, SetOptions(merge: true));
-    } catch (e) {
-      print('Error saving weapons: $e');
-    }
+  void _saveSelections() {
+    final characterNotifier = ref.read(characterProvider.notifier);
+    characterNotifier.updateWeapons({
+      'weapons': selectedWeapons,
+    });
   }
 
   @override
@@ -202,14 +193,13 @@ class _EquipmentSelectionState extends State<EquipmentSelection> {
                                 ? "SimpleWeapons"
                                 : "MartialWeapons";
                             final details =
-                                WeaponData.Weapons[group]?[weapon] ??
-                                    {
-                                      "damage_die": "N/A",
-                                      "gold_cost": "N/A",
-                                      "damage_type": "N/A",
-                                      "properties": ["N/A"],
-                                      "weight": "N/A",
-                                    };
+                                WeaponData.Weapons[group]?[weapon] ?? {
+                                  "damage_die": "N/A",
+                                  "gold_cost": "N/A",
+                                  "damage_type": "N/A",
+                                  "properties": ["N/A"],
+                                  "weight": "N/A",
+                                };
 
                             return Card(
                               elevation: 2,
@@ -320,39 +310,8 @@ class _EquipmentSelectionState extends State<EquipmentSelection> {
               ),
             ),
           ),
-          
         ],
       ),
     );
   }
 }
-
-
-// Container(
-//             padding:
-//                 const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-//             color: Colors.white,
-//             child: Row(
-//               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//               children: [
-//                 NavigationButton(
-//                   onPressed: () => Navigator.pop(context),
-//                   textContent: 'Back',
-//                 ),
-//                 NavigationButton(
-//                   textContent: "Next",
-//                   onPressed: () {
-//                     _saveSelections();
-//                     Navigator.push(
-//                       context,
-//                       MaterialPageRoute(
-//                         builder: (context) => CharacterTraitScreen(
-//                           characterName: widget.characterName,
-//                         ),
-//                       ),
-//                     );
-//                   },
-//                 ),
-//               ],
-//             ),
-//           ),

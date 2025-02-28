@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:warlocks_of_the_beach/providers/character_provider.dart';
+import 'package:warlocks_of_the_beach/widgets/navigation/bottom_navbar.dart';
+import 'package:warlocks_of_the_beach/widgets/navigation/main_appbar.dart';
 import '../../screens/dnd_forms/equipment_selection.dart';
 import 'package:flutter/material.dart';
 import '../../widgets/buttons/button_with_padding.dart';
@@ -26,7 +28,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
     'Wisdom': 8,
     'Intelligence': 8,
     'Charisma': 8,
-  }; // to save
+  }; // to save_
   int index = 0;
   final Color customColor = const Color.fromARGB(255, 138, 28, 20);
   int pointsLeft = 27; // For PointBuy
@@ -56,6 +58,19 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
     'Intelligence': 10,
     'Charisma': 8,
   }; //standard array
+
+  Map<String, int> _applyRaceBonuses(Map<String, int> scores) {
+    // Fetch race data
+    final raceData = RaceData[_selectedRace];
+    if (raceData == null) return scores;
+
+    // Get the ability score increases for the selected race
+    final Map<String, int> bonuses = raceData['abilityScoreIncrease'] ?? {};
+
+    // Apply the bonuses to the scores
+    return scores
+        .map((key, value) => MapEntry(key, value + (bonuses[key] ?? 0)));
+  }
 
   //for standard array
   List<int> standardArray = [15, 14, 13, 12, 10, 8];
@@ -107,7 +122,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
 
   void _decrementSkill(String skill) {
     final score = baseScores[skill]! - 1;
-    final cost = (baseScores[skill]! <= 14) ? 1 : 2;
+    final cost = (baseScores[skill]! < 14) ? 1 : 2;
 
     setState(() {
       if (score >= 8) {
@@ -187,29 +202,6 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
     }
   }
 
-  Map<String, int> _applyRaceBonuses(Map<String, int> scores) {
-    // Fetch race data
-    final raceData = RaceData[_selectedRace];
-    if (raceData == null) return scores;
-
-    // Default bonuses for Human
-    Map<String, int> bonuses = raceData['abilityScoreIncrease'] ?? {};
-    if (_selectedRace == 'Human') {
-      bonuses = {
-        'Strength': 1,
-        'Dexterity': 1,
-        'Constitution': 1,
-        'Wisdom': 1,
-        'Intelligence': 1,
-        'Charisma': 1,
-      };
-    }
-
-    // Apply bonuses
-    return scores
-        .map((key, value) => MapEntry(key, value + (bonuses[key] ?? 0)));
-  }
-
   void _showFinalScores() {
     final scoresToUse = index == 0
         ? baseScores
@@ -234,10 +226,12 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
             onPressed: () {
               Navigator.pop(ctx);
               // Navigate to EquipmentSelection
-              // Navigator.push(
-              //     context,
-              //     MaterialPageRoute(
-              //         builder: (context) => const EquipmentSelection()));
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const EquipmentSelection(),
+                ),
+              );
             },
             child: const Text("OK"),
           ),
@@ -249,38 +243,35 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Stats"),
-        backgroundColor: customColor,
-        foregroundColor: Colors.white,
-      ),
+      appBar: MainAppbar(),
       drawer: const MainDrawer(),
-      bottomNavigationBar: Row(
-        children: [
-          NavigationButton(
-            textContent: "Back",
-            onPressed: () => Navigator.pop(context),
-          ),
-          const SizedBox(width: 30),
-          NavigationButton(
-            onPressed: (index == 2 &&
-                    !(readyStatuses[0] &&
-                        readyStatuses[1] &&
-                        readyStatuses[2] &&
-                        readyStatuses[3] &&
-                        readyStatuses[4] &&
-                        readyStatuses[5]))
-                ? () {
-                    showSnackbar(
-                        'You haven\'t picked a skill for each option!');
-                  }
-                : _showFinalScores,
-            textContent: 'Next',
-          ),
-        ],
-      ),
+      bottomNavigationBar: MainBottomNavBar(),
+      // bottomNavigationBar: Row(
+      //   children: [
+      //     NavigationButton(
+      //       textContent: "Back",
+      //       onPressed: () => Navigator.pop(context),
+      //     ),
+      //     const SizedBox(width: 30),
+      //     NavigationButton(
+      //       onPressed: (index == 2 &&
+      //               !(readyStatuses[0] &&
+      //                   readyStatuses[1] &&
+      //                   readyStatuses[2] &&
+      //                   readyStatuses[3] &&
+      //                   readyStatuses[4] &&
+      //                   readyStatuses[5]))
+      //           ? () {
+      //               showSnackbar(
+      //                   'You haven\'t picked a skill for each option!');
+      //             }
+      //           : _showFinalScores,
+      //       textContent: 'Next',
+      //     ),
+      //   ],
+      // ),
       floatingActionButton: ExpandableFab(
-        distance: 112,
+        distance: 116,
         children: [
           ActionButton(
             onPressed: () => setState(() => index = 0),
@@ -718,6 +709,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                           value: 'Charisma',
                         ),
                       ],
+                      // you left your laptop open again
                       onChanged: (ability) {
                         setState(() {
                           // Find the ability currently assigned to this score and remove it
@@ -746,172 +738,189 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
   }
 
   Widget buildPointBuy() {
+    final elevatedButtonColor = Theme.of(context)
+            .elevatedButtonTheme
+            .style
+            ?.backgroundColor
+            ?.resolve({}) ??
+        Colors.grey;
+
     return Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(8.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            for (var row in [
-              ["Strength", "Dexterity"],
-              ["Constitution", "Wisdom"],
-              ["Intelligence", "Charisma"],
-            ])
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: row.map((label) {
-                  return Column(
+            ...[
+              "Strength",
+              "Dexterity",
+              "Constitution",
+              "Wisdom",
+              "Intelligence",
+              "Charisma"
+            ].map((label) {
+              int baseScore = baseScores[label]!;
+              int racialBonus =
+                  (RaceData[_selectedRace]!['abilityScoreIncrease'][label] ?? 0)
+                      .toInt();
+              int finalScore = baseScore + racialBonus;
+
+              return Card(
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: ListTile(
+                  title: Text(label, style: const TextStyle(fontSize: 18)),
+                  subtitle: Text("Base: $baseScore  |  Racial: +$racialBonus"),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(label,
+                      IconButton(
+                        onPressed: () => _decrementSkill(label),
+                        icon: Icon(Icons.remove_circle, color: customColor),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 8, horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: customColor,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          "$finalScore",
                           style: const TextStyle(
-                              color: Colors.black, fontSize: 18)),
-                      Row(
-                        children: [
-                          IconButton(
-                            onPressed: () => _decrementSkill(label),
-                            icon: Icon(Icons.arrow_downward_sharp,
-                                color: customColor),
-                          ),
-                          Container(
-                            decoration: BoxDecoration(
-                              color: customColor,
-                              borderRadius:
-                                  const BorderRadius.all(Radius.circular(10)),
-                            ),
-                            height: 100,
-                            width: 100,
-                            child: Center(
-                              child: Text(
-                                "${baseScores[label]!}",
-                                style: const TextStyle(
-                                    color: Colors.white, fontSize: 50),
-                              ),
-                            ),
-                          ),
-                          IconButton(
-                            onPressed: () => _incrementSkill(label),
-                            icon: Icon(Icons.arrow_upward_sharp,
-                                color: customColor),
-                          ),
-                        ],
+                              color: Colors.white, fontSize: 20),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => _incrementSkill(label),
+                        icon: Icon(Icons.add_circle, color: customColor),
                       ),
                     ],
-                  );
-                }).toList(),
-              ),
+                  ),
+                ),
+              );
+            }).toList(),
             const SizedBox(height: 16),
-            Text(
-              "Points Left: $pointsLeft",
-              style: const TextStyle(color: Colors.black, fontSize: 20),
+            Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: ListTile(
+                title:
+                    const Text("Points Left", style: TextStyle(fontSize: 20)),
+                trailing: Text(
+                  "$pointsLeft",
+                  style: const TextStyle(
+                      fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+              ),
             ),
-            const SizedBox(height: 75),
+            const SizedBox(height: 16),
+            Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text("Final Ability Scores:",
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    ...[
+                      "Strength",
+                      "Dexterity",
+                      "Constitution",
+                      "Wisdom",
+                      "Intelligence",
+                      "Charisma"
+                    ].map(
+                      (attr) {
+                        num finalScore = baseScores[attr]! +
+                            (RaceData[_selectedRace]!['abilityScoreIncrease']
+                                    [attr] ??
+                                0);
+                        return ListTile(
+                          title: Text(attr),
+                          trailing: Text(
+                            "$finalScore",
+                            style: const TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                        );
+                      },
+                    ).toList(),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  label: const Text("Back"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: elevatedButtonColor,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+                const SizedBox(width: 30),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    if (pointsLeft > 0) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                              "You still have $pointsLeft points left to allocate!"),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    }
+                    ref.read(characterProvider.notifier).updateAbilityScores({
+                      for (var attr in [
+                        "Strength",
+                        "Dexterity",
+                        "Constitution",
+                        "Wisdom",
+                        "Intelligence",
+                        "Charisma"
+                      ])
+                        attr: baseScores[attr]! +
+                            (RaceData[_selectedRace]!['abilityScoreIncrease']
+                                        [attr] ??
+                                    0)
+                                .toInt()
+                    });
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => EquipmentSelection(),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.arrow_forward, color: Colors.white),
+                  label: const Text("Next"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: elevatedButtonColor,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
     );
   }
-
-  // Future<void> _saveSelections() async {
-  //   final user = FirebaseAuth.instance.currentUser;
-  //   if (user == null) {
-  //     print('User not authenticated');
-  //     return;
-  //   }
-  //   final userId = user.uid;
-
-  //   try {
-  //     final firestore = FirebaseFirestore.instance;
-  //     final docRef = firestore
-  //         .collection('app_user_profiles')
-  //         .doc(userId)
-  //         .collection('characters')
-  //         .doc(widget.characterName);
-
-  //     // Define all ability scores and default them to 0 if not set
-  //     final Map<String, int> defaultAbilityScores = {
-  //       'Strength': 8,
-  //       'Dexterity': 8,
-  //       'Constitution': 8,
-  //       'Intelligence': 8,
-  //       'Wisdom': 8,
-  //       'Charisma': 8,
-  //     };
-
-  //     //   buildPointBuy(),
-  //     // buildDiceRoller(),
-  //     // buildStandardArray(),
-
-  //     if (index == 0) {
-  //       abilityScores = baseScores;
-  //     } else if (index == 1) {
-  //       abilityScores = rolledScores;
-  //     } else {
-  //       abilityScores = standardScores;
-  //     }
-
-  //     // Merge current abilityScores with defaults (ensures every score is included)
-  //     final updatedAbilityScores = {
-  //       for (final key in defaultAbilityScores.keys)
-  //         key: (abilityScores[key] ?? defaultAbilityScores[key])! +
-  //             ((RaceData[widget.selectedRace]?['abilityScoreIncrease']?[key]) ??
-  //                 0),
-  //     };
-
-  //     // Save to Firestore
-  //     await docRef.set(
-  //       {'abilityScores': updatedAbilityScores},
-  //       SetOptions(merge: true),
-  //     );
-
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(content: Text("Data saved successfully!")),
-  //     );
-  //   } catch (e) {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(content: Text("Failed to save data: $e")),
-  //     );
-  //   }
-  // }
-
-  // Future<void> _saveSelections() async {
-  //   final user = FirebaseAuth.instance.currentUser;
-  //   if (user == null) {
-  //     print('User not authenticated');
-  //     return;
-  //   }
-  //   final userId = user.uid;
-
-  //   try {
-  //     final firestore = FirebaseFirestore.instance;
-  //     final docRef = firestore
-  //         .collection('app_user_profiles')
-  //         .doc(userId)
-  //         .collection('characters')
-  //         .doc(widget.characterName);
-
-  //     // Save the scores with race bonuses applied
-  //     final raceData = RaceData[widget.selectedRace];
-  //     final Map<String, int> bonuses = raceData?['abilityScoreIncrease'] ?? {};
-  //     final Map<String, int> scoresToSave = abilityScores.map((key, value) {
-  //       final bonus = bonuses[key] ?? 0;
-  //       return MapEntry(key, value + bonus);
-  //     });
-
-  //     await docRef.set(
-  //       {'abilityScores': scoresToSave},
-  //       SetOptions(merge: true),
-  //     );
-
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(content: Text("Data saved successfully!")),
-  //     );
-  //   } catch (e) {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(content: Text("Failed to save data: $e")),
-  //     );
-  //   }
-  // }
 
   Widget buildDiceRoller() {
     return Column(
