@@ -1,0 +1,2 @@
+C:/flutter/mobile app/dnd_app/android/app/.cxx/Debug/1h4i2y11/arm64-v8a/CMakeFiles/edit_cache.dir
+C:/flutter/mobile app/dnd_app/android/app/.cxx/Debug/1h4i2y11/arm64-v8a/CMakeFiles/rebuild_cache.dir

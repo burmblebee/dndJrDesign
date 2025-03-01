@@ -1,0 +1,154 @@
+{
+  "project_info": {
+    "project_number": "401164869188",
+    "project_id": "warlocks-of-the-beach",
+    "storage_bucket": "warlocks-of-the-beach.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:401164869188:android:f5d1c1bedcd97801a2e611",
+        "android_client_info": {
+          "package_name": "com.android.application"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "401164869188-1r47uo1erd7fio22a2kmn7nrop97hf98.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwI9DDOyU0L3MhA3DK_hGr07VL-tb-tE4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "401164869188-1r47uo1erd7fio22a2kmn7nrop97hf98.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "401164869188-3li0de6kvcdro4qojr77mntu8lef24ho.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.warlocksOfTheBeach"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:401164869188:android:c5daecc5d0a5da25a2e611",
+        "android_client_info": {
+          "package_name": "com.example.dnd_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "401164869188-1r47uo1erd7fio22a2kmn7nrop97hf98.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwI9DDOyU0L3MhA3DK_hGr07VL-tb-tE4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "401164869188-1r47uo1erd7fio22a2kmn7nrop97hf98.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "401164869188-3li0de6kvcdro4qojr77mntu8lef24ho.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.warlocksOfTheBeach"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:401164869188:android:fa75f2f6c61db4c7a2e611",
+        "android_client_info": {
+          "package_name": "com.example.dnd_jr_design"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "401164869188-1r47uo1erd7fio22a2kmn7nrop97hf98.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwI9DDOyU0L3MhA3DK_hGr07VL-tb-tE4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "401164869188-1r47uo1erd7fio22a2kmn7nrop97hf98.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "401164869188-3li0de6kvcdro4qojr77mntu8lef24ho.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.warlocksOfTheBeach"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:401164869188:android:18a435a44ad9a579a2e611",
+        "android_client_info": {
+          "package_name": "com.example.warlocks_of_the_beach"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "401164869188-1r47uo1erd7fio22a2kmn7nrop97hf98.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwI9DDOyU0L3MhA3DK_hGr07VL-tb-tE4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "401164869188-1r47uo1erd7fio22a2kmn7nrop97hf98.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "401164869188-3li0de6kvcdro4qojr77mntu8lef24ho.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.warlocksOfTheBeach"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
