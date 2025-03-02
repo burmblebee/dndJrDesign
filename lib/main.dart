@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:warlocks_of_the_beach/screens/campaign_screen.dart';
 import 'package:warlocks_of_the_beach/screens/dnd_forms/character_name.dart';
 import 'package:warlocks_of_the_beach/screens/dnd_forms/race_selection.dart';
+import 'package:warlocks_of_the_beach/screens/dnd_forms/equipment_selection.dart';
 import 'firebase_options.dart'; 
 
 
@@ -67,6 +68,7 @@ class MyApp extends StatelessWidget {
 
         },
         home: const CampaignScreen(),
+        
       ),
     );
   }

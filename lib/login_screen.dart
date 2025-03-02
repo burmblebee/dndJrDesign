@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../google_sign_in.dart';
+import 'google_sign_in.dart';
 
 
 class LoginScreen extends StatefulWidget {

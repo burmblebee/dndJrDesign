@@ -98,6 +98,8 @@ flutter:
     - assets/DragonIcon.png
     - assets/witch.jpg
     - assets/dog.webp
+    - lib/data/SRD Data/spellcasting.json
+    - lib/data/SRD Data/classes.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

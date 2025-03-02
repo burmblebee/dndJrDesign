@@ -3,13 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:warlocks_of_the_beach/rpg_awesome_icons.dart';
-import 'package:warlocks_of_the_beach/screens/dnd_forms/spell_selection.dart';
+import 'package:warlocks_of_the_beach/screens/dnd_forms/spell_selection_screen.dart';
 import 'package:warlocks_of_the_beach/widgets/main_appbar.dart';
 import 'package:warlocks_of_the_beach/widgets/navigation/bottom_navbar.dart';
 import 'package:warlocks_of_the_beach/widgets/navigation/main_drawer.dart';
 import '../../data/character creator data/weapon_data.dart';
-import '../../screens/dnd_forms/character_trait_selection.dart';
-import '../../widgets/buttons/navigation_button.dart';
 import 'package:warlocks_of_the_beach/providers/character_provider.dart';
 
 class EquipmentSelection extends ConsumerStatefulWidget {
@@ -71,16 +69,13 @@ class _EquipmentSelectionState extends ConsumerState<EquipmentSelection> {
 
   final TextEditingController _searchController = TextEditingController();
   String searchQuery = '';
-
   List<String> selectedWeapons = [];
 
-  // Using customColor for icons; the overlay will now use gray tones.
+  // Using customColor for icons.
   final Color customColor = const Color.fromARGB(255, 138, 28, 20);
 
   // GlobalKey to measure the bottom overlay’s height.
   final GlobalKey _selectedOverlayKey = GlobalKey();
-
-  // This variable holds the measured height of the selected overlay.
   double _selectedOverlayHeight = 0;
 
   @override
@@ -101,7 +96,7 @@ class _EquipmentSelectionState extends ConsumerState<EquipmentSelection> {
     super.dispose();
   }
 
-  // Call this method to measure the overlay's height.
+  // Measure the overlay's height.
   void _updateOverlayHeight() {
     final context = _selectedOverlayKey.currentContext;
     if (context != null) {
@@ -142,14 +137,14 @@ class _EquipmentSelectionState extends ConsumerState<EquipmentSelection> {
 
   @override
   Widget build(BuildContext context) {
-
     final elevatedButtonColor = Theme.of(context)
             .elevatedButtonTheme
             .style
             ?.backgroundColor
             ?.resolve({}) ??
         Colors.grey;
-    // Re-measure the overlay each build in case the content changed.
+
+    // Re-measure overlay if content changes.
     WidgetsBinding.instance.addPostFrameCallback((_) => _updateOverlayHeight());
 
     final List<String> filteredWeapons = allWeapons.where((weapon) {
@@ -162,23 +157,28 @@ class _EquipmentSelectionState extends ConsumerState<EquipmentSelection> {
       bottomNavigationBar: MainBottomNavBar(),
       body: Stack(
         children: [
-          // Main content area; the bottom padding equals the overlay's height.
+          // Main content area with dynamic bottom padding.
           Padding(
-            padding:
-                EdgeInsets.fromLTRB(16.0, 16.0, 16.0, _selectedOverlayHeight),
+            padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, _selectedOverlayHeight),
             child: Column(
               children: [
-                TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: 'Search Weapons',
-                    prefixIcon: const Icon(Icons.search),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.0),
+                // Reduced-height search bar.
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12.0),
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Search Weapons',
+                      prefixIcon: const Icon(Icons.search, size: 20),
+                      contentPadding: const EdgeInsets.symmetric(
+                          vertical: 8, horizontal: 12),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
                 Expanded(
                   child: filteredWeapons.isNotEmpty
                       ? ListView.separated(
@@ -192,12 +192,12 @@ class _EquipmentSelectionState extends ConsumerState<EquipmentSelection> {
                                 : "MartialWeapons";
                             final details =
                                 WeaponData.Weapons[group]?[weapon] ?? {
-                                  "damage_die": "N/A",
-                                  "gold_cost": "N/A",
-                                  "damage_type": "N/A",
-                                  "properties": ["N/A"],
-                                  "weight": "N/A",
-                                };
+                              "damage_die": "N/A",
+                              "gold_cost": "N/A",
+                              "damage_type": "N/A",
+                              "properties": ["N/A"],
+                              "weight": "N/A",
+                            };
 
                             return Card(
                               elevation: 2,
@@ -226,11 +226,9 @@ class _EquipmentSelectionState extends ConsumerState<EquipmentSelection> {
                                         selectedWeapons.add(weapon);
                                       });
                                     } else {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
+                                      ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(
-                                          content:
-                                              Text('$weapon already added!'),
+                                          content: Text('$weapon already added!'),
                                         ),
                                       );
                                     }
@@ -247,39 +245,48 @@ class _EquipmentSelectionState extends ConsumerState<EquipmentSelection> {
               ],
             ),
           ),
-          // Bottom overlay for selected weapons with a blur effect.
+          // Bottom overlay with a simulated blur effect.
           Positioned(
             left: 0,
             right: 0,
             bottom: 0,
-            child: ClipRRect(
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(16)),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                child: Container(
-                  key: _selectedOverlayKey,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16.0,
-                    vertical: 8.0,
+            child: Container(
+              key: _selectedOverlayKey,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 8.0,
+              ),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.white.withOpacity(0.7),
+                    Colors.white.withOpacity(0.9),
+                  ],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(16)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 10,
+                    offset: const Offset(0, -3),
                   ),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.grey[800]!,
-                        Colors.grey[400]!,
-                      ],
-                      begin: Alignment.bottomCenter,
-                      end: Alignment.topCenter,
-                    ),
-                  ),
-                  child: selectedWeapons.isNotEmpty
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Selected weapons display.
+                  selectedWeapons.isNotEmpty
                       ? Wrap(
                           spacing: 8.0,
                           runSpacing: 4.0,
                           children: selectedWeapons.map((weapon) {
                             return Chip(
-                              backgroundColor: Theme.of(context).cardColor,
+                              backgroundColor:
+                                  Theme.of(context).cardColor,
                               avatar: FaIcon(
                                 _getWeaponIcon(weapon),
                                 color: customColor,
@@ -304,45 +311,44 @@ class _EquipmentSelectionState extends ConsumerState<EquipmentSelection> {
                             ),
                           ),
                         ),
-                ),
+                  const SizedBox(height: 10),
+                  // Navigation buttons.
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(Icons.arrow_back, color: Colors.white),
+                        label: const Text("Back"),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: elevatedButtonColor,
+                          foregroundColor: Colors.white,
+                        ),
+                      ),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          ref
+                              .read(characterProvider.notifier)
+                              .updateWeapons(selectedWeapons);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => SpellSelectionScreen())
+                          );
+                        },
+                        icon: const Icon(Icons.arrow_forward, color: Colors.white),
+                        label: const Text("Next"),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: elevatedButtonColor,
+                          foregroundColor: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ),
-          Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton.icon(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.arrow_back, color: Colors.white),
-                  label: const Text("Back"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: elevatedButtonColor,
-                    foregroundColor: Colors.white,
-                  ),
-                ),
-                const SizedBox(width: 30),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    ref
-                        .read(characterProvider.notifier)
-                        .updateWeapons(selectedWeapons);
-                    
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CantripSelection(characterName: 'HARDCODED IN EQUIPMENT @ LINE 343'),
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.arrow_forward, color: Colors.white),
-                  label: const Text("Next"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: elevatedButtonColor,
-                    foregroundColor: Colors.white,
-                  ),
-                ),
-              ],
-            ),
         ],
       ),
     );
