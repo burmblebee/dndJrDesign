@@ -9,7 +9,6 @@ class NPCListScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Fetch NPCs automatically when the screen is built
     ref.read(npcProvider.notifier).fetchNPCs();
 
     final npcState = ref.watch(npcProvider);
@@ -53,7 +52,7 @@ class NPCListScreen extends ConsumerWidget {
                 visualDensity: const VisualDensity(vertical: 4),
                 title: Text(npc.name, style: const TextStyle(fontSize: 20)),
                 onTap: () {
-                  ref.read(npcProvider.notifier).selectNPC(npc); // Select the NPC
+                  ref.read(npcProvider.notifier).selectNPC(npc);
                   Navigator.push(
                     context,
                     MaterialPageRoute(

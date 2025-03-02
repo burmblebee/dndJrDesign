@@ -556,7 +556,6 @@ class DMCombatScreen extends ConsumerWidget {
     );
   }
 
-  // Accept BuildContext as a parameter
   Widget currentTurnOrder(BuildContext context, List<Character> characters,
       Color oddItemColor, Color evenItemColor, WidgetRef ref) {
     return SizedBox(
