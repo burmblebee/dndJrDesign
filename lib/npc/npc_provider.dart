@@ -104,15 +104,12 @@ class NPCProvider extends StateNotifier<NPCState> {
     }
   }
 
-  //edit npc name
   Future<void> editNPCName(NPC npc, String newName) async {
     try {
-      // Update Firestore
       await _firestore.collection('npcs').doc(npc.id).update({
         'name': newName,
       });
 
-      // Update local state
       final updatedNpcs = state.npcs.map((currNpc) {
         if (currNpc.id == npc.id) {
           return currNpc.copyWith(name: newName);
@@ -120,12 +117,10 @@ class NPCProvider extends StateNotifier<NPCState> {
         return currNpc;
       }).toList();
 
-      // Ensure selected NPC is updated too
       final updatedSelectedNPC = state.selectedNPC?.id == npc.id
           ? state.selectedNPC!.copyWith(name: newName)
           : state.selectedNPC;
 
-      // Update state
       state = state.copyWith(npcs: updatedNpcs, selectedNPC: updatedSelectedNPC);
     } catch (e) {
       print("Error updating NPC name: $e");
@@ -151,11 +146,10 @@ class NPCProvider extends StateNotifier<NPCState> {
         }).toList(),
       });
 
-      // Update the local state with the new attacks
       final updatedNpc = state.npcs[npcIndex].copyWith(attacks: updatedAttacks);
       final updatedNpcs = [...state.npcs]..[npcIndex] = updatedNpc;
 
-      state = state.copyWith(npcs: updatedNpcs, selectedNPC: updatedNpc); // Update selectedNPC
+      state = state.copyWith(npcs: updatedNpcs, selectedNPC: updatedNpc);
     } catch (e) {
       print("Error updating attack option: $e");
     }

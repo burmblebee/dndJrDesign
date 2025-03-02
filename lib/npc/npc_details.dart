@@ -69,16 +69,26 @@ class NPCDetailScreen extends ConsumerWidget {
                 itemCount: npc.attacks.length,
                 itemBuilder: (context, index) {
                   final attack = npc.attacks[index];
-                  return ListTile(
-                    title: Text(attack.name),
-                    subtitle: Text(getDiceString(attack.diceConfig)),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed: () {
-                        _editAttack(context, ref.read(npcProvider.notifier),
-                            attack, index);
-                      },
-                    ),
+                  return Column(
+                    children: [
+                      const SizedBox(height: 10),
+                      ListTile(
+                        tileColor: const Color(0xFFD4C097).withOpacity(0.5),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        title: Text(attack.name),
+                        subtitle: Text(getDiceString(attack.diceConfig)),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.edit),
+                          onPressed: () {
+                            _editAttack(context, ref.read(npcProvider.notifier),
+                                attack, index);
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                    ],
                   );
                 },
               ),
