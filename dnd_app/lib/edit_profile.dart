@@ -1,13 +1,22 @@
-import 'dart:ffi';
 import 'dart:typed_data';
-
 import 'package:dnd_app/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:io';
+
 
 class EditProfile extends StatefulWidget {
-  const EditProfile({super.key});
+  final String username;
+  final String name;
+  final String phone;
+  final String gender;
+
+  const EditProfile({
+    super.key,
+    required this.username,
+    required this.name,
+    required this.phone,
+    required this.gender,
+  });
 
   @override
   _EditProfileState createState() => _EditProfileState();
@@ -15,6 +24,20 @@ class EditProfile extends StatefulWidget {
 
 class _EditProfileState extends State<EditProfile> {
   Uint8List? _image;
+  late TextEditingController usernameController;
+  late TextEditingController nameController;
+  late TextEditingController phoneController;
+  String selectedGender = "Female";
+
+  
+  @override
+  void initState() {
+    super.initState();
+    usernameController = TextEditingController(text: widget.username);
+    nameController = TextEditingController(text: widget.name);
+    phoneController = TextEditingController(text: widget.phone);
+    selectedGender = widget.gender;
+  }
 
   void selectImage() async {
     Uint8List img = await pickImage(ImageSource.gallery);
@@ -23,17 +46,8 @@ class _EditProfileState extends State<EditProfile> {
     });
   }
 
-//female will temporarily be the default
-  bool _isGenderExpanded = false;
-  String _selectedGender = "Female";
-  String _savedGender = "Female";
-
 
   void _updateProfile() {
-    setState(() {
-      _savedGender = _selectedGender; // Save the gender
-    });
-
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text("Profile updated successfully!"),
@@ -43,9 +57,15 @@ class _EditProfileState extends State<EditProfile> {
 
     // Wait for the SnackBar to show, then navigate back
     Future.delayed(Duration(seconds: 2), () {
-      Navigator.pop(context); // This will navigate back to the previous screen
+       Navigator.pop(context, {
+      'username': usernameController.text,
+      'name': nameController.text,
+      'phone': phoneController.text,
+      'gender': selectedGender,
+    }); // This will navigate back to the previous screen
     });
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -56,24 +76,24 @@ class _EditProfileState extends State<EditProfile> {
           children: [
             Stack(
               children: [
-                _image != null 
+                _image != null
                     ? CircleAvatar(
                         radius: 65,
                         backgroundImage: MemoryImage(_image!),
                       )
                     : // If no image is selected, show a default image
-                const CircleAvatar(
-                  radius: 65,
-                  backgroundImage:
-                      AssetImage('assets/profile.png'), // Default image
-                ),
+                    const CircleAvatar(
+                        radius: 65,
+                        backgroundImage:
+                            AssetImage('assets/profile.png'), // Default image
+                      ),
                 Positioned(
+                  bottom: -10,
+                  left: 80,
                   child: IconButton(
                     onPressed: selectImage,
                     icon: const Icon(Icons.add_a_photo),
                   ),
-                  bottom: -10,
-                  left: 80,
                 ),
               ],
             ),
@@ -104,81 +124,75 @@ class _EditProfileState extends State<EditProfile> {
                     ],
                   ),
                   SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Expanded(
-                        flex: 3,
-                        child: Text(
-                          'Username:',
-                          style: Theme.of(context).textTheme.bodyLarge,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      Flexible(
-                        flex: 9,
-                        child: Container(
-                          constraints: BoxConstraints(maxWidth: 200), // Set max width
-                          child: const TextField(
-                            decoration: InputDecoration(
-                              hintText: 'Enter Username',
-                              contentPadding: EdgeInsets.all(10),
-                            ),
-                            
-                          ),
-                        ),),
-                    ],
+            Row(
+              children: [
+                SizedBox(
+                  width: 80, // Adjust this width to match the longest label
+                  child: Text(
+                    'Username:',
+                    style: TextStyle(fontSize: 16),
                   ),
-                  SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Expanded(
-                        flex: 3,
-                        child: Text(
-                          'Name:',
-                          style: Theme.of(context).textTheme.bodyLarge,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      Flexible(
-                        flex: 9,
-                        child: Container(
-                          constraints: BoxConstraints(maxWidth: 200), // Set max width
-                          child: const TextField(
-                            decoration: InputDecoration(
-                              hintText: 'Enter Name',
-                              contentPadding: EdgeInsets.all(10),
-                            ),
-                            
-                          ),
-                        ),),
-                    ],
+                ),
+                SizedBox(width: 10), // Adds spacing between label and text field
+                Expanded(
+                  child: TextField(
+                    controller: usernameController,
+                    decoration: InputDecoration(
+                      labelText: 'Username',
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                    ),
                   ),
-                  SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Expanded(
-                        flex: 3,
-                        child: Text(
-                          'Phone:',
-                          style: Theme.of(context).textTheme.bodyLarge,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      Flexible(
-                        flex: 9,
-                        child: Container(
-                          constraints: BoxConstraints(maxWidth: 200), // Set max width
-                          child: const TextField(
-                            decoration: InputDecoration(
-                              hintText: 'Enter Number',
-                              contentPadding: EdgeInsets.all(10),
-                            ),
-                            
-                          ),
-                        ),),
-                    ],
+                ),
+                ],
+              ),
+                SizedBox(height: 10),
+              Row(
+                children: [
+                  SizedBox(
+                    width: 80, // Match the width with the previous label
+                    child: Text(
+                    'Name:',
+                    style: TextStyle(fontSize: 16),
                   ),
-                 
+                ),
+              SizedBox(width: 10),
+              Expanded(
+                child: TextField(
+                  controller: nameController,
+                  decoration: InputDecoration(
+                    labelText: 'Name',
+                    border: OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                ),
+              ),
+            ],
+          ),
+                SizedBox(height: 10),
+              Row(
+                children: [
+                  SizedBox(
+                    width: 80, // Consistent width for alignment
+                    child: Text(
+                      'Phone:',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ),
+                  SizedBox(width: 10),
+                  Expanded(
+                    child: TextField(
+                      controller: phoneController,
+                      decoration: InputDecoration(
+                        labelText: 'Phone',
+                        border: OutlineInputBorder(),
+                      isDense: true,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
                   SizedBox(height: 10),
                   Row(
                     children: [
@@ -190,18 +204,14 @@ class _EditProfileState extends State<EditProfile> {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      Flexible(
+                      Expanded(
                         flex: 9,
-                        child: Container(
-                          constraints: BoxConstraints(maxWidth: 200), // Set max width
-                          child: const TextField(
-                            decoration: InputDecoration(
-                              hintText: 'Enter Email',
-                              contentPadding: EdgeInsets.all(10),
-                            ),
-                            
-                          ),
-                        ),),
+                        child: Text(
+                          'gabriela.cisneros@calbaptist.edu',
+                          style: Theme.of(context).textTheme.bodyLarge,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
                     ],
                   ),
                   SizedBox(height: 10),
@@ -237,98 +247,18 @@ class _EditProfileState extends State<EditProfile> {
                     ],
                   ),
                   SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Expanded(
-                        flex: 3,
-                        child: Text(
-                          'Gender:',
-                          style: Theme.of(context).textTheme.bodyLarge,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      Expanded(
-                        flex: 8,
-                        child: Text(
-                          _savedGender, // Show saved gender
-                          style: Theme.of(context).textTheme.bodyMedium,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _isGenderExpanded = !_isGenderExpanded;
-                          });
-                        },
-                        child: Icon(
-                          _isGenderExpanded
-                              ? Icons.arrow_downward
-                              : Icons.arrow_forward_ios,
-                          size: 18,
-                        ),
-                      ),
-                    ],
+
+                  DropdownButton<String>(
+                    value: selectedGender,
+                    items: ['Female', 'Male', 'Other'].map((gender) {
+                      return DropdownMenuItem(value: gender, child: Text(gender));
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      selectedGender = value!;
+                    });
+                  },
                   ),
-                  if (_isGenderExpanded)
-                    Padding(
-                      padding: EdgeInsets.only(left: 40, top: 5),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _selectedGender = "Female";
-                                _savedGender = "Female"; // Update immediately
-                                _isGenderExpanded = false;
-                              });
-                            },
-                            child: Text(
-                              "Female",
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: 5),
-                          GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _selectedGender = "Male";
-                                _savedGender = "Male"; // Update immediately
-                                _isGenderExpanded = false;
-                              });
-                            },
-                            child: Text(
-                              "Male",
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: 5),
-                          GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _selectedGender = "Other";
-                                _savedGender = "Other"; // Update immediately
-                                _isGenderExpanded = false;
-                              });
-                            },
-                            child: Text(
-                              "Other",
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
                   SizedBox(height: 10),
                   Divider(
                     color: Colors.grey,
