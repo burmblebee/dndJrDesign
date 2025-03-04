@@ -3,7 +3,19 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/character.dart';
 
 class CharacterNotifier extends StateNotifier<Character> {
-  CharacterNotifier() : super(Character(name: '', race: '', characterClass: '', background: '', picture: '', abilityScores: {}, weapons: [], spells: {}, proficiencies: [], languages: []));
+  CharacterNotifier()
+      : super(Character(
+          name: '',
+          race: '',
+          characterClass: '',
+          background: '',
+          picture: '',
+          abilityScores: {},
+          weapons: [],
+          spells: {},
+          proficiencies: [],
+          languages: [],
+        ));
 
   void updateCharacterName(String name) {
     state = state.copyWith(name: name);
@@ -43,6 +55,14 @@ class CharacterNotifier extends StateNotifier<Character> {
 
   void updatePicture(String picture) {
     state = state.copyWith(picture: picture);
+  }
+
+  /// Updates a single trait value in the traits map.
+  void updateTrait(String key, String value) {
+    final currentTraits = state.traits;
+    final newTraits = Map<String, String>.from(currentTraits);
+    newTraits[key] = value;
+    state = state.copyWith(traits: newTraits);
   }
 
   Future<void> saveCharacterToFirestore(String userId) async {

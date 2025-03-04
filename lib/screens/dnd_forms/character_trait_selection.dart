@@ -1,3 +1,4 @@
+import 'package:warlocks_of_the_beach/screens/dnd_forms/character_other.dart';
 import 'package:warlocks_of_the_beach/widgets/navigation/main_drawer.dart';
 
 import '../../screens/dnd_forms/image_generator.dart';
@@ -497,6 +498,7 @@ backgroundColor: customColor,foregroundColor: Colors.white,      ),
               //       builder: (context) => ImageGenerator(characterName: widget.characterName,)
               //     ),
               //   );
+              Navigator.push(context, MaterialPageRoute(builder: (context) => CharacterOther(characterName: 'characterName')));
             },
           ),
         ],
