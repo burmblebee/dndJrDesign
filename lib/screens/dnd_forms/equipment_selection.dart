@@ -74,10 +74,6 @@ class _EquipmentSelectionState extends ConsumerState<EquipmentSelection> {
   // Using customColor for icons.
   final Color customColor = const Color.fromARGB(255, 138, 28, 20);
 
-  // GlobalKey to measure the bottom overlay’s height.
-  final GlobalKey _selectedOverlayKey = GlobalKey();
-  double _selectedOverlayHeight = 0;
-
   @override
   void initState() {
     super.initState();
@@ -86,27 +82,12 @@ class _EquipmentSelectionState extends ConsumerState<EquipmentSelection> {
         searchQuery = _searchController.text;
       });
     });
-    // Delay measurement until after the first frame.
-    WidgetsBinding.instance.addPostFrameCallback((_) => _updateOverlayHeight());
   }
 
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
-  }
-
-  // Measure the overlay's height.
-  void _updateOverlayHeight() {
-    final context = _selectedOverlayKey.currentContext;
-    if (context != null) {
-      final newHeight = context.size?.height ?? 0;
-      if (newHeight != _selectedOverlayHeight) {
-        setState(() {
-          _selectedOverlayHeight = newHeight;
-        });
-      }
-    }
   }
 
   IconData _getWeaponIcon(String weapon) {
@@ -144,9 +125,6 @@ class _EquipmentSelectionState extends ConsumerState<EquipmentSelection> {
             ?.resolve({}) ??
         Colors.grey;
 
-    // Re-measure overlay if content changes.
-    WidgetsBinding.instance.addPostFrameCallback((_) => _updateOverlayHeight());
-
     final List<String> filteredWeapons = allWeapons.where((weapon) {
       return weapon.toLowerCase().contains(searchQuery.toLowerCase());
     }).toList();
@@ -155,33 +133,109 @@ class _EquipmentSelectionState extends ConsumerState<EquipmentSelection> {
       appBar: MainAppbar(),
       drawer: const MainDrawer(),
       bottomNavigationBar: MainBottomNavBar(),
-      body: Stack(
-        children: [
-          // Main content area with dynamic bottom padding.
-          Padding(
-            padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, _selectedOverlayHeight),
-            child: Column(
-              children: [
-                // Reduced-height search bar.
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12.0),
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: 'Search Weapons',
-                      prefixIcon: const Icon(Icons.search, size: 20),
-                      contentPadding: const EdgeInsets.symmetric(
-                          vertical: 8, horizontal: 12),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.0),
-                      ),
-                    ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            // Search bar.
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12.0),
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: 'Search Weapons',
+                  prefixIcon: const Icon(Icons.search, size: 20),
+                  contentPadding:
+                      const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.0),
                   ),
                 ),
-                const SizedBox(height: 10),
-                Expanded(
-                  child: filteredWeapons.isNotEmpty
+              ),
+            ),
+            const SizedBox(height: 10),
+            // List of selected weapons and available weapons.
+            Expanded(
+              child: ListView(
+                children: [
+                  // Selected weapons section.
+                  const Text(
+                    'Selected Weapons',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const Divider(),
+                  selectedWeapons.isNotEmpty
+                      ? ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: selectedWeapons.length,
+                          itemBuilder: (context, index) {
+                            final weapon = selectedWeapons[index];
+                            final String group = simpleWeapons.contains(weapon)
+                                ? "SimpleWeapons"
+                                : "MartialWeapons";
+                            final details =
+                                WeaponData.Weapons[group]?[weapon] ?? {
+                              "damage_die": "N/A",
+                              "gold_cost": "N/A",
+                              "damage_type": "N/A",
+                              "properties": ["N/A"],
+                              "weight": "N/A",
+                            };
+
+                            return Card(
+                              elevation: 2,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: ListTile(
+                                leading: FaIcon(
+                                  _getWeaponIcon(weapon),
+                                  color: customColor,
+                                ),
+                                title: Text(
+                                  weapon,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                subtitle: Text(
+                                  'Cost: ${details["gold_cost"]} | Damage: ${details["damage_die"]} (${details["damage_type"]}) | ${group == "SimpleWeapons" ? "Simple" : "Martial"}',
+                                ),
+                                trailing: IconButton(
+                                  icon: const Icon(Icons.remove_circle, color: Colors.red),
+                                  onPressed: () {
+                                    setState(() {
+                                      selectedWeapons.remove(weapon);
+                                      allWeapons.add(weapon);
+                                      allWeapons.sort();
+                                    });
+                                  },
+                                ),
+                              ),
+                            );
+                          },
+                        )
+                      : const Center(
+                          child: Text('No weapons selected.'),
+                        ),
+                  const SizedBox(height: 10),
+                  // Available weapons section.
+                  const Text(
+                    'Available Weapons',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const Divider(),
+                  filteredWeapons.isNotEmpty
                       ? ListView.separated(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
                           itemCount: filteredWeapons.length,
                           separatorBuilder: (_, __) =>
                               const SizedBox(height: 8),
@@ -224,11 +278,13 @@ class _EquipmentSelectionState extends ConsumerState<EquipmentSelection> {
                                     if (!selectedWeapons.contains(weapon)) {
                                       setState(() {
                                         selectedWeapons.add(weapon);
+                                        allWeapons.remove(weapon);
                                       });
                                     } else {
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(
-                                          content: Text('$weapon already added!'),
+                                          content:
+                                              Text('$weapon already added!'),
                                         ),
                                       );
                                     }
@@ -241,115 +297,46 @@ class _EquipmentSelectionState extends ConsumerState<EquipmentSelection> {
                       : const Center(
                           child: Text('No weapons match your search.'),
                         ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+            // Navigation buttons.
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  label: const Text("Back"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: elevatedButtonColor,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    ref
+                        .read(characterProvider.notifier)
+                        .updateWeapons(selectedWeapons);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SpellSelectionScreen(),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.arrow_forward, color: Colors.white),
+                  label: const Text("Next"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: elevatedButtonColor,
+                    foregroundColor: Colors.white,
+                  ),
                 ),
               ],
             ),
-          ),
-          // Bottom overlay with a simulated blur effect.
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Container(
-              key: _selectedOverlayKey,
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16.0,
-                vertical: 8.0,
-              ),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.white.withOpacity(0.7),
-                    Colors.white.withOpacity(0.9),
-                  ],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(16)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 10,
-                    offset: const Offset(0, -3),
-                  ),
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Selected weapons display.
-                  selectedWeapons.isNotEmpty
-                      ? Wrap(
-                          spacing: 8.0,
-                          runSpacing: 4.0,
-                          children: selectedWeapons.map((weapon) {
-                            return Chip(
-                              backgroundColor:
-                                  Theme.of(context).cardColor,
-                              avatar: FaIcon(
-                                _getWeaponIcon(weapon),
-                                color: customColor,
-                                size: 16,
-                              ),
-                              label: Text(weapon),
-                              deleteIcon: const Icon(Icons.close),
-                              onDeleted: () {
-                                setState(() {
-                                  selectedWeapons.remove(weapon);
-                                });
-                              },
-                            );
-                          }).toList(),
-                        )
-                      : Center(
-                          child: Text(
-                            'No weapons selected.',
-                            style: TextStyle(
-                              color: customColor,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                  const SizedBox(height: 10),
-                  // Navigation buttons.
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      ElevatedButton.icon(
-                        onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.arrow_back, color: Colors.white),
-                        label: const Text("Back"),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: elevatedButtonColor,
-                          foregroundColor: Colors.white,
-                        ),
-                      ),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          ref
-                              .read(characterProvider.notifier)
-                              .updateWeapons(selectedWeapons);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => SpellSelectionScreen())
-                          );
-                        },
-                        icon: const Icon(Icons.arrow_forward, color: Colors.white),
-                        label: const Text("Next"),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: elevatedButtonColor,
-                          foregroundColor: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

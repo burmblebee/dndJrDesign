@@ -37,6 +37,13 @@ class MyApp extends StatelessWidget {
             ),
             iconTheme: IconThemeData(color: Colors.white),
           ),
+          listTileTheme: const ListTileThemeData(
+            textColor: Colors.white,
+            tileColor: Color.fromARGB(255, 28, 28, 34),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(12)),
+            ),
+          ),
           bottomNavigationBarTheme: const BottomNavigationBarThemeData(
             backgroundColor: Color(0xFF25291C),
             selectedItemColor: Color.fromARGB(255, 243, 241, 230), // Warm white
