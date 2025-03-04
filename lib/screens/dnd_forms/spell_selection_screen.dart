@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:warlocks_of_the_beach/screens/dnd_forms/character_trait_selection.dart';
+import 'package:warlocks_of_the_beach/widgets/navigation/bottom_navbar.dart';
+import 'package:warlocks_of_the_beach/widgets/navigation/main_drawer.dart';
 import '../../services/spell_service.dart';
 import '../../services/class_service.dart';
 import '../../providers/character_provider.dart';
@@ -35,8 +38,10 @@ class _SpellSelectionScreenState extends ConsumerState<SpellSelectionScreen> {
 
   ///////////// FILTER STATES FOR MULTI-SELECTION /////////////
   Set<String> selectedSchools = {}; // Holds selected magic schools.
-  Set<String> selectedTypes = {};   // Holds selected spell types (Damage, Utility).
-  Set<String> selectedRanges = {};  // Holds selected spell ranges (Range, Touch, Self).
+  Set<String> selectedTypes =
+      {}; // Holds selected spell types (Damage, Utility).
+  Set<String> selectedRanges =
+      {}; // Holds selected spell ranges (Range, Touch, Self).
 
   // Predefined filter options.
   final List<String> schoolOptions = [
@@ -113,12 +118,16 @@ class _SpellSelectionScreenState extends ConsumerState<SpellSelectionScreen> {
         return;
       }
       final table = classTable["table"];
-      allowedSpells = int.tryParse((table["Spells Known"]?[0] ?? "0").toString()) ?? 0;
-      allowedCantrips = int.tryParse((table["Cantrips Known"]?[0] ?? "0").toString()) ?? 0;
+      allowedSpells =
+          int.tryParse((table["Spells Known"]?[0] ?? "0").toString()) ?? 0;
+      allowedCantrips =
+          int.tryParse((table["Cantrips Known"]?[0] ?? "0").toString()) ?? 0;
 
       // Load available cantrips and spells using SpellService.
-      availableCantrips = await SpellService.getSpellsByClass('$characterClass Spells', 'Cantrips (0 Level)');
-      availableSpells = await SpellService.getSpellsByClass('$characterClass Spells', '1st Level');
+      availableCantrips = await SpellService.getSpellsByClass(
+          '$characterClass Spells', 'Cantrips (0 Level)');
+      availableSpells = await SpellService.getSpellsByClass(
+          '$characterClass Spells', '1st Level');
 
       setState(() {
         isLoading = false;
@@ -139,7 +148,8 @@ class _SpellSelectionScreenState extends ConsumerState<SpellSelectionScreen> {
   }
 
   /// Displays a dialog with detailed spell information.
-  Future<void> _showSpellInfoDialog(BuildContext context, String spellName) async {
+  Future<void> _showSpellInfoDialog(
+      BuildContext context, String spellName) async {
     String description = await _getSpellDescription(spellName);
     showDialog(
       context: context,
@@ -148,7 +158,8 @@ class _SpellSelectionScreenState extends ConsumerState<SpellSelectionScreen> {
           backgroundColor: Colors.black,
           title: Text(
             spellName,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.white),
+            style: const TextStyle(
+                fontWeight: FontWeight.bold, fontSize: 20, color: Colors.white),
           ),
           content: SingleChildScrollView(
             child: _buildFormattedDescription(description),
@@ -274,10 +285,12 @@ class _SpellSelectionScreenState extends ConsumerState<SpellSelectionScreen> {
           color: Colors.grey[850],
           child: ListTile(
             // Leading magic icon.
-            leading: const FaIcon(FontAwesomeIcons.magic, color: Color.fromARGB(255, 138, 28, 20)),
+            leading: const FaIcon(FontAwesomeIcons.magic,
+                color: Color.fromARGB(255, 138, 28, 20)),
             title: Text(
               spellName,
-              style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold, color: Colors.white),
             ),
             // Subtitle now shows School, Class, and Range.
             subtitle: Text(
@@ -297,7 +310,8 @@ class _SpellSelectionScreenState extends ConsumerState<SpellSelectionScreen> {
                 // Toggle selection icon.
                 isSelected
                     ? const Icon(Icons.check_circle, color: Colors.green)
-                    : const Icon(Icons.add_circle_outline, color: Color.fromARGB(255, 138, 28, 20)),
+                    : const Icon(Icons.add_circle_outline,
+                        color: Color.fromARGB(255, 138, 28, 20)),
               ],
             ),
             // Tapping toggles the spell selection.
@@ -312,7 +326,8 @@ class _SpellSelectionScreenState extends ConsumerState<SpellSelectionScreen> {
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('You can only select $allowedCantrips cantrips.',
+                          content: Text(
+                              'You can only select $allowedCantrips cantrips.',
                               style: const TextStyle(color: Colors.white)),
                         ),
                       );
@@ -327,7 +342,8 @@ class _SpellSelectionScreenState extends ConsumerState<SpellSelectionScreen> {
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('You can only select $allowedSpells spells.',
+                          content: Text(
+                              'You can only select $allowedSpells spells.',
                               style: const TextStyle(color: Colors.white)),
                         ),
                       );
@@ -349,7 +365,8 @@ class _SpellSelectionScreenState extends ConsumerState<SpellSelectionScreen> {
     for (String spell in spells) {
       String description = await _getSpellDescription(spell);
       // Apply search filter.
-      if (searchQuery.isNotEmpty && !spell.toLowerCase().contains(searchQuery.toLowerCase())) {
+      if (searchQuery.isNotEmpty &&
+          !spell.toLowerCase().contains(searchQuery.toLowerCase())) {
         continue;
       }
       // Apply School filter (if any school is selected).
@@ -412,16 +429,21 @@ class _SpellSelectionScreenState extends ConsumerState<SpellSelectionScreen> {
                   children: [
                     ////////////// FILTER HEADER //////////////
                     const Text('Filter Options',
-                        style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold)),
                     const SizedBox(height: 16),
                     ////////////// SCHOOL FILTERS //////////////
                     Align(
                       alignment: Alignment.centerLeft,
-                      child: Text('School of Magic', style: TextStyle(color: Colors.white, fontSize: 16)),
+                      child: Text('School of Magic',
+                          style: TextStyle(color: Colors.white, fontSize: 16)),
                     ),
                     ...schoolOptions.map((school) {
                       return SwitchListTile(
-                        title: Text(school, style: const TextStyle(color: Colors.white)),
+                        title: Text(school,
+                            style: const TextStyle(color: Colors.white)),
                         value: selectedSchools.contains(school),
                         onChanged: (bool value) {
                           modalSetState(() {
@@ -439,11 +461,13 @@ class _SpellSelectionScreenState extends ConsumerState<SpellSelectionScreen> {
                     ////////////// TYPE FILTERS //////////////
                     Align(
                       alignment: Alignment.centerLeft,
-                      child: Text('Type', style: TextStyle(color: Colors.white, fontSize: 16)),
+                      child: Text('Type',
+                          style: TextStyle(color: Colors.white, fontSize: 16)),
                     ),
                     ...typeOptions.map((type) {
                       return SwitchListTile(
-                        title: Text(type, style: const TextStyle(color: Colors.white)),
+                        title: Text(type,
+                            style: const TextStyle(color: Colors.white)),
                         value: selectedTypes.contains(type),
                         onChanged: (bool value) {
                           modalSetState(() {
@@ -461,11 +485,13 @@ class _SpellSelectionScreenState extends ConsumerState<SpellSelectionScreen> {
                     ////////////// RANGE FILTERS //////////////
                     Align(
                       alignment: Alignment.centerLeft,
-                      child: Text('Range', style: TextStyle(color: Colors.white, fontSize: 16)),
+                      child: Text('Range',
+                          style: TextStyle(color: Colors.white, fontSize: 16)),
                     ),
                     ...rangeOptions.map((range) {
                       return SwitchListTile(
-                        title: Text(range, style: const TextStyle(color: Colors.white)),
+                        title: Text(range,
+                            style: const TextStyle(color: Colors.white)),
                         value: selectedRanges.contains(range),
                         onChanged: (bool value) {
                           modalSetState(() {
@@ -485,9 +511,11 @@ class _SpellSelectionScreenState extends ConsumerState<SpellSelectionScreen> {
                         Navigator.pop(context);
                       },
                       style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all<Color>(customColor),
+                        backgroundColor:
+                            MaterialStateProperty.all<Color>(customColor),
                       ),
-                      child: const Text('Done', style: TextStyle(color: Colors.white)),
+                      child: const Text('Done',
+                          style: TextStyle(color: Colors.white)),
                     )
                   ],
                 ),
@@ -504,11 +532,15 @@ class _SpellSelectionScreenState extends ConsumerState<SpellSelectionScreen> {
   ///////////// BUILD METHOD & UI SECTION /////////////
   @override
   Widget build(BuildContext context) {
-    final characterClass = ref.watch(characterProvider).characterClass ?? 'Unknown Class';
+    final characterClass =
+        ref.watch(characterProvider).characterClass ?? 'Unknown Class';
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      bottomNavigationBar: MainBottomNavBar(),
+      drawer: MainDrawer(),
       appBar: AppBar(
-        title: Text('$characterClass Spell Selection', style: const TextStyle(color: Colors.white)),
+        title: Text('$characterClass Spell Selection',
+            style: const TextStyle(color: Colors.white)),
         backgroundColor: Colors.grey[900],
         actions: [
           // Icon button to open the filter modal.
@@ -521,7 +553,9 @@ class _SpellSelectionScreenState extends ConsumerState<SpellSelectionScreen> {
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : errorMessage.isNotEmpty
-              ? Center(child: Text(errorMessage, style: const TextStyle(color: Colors.white)))
+              ? Center(
+                  child: Text(errorMessage,
+                      style: const TextStyle(color: Colors.white)))
               : Column(
                   children: [
                     ////////////// SEARCH FIELD //////////////
@@ -532,7 +566,8 @@ class _SpellSelectionScreenState extends ConsumerState<SpellSelectionScreen> {
                         decoration: InputDecoration(
                           hintText: 'Search Spells',
                           prefixIcon: const Icon(Icons.search, size: 20),
-                          contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                          contentPadding: const EdgeInsets.symmetric(
+                              vertical: 8, horizontal: 12),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12.0),
                           ),
@@ -544,11 +579,15 @@ class _SpellSelectionScreenState extends ConsumerState<SpellSelectionScreen> {
                       child: FutureBuilder<List<String>>(
                         future: filterSpells(availableCantrips),
                         builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.waiting) {
-                            return const Center(child: CircularProgressIndicator());
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                                child: CircularProgressIndicator());
                           } else if (snapshot.hasError) {
                             return Center(
-                                child: Text('Error: ${snapshot.error}', style: const TextStyle(color: Colors.white)));
+                                child: Text('Error: ${snapshot.error}',
+                                    style:
+                                        const TextStyle(color: Colors.white)));
                           } else {
                             final filteredCantrips = snapshot.data ?? [];
                             return SingleChildScrollView(
@@ -559,7 +598,10 @@ class _SpellSelectionScreenState extends ConsumerState<SpellSelectionScreen> {
                                   ////////////// CANTRIPS SECTION //////////////
                                   Text(
                                     'Cantrips (Select $allowedCantrips)',
-                                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                                    style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white),
                                   ),
                                   Text(
                                     'Selected: ${selectedCantrips.length} / $allowedCantrips',
@@ -568,17 +610,22 @@ class _SpellSelectionScreenState extends ConsumerState<SpellSelectionScreen> {
                                   const Divider(color: Colors.white70),
                                   ListView.builder(
                                     shrinkWrap: true,
-                                    physics: const NeverScrollableScrollPhysics(),
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
                                     itemCount: filteredCantrips.length,
                                     itemBuilder: (context, index) {
-                                      return buildSpellTile(filteredCantrips[index], true);
+                                      return buildSpellTile(
+                                          filteredCantrips[index], true);
                                     },
                                   ),
                                   const SizedBox(height: 20),
                                   ////////////// 1ST LEVEL SPELLS SECTION //////////////
                                   Text(
                                     '1st Level Spells (Select $allowedSpells)',
-                                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                                    style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white),
                                   ),
                                   Text(
                                     'Selected: ${selectedSpells.length} / $allowedSpells',
@@ -588,49 +635,98 @@ class _SpellSelectionScreenState extends ConsumerState<SpellSelectionScreen> {
                                   FutureBuilder<List<String>>(
                                     future: filterSpells(availableSpells),
                                     builder: (context, snapshot) {
-                                      if (snapshot.connectionState == ConnectionState.waiting) {
-                                        return const Center(child: CircularProgressIndicator());
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.waiting) {
+                                        return const Center(
+                                            child: CircularProgressIndicator());
                                       } else if (snapshot.hasError) {
                                         return Center(
-                                            child: Text('Error: ${snapshot.error}', style: const TextStyle(color: Colors.white)));
+                                            child: Text(
+                                                'Error: ${snapshot.error}',
+                                                style: const TextStyle(
+                                                    color: Colors.white)));
                                       } else {
-                                        final filteredSpells = snapshot.data ?? [];
+                                        final filteredSpells =
+                                            snapshot.data ?? [];
                                         return ListView.builder(
                                           shrinkWrap: true,
-                                          physics: const NeverScrollableScrollPhysics(),
+                                          physics:
+                                              const NeverScrollableScrollPhysics(),
                                           itemCount: filteredSpells.length,
                                           itemBuilder: (context, index) {
-                                            return buildSpellTile(filteredSpells[index], false);
+                                            return buildSpellTile(
+                                                filteredSpells[index], false);
                                           },
                                         );
                                       }
                                     },
                                   ),
                                   const SizedBox(height: 20),
-                                  ////////////// CONFIRM SELECTION BUTTON //////////////
-                                  Center(
-                                    child: ElevatedButton(
-                                      style: ButtonStyle(
-                                        backgroundColor: WidgetStateProperty.all<Color>(customColor),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      ElevatedButton.icon(
+                                        onPressed: () => Navigator.pop(context),
+                                        icon: const Icon(Icons.arrow_back,
+                                            color: Colors.white),
+                                        label: const Text("Back"),
+                                        style: ElevatedButton.styleFrom(
+                                          
+                                          foregroundColor: Colors.white,
+                                        ),
                                       ),
-                                      onPressed: (selectedCantrips.length == allowedCantrips &&
-                                              selectedSpells.length == allowedSpells)
-                                          ? () {
-                                              ScaffoldMessenger.of(context).showSnackBar(
-                                                const SnackBar(
-                                                    content: Text('Spell selection confirmed!',
-                                                        style: TextStyle(color: Colors.white))),
-                                              );
-                                              ref.read(characterProvider.notifier).updateSpells({
-                                                'cantrips': selectedCantrips.toList(),
-                                                'spells': selectedSpells.toList(),
-                                              });
-                                              Navigator.pop(context);
-                                            }
-                                          : null,
-                                      child: const Text('Confirm Selection', style: TextStyle(color: Colors.white)),
-                                    ),
+                                      const SizedBox(width: 30),
+                                      ElevatedButton.icon(
+                                        onPressed: () {
+                                          ref
+                                              .read(characterProvider.notifier)
+                                              .updateSpells({
+                                            'cantrips':
+                                                selectedCantrips.toList(),
+                                            'spells': selectedSpells.toList(),
+                                          });
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  CharacterTraitScreen(characterName: 'HARDCODED SPELL SELECTION LINE 688',),
+                                            ),
+                                          );
+                                        },
+                                        icon: const Icon(Icons.arrow_forward,
+                                            color: Colors.white),
+                                        label: const Text("Next"),
+                                        style: ElevatedButton.styleFrom(
+                                          
+                                          foregroundColor: Colors.white,
+                                        ),
+                                      ),
+                                    ],
                                   ),
+                                  ////////////// Navigation Buttons //////////////
+                                  // Center(
+                                  //   child: ElevatedButton(
+                                  //     style: ButtonStyle(
+                                  //
+                                  //     ),
+                                  //     onPressed: (selectedCantrips.length == allowedCantrips &&
+                                  //             selectedSpells.length == allowedSpells)
+                                  //         ? () {
+                                  //             ScaffoldMessenger.of(context).showSnackBar(
+                                  //               const SnackBar(
+                                  //                   content: Text('Spell selection confirmed!',
+                                  //                       style: TextStyle(color: Colors.white))),
+                                  //             );
+                                  //             ref.read(characterProvider.notifier).updateSpells({
+                                  //               'cantrips': selectedCantrips.toList(),
+                                  //               'spells': selectedSpells.toList(),
+                                  //             });
+                                  //             Navigator.pop(context);
+                                  //           }
+                                  //         : null,
+                                  //     child: const Text('Confirm Selection', style: TextStyle(color: Colors.white)),
+                                  //   ),
+                                  // ),
                                 ],
                               ),
                             );
