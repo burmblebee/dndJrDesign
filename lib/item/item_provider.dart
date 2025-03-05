@@ -5,6 +5,8 @@ import 'item.dart'; // Make sure 'CombatItem' is defined here.
 
 final selectedItemTypeProvider = StateProvider<ItemType?>((ref) => null);
 final requiresAttunementProvider = StateProvider<bool>((ref) => false);
+final selectedDamageType1Provider = StateProvider<DamageType?>((ref) => null);
+final selectedDamageType2Provider = StateProvider<DamageType?>((ref) => null);
 
 class ItemState {
   final List<Item> items;
@@ -33,26 +35,36 @@ class ItemProvider extends StateNotifier<ItemState> {
 
   ItemProvider() : super(ItemState(items: [], selectedItem: null));
 
+  // Ensure the collection exists by adding a dummy document if empty
+  Future<void> _ensureCollectionExists() async {
+    final querySnapshot = await _firestore.collection('items').limit(1).get();
+    if (querySnapshot.docs.isEmpty) {
+      await _firestore.collection('items').doc('placeholder').set({
+        'name': 'Placeholder Item',
+        'type': 'None',
+      });
+      print("Created 'items' collection with a placeholder document.");
+    }
+  }
+
   // Add Item
   Future<void> addItem(Item item) async {
     try {
-      final docRef = _firestore.collection('items').doc(); // Generate an ID if missing
+      await _ensureCollectionExists(); // Ensure collection exists
+      final docRef = _firestore.collection('items').doc();
       final newItem = item.id.isEmpty ? item.copyWith(id: docRef.id) : item;
-
       await docRef.set(newItem.toMap());
-
       state = state.copyWith(items: [...state.items, newItem], selectedItem: newItem);
-
       print("Item added successfully with ID: ${newItem.id}");
     } catch (e) {
       print("Error adding item to Firestore: $e");
     }
   }
 
-
   // Fetch Items
   Future<void> fetchItems() async {
     try {
+      await _ensureCollectionExists(); // Ensure collection exists
       final querySnapshot = await _firestore.collection('items').get();
       final items = querySnapshot.docs.map((doc) {
         final data = doc.data();
@@ -64,7 +76,6 @@ class ItemProvider extends StateNotifier<ItemState> {
         }
         return Item.fromMap(data, id);
       }).toList();
-
       state = state.copyWith(items: items.cast<Item>());
     } catch (e) {
       print("Error fetching items: $e");
@@ -106,13 +117,10 @@ class ItemProvider extends StateNotifier<ItemState> {
   Future<void> updateRequiresAttunement(bool value) async {
     if (state.selectedItem != null) {
       final updatedItem = state.selectedItem!.copyWith(requiresAttunement: value);
-
       try {
         await _firestore.collection('items').doc(updatedItem.id).update({
           'requiresAttunement': updatedItem.requiresAttunement,
         });
-
-        // Update the entire state, including items list
         state = state.copyWith(
           selectedItem: updatedItem,
           items: state.items.map((item) => item.id == updatedItem.id ? updatedItem : item).toList(),
