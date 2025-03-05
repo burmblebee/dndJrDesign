@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:warlocks_of_the_beach/screens/profile.dart';
+import '../../home_screen.dart';
+import '../../screens/dnd_forms/character_name.dart';
 
 class MainDrawer extends StatelessWidget{
   const MainDrawer({super.key});
@@ -24,7 +27,11 @@ class MainDrawer extends StatelessWidget{
             leading: const Icon(Icons.home),
             title: const Text('Home', style: TextStyle(color: Colors.white),),
             onTap: () {
-              Navigator.of(context).pushReplacementNamed('/');
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const HomePage(),
+                ),
+              );
             },
           ),
           const Divider(),
@@ -32,7 +39,11 @@ class MainDrawer extends StatelessWidget{
             leading: const Icon(Icons.group),
             title: const Text('Character Creator', style: TextStyle(color: Colors.white),),
             onTap: () {
-              Navigator.of(context).pushReplacementNamed('/character_creator');
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const CharacterName(),
+                ),
+              );
             },
           ),
           const Spacer(),
@@ -41,7 +52,11 @@ class MainDrawer extends StatelessWidget{
             leading: const Icon(Icons.person),
             title: const Text('Profile', style: TextStyle(color: Colors.white),),
             onTap: () {
-              Navigator.of(context).pushReplacementNamed('/');
+             Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const ProfilePage(),
+                ),
+              );
             },
           ),
           Align(

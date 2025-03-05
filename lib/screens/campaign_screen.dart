@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:warlocks_of_the_beach/combat/DMcombatScreen.dart';
 import '../widgets/navigation/main_appbar.dart';
 import '../widgets/navigation/main_drawer.dart';
 import '../widgets/navigation/bottom_navbar.dart';
@@ -98,7 +99,11 @@ class _CampaignScreenState extends State<CampaignScreen> {
                             ),
                             GestureDetector(
                               onTap: () {
-                                // Handles the tap - will link to another page later
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => DMCombatScreen(campaignId: '',),
+                                  ),
+                                );
                               },
                               child: Container(
                                 margin: const EdgeInsets.all(8.0),

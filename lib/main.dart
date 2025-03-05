@@ -4,7 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:warlocks_of_the_beach/screens/campaign_screen.dart';
 import 'package:warlocks_of_the_beach/screens/dnd_forms/character_name.dart';
 import 'package:warlocks_of_the_beach/screens/dnd_forms/race_selection.dart';
-import 'firebase_options.dart'; 
+import 'firebase_options.dart';
+import 'package:warlocks_of_the_beach/screens/login_screen.dart';
+
 
 
 
@@ -61,12 +63,8 @@ class MyApp extends StatelessWidget {
             color: Color(0xFFD4C097), // Matching accent color for icons
           ),
         ),
-        initialRoute: '/',
-        routes: {
-          '/character_creator': (context) => const CharacterName(),
+        home: const LoginScreen(),
 
-        },
-        home: const CampaignScreen(),
       ),
     );
   }

@@ -57,6 +57,7 @@ dependencies:
   hexagon: ^0.2.0
   google_sign_in: ^6.2.2
   riverpod_annotation: ^2.6.1
+  image_picker: ^1.1.2
 
 dev_dependencies:
   flutter_test:
@@ -98,6 +99,7 @@ flutter:
     - assets/DragonIcon.png
     - assets/witch.jpg
     - assets/dog.webp
+    - assets/profile.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
