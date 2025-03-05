@@ -1,3 +1,4 @@
+import 'package:dnd_jr_design/item/add_item.dart';
 import 'package:dnd_jr_design/npc/npc_list.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +11,7 @@ Future<void> main() async {
   runApp(
     ProviderScope( // Wrap with ProviderScope
       child: MaterialApp(
-        home: const NPCListScreen(),
+        home: AddItem(),
         //DMCombatScreen(campaignId: '15'),
         theme: ThemeData(
           brightness: Brightness.dark,

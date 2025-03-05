@@ -1,0 +1,2 @@
+C:/Users/abbyo/dndJrDesign/itemBranch/android/app/.cxx/Debug/613v1b3s/x86/CMakeFiles/edit_cache.dir
+C:/Users/abbyo/dndJrDesign/itemBranch/android/app/.cxx/Debug/613v1b3s/x86/CMakeFiles/rebuild_cache.dir
