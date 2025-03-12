@@ -1,18 +1,20 @@
+import 'package:dnd_jr_design/item/add_item.dart';
+import 'package:dnd_jr_design/item/item_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 
-class NPCListScreen extends ConsumerWidget {
-  const NPCListScreen({super.key});
+class itemListScreen extends ConsumerWidget {
+  const itemListScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ref.read(npcProvider.notifier).fetchNPCs();
+    ref.read(itemProvider.notifier).fetchItems();
 
-    final npcState = ref.watch(npcProvider);
+    final itemState = ref.watch(itemProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('NPC List')),
+      appBar: AppBar(title: const Text('Item List')),
       bottomNavigationBar: BottomAppBar(
         color: const Color(0xFF25291C),
         child: Container(
@@ -26,19 +28,19 @@ class NPCListScreen extends ConsumerWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => AddNPCScreen(),
+              builder: (context) => AddItem(),
             ),
           );
         },
         child: const Icon(Icons.add),
       ),
-      body: npcState.npcs.isEmpty
+      body: itemState.items.isEmpty
           ? const Center(child: CircularProgressIndicator())
           : ListView.builder(
 
-        itemCount: npcState.npcs.length,
+        itemCount: itemState.items.length,
         itemBuilder: (context, index) {
-          final npc = npcState.npcs[index];
+          final item = itemState.items[index];
           return Column(
             children: [
               const SizedBox(height: 10),
@@ -48,15 +50,15 @@ class NPCListScreen extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 visualDensity: const VisualDensity(vertical: 4),
-                title: Text(npc.name, style: const TextStyle(fontSize: 20)),
+                title: Text(item.name, style: const TextStyle(fontSize: 20)),
                 onTap: () {
-                  ref.read(npcProvider.notifier).selectNPC(npc);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const NPCDetailScreen(), // Pass no parameters, fetch from the provider
-                    ),
-                  );
+                  //ref.read(itemProvider.notifier).selectItem(item);
+                  // Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(
+                  //     builder: (context) => const NPCDetailScreen(), // Pass no parameters, fetch from the provider
+                  //   ),
+                //  );
                 },
               ),
               const SizedBox(height: 10),

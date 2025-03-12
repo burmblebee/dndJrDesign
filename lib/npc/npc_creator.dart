@@ -68,7 +68,7 @@ class AddNPCScreen extends ConsumerWidget {
                   final attackOptions = npcNotifier.state.attackOptions; // Get attack options from the provider
 
                   final newNPC = NPC(
-                    id: newDocRef.id, // Use the Firestore document ID
+                    id: newDocRef.id,
                     name: nameController.text,
                     attacks: attackOptions,
                   );

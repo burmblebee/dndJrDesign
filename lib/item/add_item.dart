@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'item sub-widgets/weapon.dart';
-import 'item.dart';
+import 'fixed_item.dart';
 import 'item_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 

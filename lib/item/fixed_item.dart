@@ -11,38 +11,53 @@ enum ItemType {
   Miscellaneous
 }
 
-enum WeaponType { melee, ranged, ammunition, thrown, finesse, heavy, light, loading, reach, special }
+enum WeaponType {
+  melee,
+  ranged,
+  ammunition,
+  thrown,
+  finesse,
+  heavy,
+  light,
+  loading,
+  reach,
+  special,
+}
+
+enum WeaponCategory { Simple, Martial }
 
 enum Rarity { Common, Uncommon, Rare, VeryRare, Legendary }
 
 enum ResetCondition { longRest, shortRest, dawn, other, consumable }
 
-enum ModifierType {
-  bonus,
-  damage,
-  advantage,
-  disadvantage,
-  resistance,
-  immunity
-}
+enum Currency { cp, sp, ep, gp, pp }
 
-enum Condition {
-  blinded,
-  charmed,
-  deafened,
-  exhaustion,
-  frightened,
-  grappled,
-  incapacitated,
-  invisible,
-  paralyzed,
-  petrified,
-  poisoned,
-  prone,
-  restrained,
-  stunned,
-  unconscious
-}
+// enum ModifierType {
+//   bonus,
+//   damage,
+//   advantage,
+//   disadvantage,
+//   resistance,
+//   immunity
+// }
+//
+// enum Condition {
+//   blinded,
+//   charmed,
+//   deafened,
+//   exhaustion,
+//   frightened,
+//   grappled,
+//   incapacitated,
+//   invisible,
+//   paralyzed,
+//   petrified,
+//   poisoned,
+//   prone,
+//   restrained,
+//   stunned,
+//   unconscious
+// }
 
 enum DamageType {
   Acid,
@@ -61,15 +76,18 @@ enum DamageType {
 }
 
 class Item {
-  final String id;
+  final String id; // Firestore document ID
   final String name;
   final String description;
-  final int weight;
   final int price;
+  final int weight;
   final bool requiresAttunement;
   final String? attunementDescription;
+  final ItemType itemType;
+  final Currency currency;
 
   Item({
+    required this.itemType,
     required this.id,
     required this.name,
     required this.description,
@@ -77,18 +95,52 @@ class Item {
     required this.weight,
     required this.requiresAttunement,
     this.attunementDescription,
+    this.currency = Currency.gp,
   });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'itemType': itemType.name,
+      'id': id,
+      'name': name,
+      'description': description,
+      'price': price,
+      'weight': weight,
+      'requiresAttunement': requiresAttunement,
+      'attunementDescription': attunementDescription,
+      'type': 'Miscellaneous',
+      'currency': currency.name,
+    };
+  }
+
+  factory Item.fromMap(String id, Map<String, dynamic> map) {
+    return Item(
+      itemType: ItemType.values.firstWhere((e) => e.name == map['itemType'],
+          orElse: () => ItemType.Miscellaneous),
+      id: id, // Firestore document ID
+      name: map['name'] ?? 'Unknown',
+      description: map['description'] ?? '',
+      price: map['price'] ?? 0,
+      weight: map['weight'] ?? 0,
+      requiresAttunement: map['requiresAttunement'] ?? false,
+      attunementDescription: map['attunementDescription'] ?? '',
+      currency: Currency.values.firstWhere((e) => e.name == map['currency'],
+          orElse: () => Currency.gp),
+    );
+  }
 
   Item copyWith({
     String? id,
     String? name,
     String? description,
+    int? price,
     int? weight,
     bool? requiresAttunement,
     String? attunementDescription,
-    int? price,
+    Currency? currency,
   }) {
     return Item(
+      itemType: itemType,
       id: id ?? this.id,
       name: name ?? this.name,
       description: description ?? this.description,
@@ -97,95 +149,79 @@ class Item {
       requiresAttunement: requiresAttunement ?? this.requiresAttunement,
       attunementDescription:
           attunementDescription ?? this.attunementDescription,
-    );
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'name': name,
-      'description': description,
-      'price': price,
-      'weight': weight,
-      'requiresAttunement': requiresAttunement,
-      'attunementDescription': attunementDescription,
-    };
-  }
-
-  factory Item.fromMap(Map<String, dynamic> map, String id) {
-    return Item(
-      id: id,
-      name: map['name'],
-      description: map['description'],
-      price: map['price'] ?? 0,
-      weight: map['weight'] ?? 0,
-      requiresAttunement: map['requiresAttunement'] ?? false,
-      attunementDescription: map['attunementDescription'],
+      currency: currency ?? this.currency,
     );
   }
 }
 
 class CombatItem extends Item {
   final DamageType damageType1;
-  final String damage1; // "1d8", "2d6", etc.
+  final String damage1;
   final DamageType? damageType2;
   final String? damage2;
-
+  final WeaponCategory weaponCategory;
   CombatItem({
     required String id,
     required String name,
     required String description,
     required int price,
+    required int weight,
+    required bool requiresAttunement,
+    String? attunementDescription,
     required this.damageType1,
     required this.damage1,
     this.damageType2,
     this.damage2,
-    required int weight,
-    required bool requiresAttunement,
-    String? attunementDescription,
+    required this.weaponCategory,
+    required Currency currency,
   }) : super(
-    id: id,
-    name: name,
-    description: description,
-    price: price,
-    weight: weight,
-    requiresAttunement: requiresAttunement,
-    attunementDescription: attunementDescription,
-  );
+            itemType: ItemType.Weapon,
+            id: id,
+            name: name,
+            description: description,
+            price: price,
+            weight: weight,
+            requiresAttunement: requiresAttunement,
+            attunementDescription: attunementDescription,
+            currency: currency);
 
   @override
   Map<String, dynamic> toMap() {
-    var map = super.toMap();
-    map.addAll({
-      'damageType1': damageType1.toString().split('.').last,
+    final baseMap = super.toMap();
+    baseMap.addAll({
+      'type': 'Weapon',
+      'damageType1': damageType1.name,
       'damage1': damage1,
-      'damageType2': damageType2?.toString().split('.').last,
+      'damageType2': damageType2?.name,
       'damage2': damage2,
+      'weaponCategory': weaponCategory.name,
     });
-    return map;
+    return baseMap;
   }
 
-  factory CombatItem.fromMap(Map<String, dynamic> map, String id) {
+  factory CombatItem.fromMap(String id, Map<String, dynamic> map) {
     return CombatItem(
       id: id,
-      name: map['name'],
-      description: map['description'],
+      name: map['name'] ?? 'Unknown',
+      description: map['description'] ?? '',
       price: map['price'] ?? 0,
-      damageType1: DamageType.values.firstWhere(
-            (e) => e.toString().split('.').last == map['damageType1'],
-        orElse: () => DamageType.Bludgeoning, // Default fallback
-      ),
-      damage1: map['damage1'] ?? "1d6",
-      damageType2: map.containsKey('damageType2') && map['damageType2'] != null
-          ? DamageType.values.firstWhere(
-            (e) => e.toString().split('.').last == map['damageType2'],
-        orElse: () => DamageType.Bludgeoning,
-      )
-          : null,
-      damage2: map['damage2'],
       weight: map['weight'] ?? 0,
       requiresAttunement: map['requiresAttunement'] ?? false,
       attunementDescription: map['attunementDescription'],
+      damageType1: DamageType.values.firstWhere(
+          (e) => e.name == map['damageType1'],
+          orElse: () => DamageType.Bludgeoning),
+      damage1: map['damage1'] ?? '',
+      damageType2: map['damageType2'] != null
+          ? DamageType.values.firstWhere((e) => e.name == map['damageType2'],
+              orElse: () => DamageType.Bludgeoning)
+          : null,
+      damage2: map['damage2'],
+      weaponCategory: WeaponCategory.values.firstWhere(
+          (e) => e.name == map['weaponCategory'],
+          orElse: () => WeaponCategory.Simple),
+      currency: Currency.values.firstWhere((e) => e.name == map['currency'],
+          orElse: () => Currency.gp),
     );
   }
 
@@ -201,6 +237,8 @@ class CombatItem extends Item {
     String? damage1,
     DamageType? damageType2,
     String? damage2,
+    WeaponCategory? weaponCategory,
+    Currency? currency,
   }) {
     return CombatItem(
       id: id ?? this.id,
@@ -210,15 +248,16 @@ class CombatItem extends Item {
       weight: weight ?? this.weight,
       requiresAttunement: requiresAttunement ?? this.requiresAttunement,
       attunementDescription:
-      attunementDescription ?? this.attunementDescription,
+          attunementDescription ?? this.attunementDescription,
       damageType1: damageType1 ?? this.damageType1,
       damage1: damage1 ?? this.damage1,
       damageType2: damageType2 ?? this.damageType2,
       damage2: damage2 ?? this.damage2,
+      weaponCategory: weaponCategory ?? this.weaponCategory,
+      currency: currency ?? this.currency,
     );
   }
 }
-
 
 class ArmorItem extends Item {
   int armorClass;
@@ -227,7 +266,6 @@ class ArmorItem extends Item {
   bool stealthDisadvantage;
 
   ArmorItem({
-    required String id,
     required String name,
     required String description,
     required int price,
@@ -239,13 +277,15 @@ class ArmorItem extends Item {
     required bool requiresAttunement,
     String? attunementDescription,
   }) : super(
-          id: id,
+          id: 'armor_${name.toLowerCase().replaceAll(' ', '_')}', // Unique ID based on name
+          itemType: ItemType.Armor,
           name: name,
           description: description,
           price: price,
           weight: weight,
           requiresAttunement: requiresAttunement,
-          attunementDescription: attunementDescription,
+          attunementDescription:
+              (requiresAttunement) ? attunementDescription : null,
         );
 
   @override
@@ -260,9 +300,8 @@ class ArmorItem extends Item {
     return map;
   }
 
-  factory ArmorItem.fromMap(Map<String, dynamic> map, String id) {
+  factory ArmorItem.fromMap(Map<String, dynamic> map) {
     return ArmorItem(
-      id: id, // Pass id here
       name: map['name'],
       description: map['description'],
       price: map['price'] ?? 0,

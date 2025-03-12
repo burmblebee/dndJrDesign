@@ -1,12 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'item.dart'; // Make sure 'CombatItem' is defined here.
+import 'fixed_item.dart';
 
 final selectedItemTypeProvider = StateProvider<ItemType?>((ref) => null);
 final requiresAttunementProvider = StateProvider<bool>((ref) => false);
 final selectedDamageType1Provider = StateProvider<DamageType?>((ref) => null);
 final selectedDamageType2Provider = StateProvider<DamageType?>((ref) => null);
+final selectedWeaponTypeProvider = StateProvider<Set<WeaponType>>((ref) => {});
+final selectedWeaponCategoryProvider = StateProvider<WeaponCategory>((ref) => WeaponCategory.Simple);
 
 class ItemState {
   final List<Item> items;
@@ -35,99 +38,78 @@ class ItemProvider extends StateNotifier<ItemState> {
 
   ItemProvider() : super(ItemState(items: [], selectedItem: null));
 
-  // Ensure the collection exists by adding a dummy document if empty
-  Future<void> _ensureCollectionExists() async {
-    final querySnapshot = await _firestore.collection('items').limit(1).get();
-    if (querySnapshot.docs.isEmpty) {
-      await _firestore.collection('items').doc('placeholder').set({
-        'name': 'Placeholder Item',
-        'type': 'None',
-      });
-      print("Created 'items' collection with a placeholder document.");
-    }
-  }
-
-  // Add Item
-  Future<void> addItem(Item item) async {
+  Future<void> saveItem(Item item) async {
     try {
-      await _ensureCollectionExists(); // Ensure collection exists
-      final docRef = _firestore.collection('items').doc();
-      final newItem = item.id.isEmpty ? item.copyWith(id: docRef.id) : item;
-      await docRef.set(newItem.toMap());
-      state = state.copyWith(items: [...state.items, newItem], selectedItem: newItem);
-      print("Item added successfully with ID: ${newItem.id}");
-    } catch (e) {
-      print("Error adding item to Firestore: $e");
-    }
-  }
+      final docRef = item.id.isEmpty
+          ? _firestore.collection('items').doc()
+          : _firestore.collection('items').doc(item.id);
 
-  // Fetch Items
-  Future<void> fetchItems() async {
-    try {
-      await _ensureCollectionExists(); // Ensure collection exists
-      final querySnapshot = await _firestore.collection('items').get();
-      final items = querySnapshot.docs.map((doc) {
-        final data = doc.data();
-        final id = doc.id;
-        if (data['type'] == 'Weapon') {
-          return CombatItem.fromMap(data, id);
-        } else if (data['type'] == 'Armor') {
-          return ArmorItem.fromMap(data, id);
-        }
-        return Item.fromMap(data, id);
-      }).toList();
-      state = state.copyWith(items: items.cast<Item>());
-    } catch (e) {
-      print("Error fetching items: $e");
-    }
-  }
+      item = item.copyWith(id: docRef.id);
+      await docRef.set(item.toMap(), SetOptions(merge: true));
 
-  // Update Item
-  Future<void> updateItem(Item item) async {
-    try {
-      await _firestore.collection('items').doc(item.id).update(item.toMap());
       state = state.copyWith(
-        items: state.items.map((existingItem) {
-          return existingItem.id == item.id ? item : existingItem;
-        }).toList(),
+        items: [...state.items, item],
         selectedItem: item,
       );
     } catch (e) {
-      print("Error updating item: $e");
+      debugPrint("Error saving item: $e");
     }
   }
 
-  // Delete Item
-  Future<void> deleteItem(String itemId) async {
+  Future<void> fetchItems() async {
     try {
-      await _firestore.collection('items').doc(itemId).delete();
-      state = state.copyWith(
-        items: state.items.where((i) => i.id != itemId).toList(),
-      );
+      final querySnapshot = await _firestore.collection('items').get();
+      final items = querySnapshot.docs.map((doc) {
+        final data = doc.data();
+        final type = data['type'];
+        final id = doc.id;
+
+        switch (type) {
+          case 'Weapon':
+            return CombatItem.fromMap(id, data);
+          // case 'Armor':
+          //   return ArmorItem.fromMap(id, data);
+          default:
+            return Item.fromMap(id, data);
+        }
+      }).toList();
+
+      state = state.copyWith(items: items);
     } catch (e) {
-      print("Error deleting item: $e");
+      debugPrint("Error fetching items: $e");
     }
   }
 
-  // Select Item
   void selectItem(Item item) {
     state = state.copyWith(selectedItem: item);
   }
 
-  Future<void> updateRequiresAttunement(bool value) async {
-    if (state.selectedItem != null) {
-      final updatedItem = state.selectedItem!.copyWith(requiresAttunement: value);
-      try {
-        await _firestore.collection('items').doc(updatedItem.id).update({
-          'requiresAttunement': updatedItem.requiresAttunement,
-        });
-        state = state.copyWith(
-          selectedItem: updatedItem,
-          items: state.items.map((item) => item.id == updatedItem.id ? updatedItem : item).toList(),
-        );
-      } catch (e) {
-        print("Error updating requiresAttunement: $e");
-      }
+  Future<void> deleteItem(String id) async {
+    try {
+      await _firestore.collection('items').doc(id).delete();
+      state = state.copyWith(
+        items: state.items.where((item) => item.id != id).toList(),
+        selectedItem: null,
+      );
+    } catch (e) {
+      debugPrint("Error deleting item: $e");
+    }
+  }
+
+
+  Future<void> updateItem(Item item) async {
+    if (item.id.isEmpty) {
+      debugPrint("Error: Item ID is null, cannot update.");
+      return;
+    }
+    try {
+      await _firestore.collection('items').doc(item.id).update(item.toMap());
+      state = state.copyWith(
+        items: state.items.map((i) => i.id == item.id ? item : i).toList(),
+        selectedItem: item,
+      );
+    } catch (e) {
+      debugPrint("Error updating item: $e");
     }
   }
 }
