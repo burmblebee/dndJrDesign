@@ -25,9 +25,11 @@ class itemListScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
+          ref.read(selectedItemTypeProvider.notifier).state = null;
           Navigator.push(
             context,
             MaterialPageRoute(
+
               builder: (context) => AddItem(),
             ),
           );

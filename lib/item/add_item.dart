@@ -31,6 +31,7 @@ class AddItem extends ConsumerWidget {
     final selectedItemType = ref.watch(selectedItemTypeProvider);
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: const Text('Add Item'),
       ),

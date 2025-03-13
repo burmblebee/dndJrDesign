@@ -160,6 +160,7 @@ class CombatItem extends Item {
   final DamageType? damageType2;
   final String? damage2;
   final WeaponCategory weaponCategory;
+  final Set<WeaponType?> weaponTypes;
   CombatItem({
     required String id,
     required String name,
@@ -174,6 +175,7 @@ class CombatItem extends Item {
     this.damage2,
     required this.weaponCategory,
     required Currency currency,
+    required this.weaponTypes,
   }) : super(
             itemType: ItemType.Weapon,
             id: id,
@@ -195,6 +197,7 @@ class CombatItem extends Item {
       'damageType2': damageType2?.name,
       'damage2': damage2,
       'weaponCategory': weaponCategory.name,
+      'weaponTypes': weaponTypes.map((e) => e?.name).toList(),
     });
     return baseMap;
   }
@@ -222,6 +225,9 @@ class CombatItem extends Item {
           orElse: () => WeaponCategory.Simple),
       currency: Currency.values.firstWhere((e) => e.name == map['currency'],
           orElse: () => Currency.gp),
+      weaponTypes: Set.from(
+          (map['weaponTypes'] as List<dynamic>?)?.map((e) => WeaponType.values.firstWhere((type) => type.name == e)) ?? []
+    ),
     );
   }
 
@@ -239,6 +245,7 @@ class CombatItem extends Item {
     String? damage2,
     WeaponCategory? weaponCategory,
     Currency? currency,
+    Set<WeaponType?>? weaponTypes,
   }) {
     return CombatItem(
       id: id ?? this.id,
@@ -255,6 +262,7 @@ class CombatItem extends Item {
       damage2: damage2 ?? this.damage2,
       weaponCategory: weaponCategory ?? this.weaponCategory,
       currency: currency ?? this.currency,
+      weaponTypes: weaponTypes ?? this.weaponTypes,
     );
   }
 }
