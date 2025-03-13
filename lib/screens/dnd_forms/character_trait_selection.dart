@@ -1,4 +1,6 @@
 import 'package:warlocks_of_the_beach/screens/dnd_forms/character_other.dart';
+import 'package:warlocks_of_the_beach/widgets/main_appbar.dart';
+import 'package:warlocks_of_the_beach/widgets/navigation/bottom_navbar.dart';
 import 'package:warlocks_of_the_beach/widgets/navigation/main_drawer.dart';
 
 import '../../screens/dnd_forms/image_generator.dart';
@@ -475,34 +477,38 @@ class _CharacterTraitScreenState extends State<CharacterTraitScreen> {
     }
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      appBar: AppBar(
-        title: const Text("Character Traits"),
-backgroundColor: customColor,foregroundColor: Colors.white,      ),
+      appBar: MainAppbar(),
       drawer: const MainDrawer(),
-      bottomNavigationBar: Row(
-        children: [
-          NavigationButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            textContent: 'Back',
-          ),
-          const SizedBox(width: 30),
-          NavigationButton(
-            textContent: "Next",
-            onPressed: () {
-              _saveSelections();
-              // Navigator.push(
-              //     context,
-              //     MaterialPageRoute(
-              //       builder: (context) => ImageGenerator(characterName: widget.characterName,)
-              //     ),
-              //   );
-              Navigator.push(context, MaterialPageRoute(builder: (context) => CharacterOther(characterName: 'characterName')));
-            },
-          ),
-        ],
-      ),
+      bottomNavigationBar: MainBottomNavBar(),
+      
+      // bottomNavigationBar: Row(
+      //   children: [
+      //     NavigationButton(
+      //       onPressed: () {
+      //         Navigator.pop(context);
+      //       },
+      //       textContent: 'Back',
+      //     ),
+      //     const SizedBox(width: 30),
+      //     NavigationButton(
+      //       textContent: "Next",
+      //       onPressed: () {
+      //         _saveSelections();
+      //         // Navigator.push(
+      //         //     context,
+      //         //     MaterialPageRoute(
+      //         //       builder: (context) => ImageGenerator(characterName: widget.characterName,)
+      //         //     ),
+      //         //   );
+      //         Navigator.push(
+      //             context,
+      //             MaterialPageRoute(
+      //                 builder: (context) =>
+      //                     CharacterOther(characterName: 'characterName')));
+      //       },
+      //     ),
+      //   ],
+      // ),
       body: SingleChildScrollView(
         child: Column(
           children: [

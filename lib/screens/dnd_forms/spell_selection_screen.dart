@@ -285,8 +285,8 @@ class _SpellSelectionScreenState extends ConsumerState<SpellSelectionScreen> {
           color: Colors.grey[850],
           child: ListTile(
             // Leading magic icon.
-            leading: const FaIcon(FontAwesomeIcons.magic,
-                color: Color.fromARGB(255, 138, 28, 20)),
+            leading: FaIcon(FontAwesomeIcons.wandMagic,
+                color: Theme.of(context).iconTheme.color,),
             title: Text(
               spellName,
               style: const TextStyle(
@@ -302,7 +302,8 @@ class _SpellSelectionScreenState extends ConsumerState<SpellSelectionScreen> {
               children: [
                 // Info icon to show full details.
                 IconButton(
-                  icon: Icon(Icons.info_outline, color: customColor),
+                  
+                  icon: Icon(Icons.info_outline, color: Theme.of(context).iconTheme.color),
                   onPressed: () {
                     _showSpellInfoDialog(context, spellName);
                   },
@@ -310,8 +311,8 @@ class _SpellSelectionScreenState extends ConsumerState<SpellSelectionScreen> {
                 // Toggle selection icon.
                 isSelected
                     ? const Icon(Icons.check_circle, color: Colors.green)
-                    : const Icon(Icons.add_circle_outline,
-                        color: Color.fromARGB(255, 138, 28, 20)),
+                    : Icon(Icons.add_circle_outline,
+                        color: Theme.of(context).iconTheme.color),
               ],
             ),
             // Tapping toggles the spell selection.
@@ -512,7 +513,7 @@ class _SpellSelectionScreenState extends ConsumerState<SpellSelectionScreen> {
                       },
                       style: ButtonStyle(
                         backgroundColor:
-                            MaterialStateProperty.all<Color>(customColor),
+                            WidgetStateProperty.all<Color>(Theme.of(context).iconTheme.color!),
                       ),
                       child: const Text('Done',
                           style: TextStyle(color: Colors.white)),

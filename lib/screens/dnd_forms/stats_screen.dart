@@ -32,7 +32,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
     'Charisma': 8,
   }; // to save_
   int index = 0;
-  final Color customColor = const Color.fromARGB(255, 138, 28, 20);
+
   int pointsLeft = 27; // For PointBuy
   final Map<String, int> baseScores = {
     'Strength': 8,
@@ -358,11 +358,11 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                   children: [
                     Container(
                       decoration: BoxDecoration(
-                        border: Border.all(color: customColor, width: 5),
+                        border: Border.all(color: Theme.of(context).iconTheme.color!, width: 5),
                         borderRadius: BorderRadius.circular(10),
                         color: (readyStatuses[0])
                             ? Colors.white
-                            : customColor.withOpacity(0.75),
+                            : Theme.of(context).iconTheme.color!.withAlpha(180),
                       ),
                       width: 100,
                       height: 100,
@@ -423,11 +423,11 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                   children: [
                     Container(
                       decoration: BoxDecoration(
-                        border: Border.all(color: customColor, width: 5),
+                        border: Border.all(color: Theme.of(context).iconTheme.color!, width: 5),
                         borderRadius: BorderRadius.circular(10),
                         color: (readyStatuses[1])
                             ? Colors.white
-                            : customColor.withOpacity(0.75),
+                            : Theme.of(context).iconTheme.color!.withAlpha(180),
                       ),
                       width: 100,
                       height: 100,
@@ -488,11 +488,11 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                   children: [
                     Container(
                       decoration: BoxDecoration(
-                        border: Border.all(color: customColor, width: 5),
+                        border: Border.all(color: Theme.of(context).iconTheme.color!, width: 5),
                         borderRadius: BorderRadius.circular(10),
                         color: (readyStatuses[2])
                             ? Colors.white
-                            : customColor.withOpacity(0.75),
+                            : Theme.of(context).iconTheme.color!.withAlpha(180),
                       ),
                       width: 100,
                       height: 100,
@@ -559,11 +559,11 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                   children: [
                     Container(
                       decoration: BoxDecoration(
-                        border: Border.all(color: customColor, width: 5),
+                        border: Border.all(color: Theme.of(context).iconTheme.color!, width: 5),
                         borderRadius: BorderRadius.circular(10),
                         color: (readyStatuses[3])
                             ? Colors.white
-                            : customColor.withOpacity(0.75),
+                            : Theme.of(context).iconTheme.color!.withAlpha(180),
                       ),
                       width: 100,
                       height: 100,
@@ -624,11 +624,11 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                   children: [
                     Container(
                       decoration: BoxDecoration(
-                        border: Border.all(color: customColor, width: 5),
+                        border: Border.all(color: Theme.of(context).iconTheme.color!, width: 5),
                         borderRadius: BorderRadius.circular(10),
                         color: (readyStatuses[4])
                             ? Colors.white
-                            : customColor.withOpacity(0.75),
+                            : Theme.of(context).iconTheme.color!.withAlpha(180),
                       ),
                       width: 100,
                       height: 100,
@@ -689,11 +689,11 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                   children: [
                     Container(
                       decoration: BoxDecoration(
-                        border: Border.all(color: customColor, width: 5),
+                        border: Border.all(color: Theme.of(context).iconTheme.color!, width: 5),
                         borderRadius: BorderRadius.circular(10),
                         color: (readyStatuses[5])
                             ? Colors.white
-                            : customColor.withOpacity(0.75),
+                            : Theme.of(context).iconTheme.color!.withAlpha(180),
                       ),
                       width: 100,
                       height: 100,
@@ -800,13 +800,13 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                     children: [
                       IconButton(
                         onPressed: () => _decrementSkill(label),
-                        icon: Icon(Icons.remove_circle, color: customColor),
+                        icon: Icon(Icons.remove_circle, color: Theme.of(context).iconTheme.color!),
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(
                             vertical: 8, horizontal: 16),
                         decoration: BoxDecoration(
-                          color: customColor,
+                          color: Theme.of(context).iconTheme.color,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
@@ -817,7 +817,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                       ),
                       IconButton(
                         onPressed: () => _incrementSkill(label),
-                        icon: Icon(Icons.add_circle, color: customColor),
+                        icon: Icon(Icons.add_circle, color: Theme.of(context).iconTheme.color),
                       ),
                     ],
                   ),
@@ -958,14 +958,14 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
               'assets/dice$dice_no1.png',
               width: 100,
               height: 100,
-              color: customColor,
+              color: Theme.of(context).iconTheme.color,
             ),
             const SizedBox(width: 20),
             Image.asset(
               'assets/dice$dice_no2.png',
               width: 100,
               height: 100,
-              color: customColor,
+              color: Theme.of(context).iconTheme.color,
             ),
           ],
         ),
@@ -978,14 +978,14 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
               'assets/dice$dice_no3.png',
               width: 100,
               height: 100,
-              color: customColor,
+              color: Theme.of(context).iconTheme.color,
             ),
             const SizedBox(width: 20),
             Image.asset(
               'assets/dice$dice_no4.png',
               width: 100,
               height: 100,
-              color: customColor,
+              color: Theme.of(context).iconTheme.color,
             ),
           ],
         ),
@@ -995,14 +995,14 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
             width: 50,
             height: 50,
             decoration: BoxDecoration(
-              border: Border.all(color: customColor, width: 2),
+              border: Border.all(color: Theme.of(context).iconTheme.color!, width: 2),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Text(
               "$currentRoll",
               style: TextStyle(
                   fontSize: 20,
-                  color: customColor,
+                  color: Theme.of(context).iconTheme.color,
                   fontWeight: FontWeight.bold),
             )),
         const SizedBox(height: 20),

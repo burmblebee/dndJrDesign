@@ -71,8 +71,8 @@ class _EquipmentSelectionState extends ConsumerState<EquipmentSelection> {
   String searchQuery = '';
   List<String> selectedWeapons = [];
 
-  // Using customColor for icons.
-  final Color customColor = const Color.fromARGB(255, 138, 28, 20);
+  
+  
 
   @override
   void initState() {
@@ -144,7 +144,7 @@ class _EquipmentSelectionState extends ConsumerState<EquipmentSelection> {
                 controller: _searchController,
                 decoration: InputDecoration(
                   hintText: 'Search Weapons',
-                  prefixIcon: const Icon(Icons.search, size: 20),
+                  prefixIcon: Icon(Icons.search, size: 20, color: Theme.of(context).iconTheme.color,),
                   contentPadding:
                       const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                   border: OutlineInputBorder(
@@ -194,7 +194,7 @@ class _EquipmentSelectionState extends ConsumerState<EquipmentSelection> {
                               child: ListTile(
                                 leading: FaIcon(
                                   _getWeaponIcon(weapon),
-                                  color: customColor,
+                                  color: Theme.of(context).iconTheme.color,
                                 ),
                                 title: Text(
                                   weapon,
@@ -206,7 +206,7 @@ class _EquipmentSelectionState extends ConsumerState<EquipmentSelection> {
                                   'Cost: ${details["gold_cost"]} | Damage: ${details["damage_die"]} (${details["damage_type"]}) | ${group == "SimpleWeapons" ? "Simple" : "Martial"}',
                                 ),
                                 trailing: IconButton(
-                                  icon: const Icon(Icons.remove_circle, color: Colors.red),
+                                  icon:  Icon(Icons.remove_circle, color: Theme.of(context).iconTheme.color),
                                   onPressed: () {
                                     setState(() {
                                       selectedWeapons.remove(weapon);
@@ -261,7 +261,7 @@ class _EquipmentSelectionState extends ConsumerState<EquipmentSelection> {
                               child: ListTile(
                                 leading: FaIcon(
                                   _getWeaponIcon(weapon),
-                                  color: customColor,
+                                  color: Theme.of(context).iconTheme.color,
                                 ),
                                 title: Text(
                                   weapon,
@@ -273,7 +273,7 @@ class _EquipmentSelectionState extends ConsumerState<EquipmentSelection> {
                                   'Cost: ${details["gold_cost"]} | Damage: ${details["damage_die"]} (${details["damage_type"]}) | ${group == "SimpleWeapons" ? "Simple" : "Martial"}',
                                 ),
                                 trailing: IconButton(
-                                  icon: Icon(Icons.add, color: customColor),
+                                  icon: Icon(Icons.add, color: Theme.of(context).iconTheme.color),
                                   onPressed: () {
                                     if (!selectedWeapons.contains(weapon)) {
                                       setState(() {

@@ -21,6 +21,7 @@ class MainDrawer extends StatelessWidget{
           ),
           const Divider(),
           ListTile(
+            tileColor: Color(0xFF25291C),
             leading: const Icon(Icons.home),
             title: const Text('Home', style: TextStyle(color: Colors.white),),
             onTap: () {
@@ -29,21 +30,25 @@ class MainDrawer extends StatelessWidget{
           ),
           const Divider(),
           ListTile(
+            tileColor: Color(0xFF25291C),
             leading: const Icon(Icons.group),
             title: const Text('Character Creator', style: TextStyle(color: Colors.white),),
             onTap: () {
               Navigator.of(context).pushReplacementNamed('/character_creator');
             },
           ),
+          const Divider(),
           const Spacer(),
           const Divider(),
           ListTile(
+            tileColor: Color(0xFF25291C),
             leading: const Icon(Icons.person),
             title: const Text('Profile', style: TextStyle(color: Colors.white),),
             onTap: () {
               Navigator.of(context).pushReplacementNamed('/');
             },
           ),
+         
           Align(
             alignment: Alignment.bottomCenter,
             child: Column(
@@ -52,6 +57,7 @@ class MainDrawer extends StatelessWidget{
               children: [
                 const Divider(),
                 ListTile(
+                  tileColor: Color(0xFF25291C),
                   leading: const Icon(Icons.logout),
                   title: const Text('Logout', style: TextStyle(color: Colors.white),),
                   onTap: () {

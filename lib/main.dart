@@ -44,6 +44,11 @@ class MyApp extends StatelessWidget {
               borderRadius: BorderRadius.all(Radius.circular(12)),
             ),
           ),
+          segmentedButtonTheme: SegmentedButtonThemeData(
+            style: ButtonStyle(
+              backgroundColor: WidgetStateProperty.all<Color>(Color.fromARGB(255, 28, 28, 34)),
+            ),
+          ),
           bottomNavigationBarTheme: const BottomNavigationBarThemeData(
             backgroundColor: Color(0xFF25291C),
             selectedItemColor: Color.fromARGB(255, 243, 241, 230), // Warm white
