@@ -1,5 +1,6 @@
 import 'package:dnd_jr_design/item/add_item.dart';
 import 'package:dnd_jr_design/item/item_provider.dart';
+import 'package:dnd_jr_design/item/weapon_details.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -29,7 +30,6 @@ class itemListScreen extends ConsumerWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-
               builder: (context) => AddItem(),
             ),
           );
@@ -54,13 +54,13 @@ class itemListScreen extends ConsumerWidget {
                 visualDensity: const VisualDensity(vertical: 4),
                 title: Text(item.name, style: const TextStyle(fontSize: 20)),
                 onTap: () {
-                  //ref.read(itemProvider.notifier).selectItem(item);
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(
-                  //     builder: (context) => const NPCDetailScreen(), // Pass no parameters, fetch from the provider
-                  //   ),
-                //  );
+                  ref.read(itemProvider.notifier).selectItem(item);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const WeaponDetailsScreen(), // Pass no parameters, fetch from the provider
+                    ),
+                 );
                 },
               ),
               const SizedBox(height: 10),

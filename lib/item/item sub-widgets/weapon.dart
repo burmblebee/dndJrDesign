@@ -435,5 +435,6 @@ class AddWeaponWidget extends ConsumerWidget {
     ref.read(selectedWeaponTypeProvider.notifier).state = {};
     ref.read(requiresAttunementProvider.notifier).state = false;
     ref.read(selectedItemTypeProvider.notifier).state = null;
+    ref.read(itemProvider.notifier).resetSelectedItem();
   }
 }

@@ -1,3 +1,4 @@
+import 'package:dnd_jr_design/content_selection.dart';
 import 'package:dnd_jr_design/item/add_item.dart';
 import 'package:dnd_jr_design/item/item_list.dart';
 import 'package:dnd_jr_design/npc/npc_list.dart';
@@ -12,7 +13,7 @@ Future<void> main() async {
   runApp(
     ProviderScope( // Wrap with ProviderScope
       child: MaterialApp(
-        home: itemListScreen(),
+        home: ContentSelection(),
         //DMCombatScreen(campaignId: '15'),
         theme: ThemeData(
           brightness: Brightness.dark,

@@ -20,6 +20,8 @@ class ItemState {
     this.selectedItem,
   });
 
+  CombatItem? get selectedWeapon => selectedItem is CombatItem ? selectedItem as CombatItem : null;
+
   ItemState copyWith({
     List<Item>? items,
     Item? selectedItem,
@@ -40,21 +42,28 @@ class ItemProvider extends StateNotifier<ItemState> {
 
   Future<void> saveItem(Item item) async {
     try {
-      final docRef = item.id.isEmpty
-          ? _firestore.collection('items').doc()
+      bool isNewItem = item.id.isEmpty;  // Check if it's a new item
+      final docRef = isNewItem
+          ? _firestore.collection('items').doc() // Generate new ID
           : _firestore.collection('items').doc(item.id);
 
-      item = item.copyWith(id: docRef.id);
+      if (isNewItem) {
+        item = item.copyWith(id: docRef.id);
+      }
+
       await docRef.set(item.toMap(), SetOptions(merge: true));
 
       state = state.copyWith(
-        items: [...state.items, item],
-        selectedItem: item,
+        items: isNewItem
+            ? [...state.items, item]
+            : state.items.map((i) => i.id == item.id ? item : i).toList(),
+        selectedItem: null,
       );
     } catch (e) {
       debugPrint("Error saving item: $e");
     }
   }
+
 
   Future<void> fetchItems() async {
     try {
@@ -67,8 +76,6 @@ class ItemProvider extends StateNotifier<ItemState> {
         switch (type) {
           case 'Weapon':
             return CombatItem.fromMap(id, data);
-          // case 'Armor':
-          //   return ArmorItem.fromMap(id, data);
           default:
             return Item.fromMap(id, data);
         }
@@ -81,8 +88,21 @@ class ItemProvider extends StateNotifier<ItemState> {
   }
 
   void selectItem(Item item) {
-    state = state.copyWith(selectedItem: item);
+    if (item is CombatItem) {
+      state = state.copyWith(selectedItem: item);
+    } else if (item.itemType == ItemType.Weapon) {
+      // Convert to CombatItem if it’s a weapon
+      final combatItem = CombatItem.fromMap(item.id, item.toMap());
+      state = state.copyWith(selectedItem: combatItem);
+    } else {
+      state = state.copyWith(selectedItem: item);
+    }
   }
+
+  void resetSelectedItem() {
+    state = state.copyWith(selectedItem: null);
+  }
+
 
   Future<void> deleteItem(String id) async {
     try {
@@ -95,7 +115,6 @@ class ItemProvider extends StateNotifier<ItemState> {
       debugPrint("Error deleting item: $e");
     }
   }
-
 
   Future<void> updateItem(Item item) async {
     if (item.id.isEmpty) {

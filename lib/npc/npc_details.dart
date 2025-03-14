@@ -24,7 +24,6 @@ class NPCDetailScreen extends ConsumerWidget {
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.save),
         onPressed: () {
-          // Implement save functionality
           ref.read(npcProvider.notifier).updateNPC(npc);
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('NPC details saved!')),
