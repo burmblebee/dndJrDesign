@@ -3,7 +3,6 @@ import 'package:dnd_app/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-
 class EditProfile extends StatefulWidget {
   final String username;
   final String name;
@@ -29,7 +28,6 @@ class _EditProfileState extends State<EditProfile> {
   late TextEditingController phoneController;
   String selectedGender = "Female";
 
-  
   @override
   void initState() {
     super.initState();
@@ -46,7 +44,6 @@ class _EditProfileState extends State<EditProfile> {
     });
   }
 
-
   void _updateProfile() {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -57,15 +54,14 @@ class _EditProfileState extends State<EditProfile> {
 
     // Wait for the SnackBar to show, then navigate back
     Future.delayed(Duration(seconds: 2), () {
-       Navigator.pop(context, {
-      'username': usernameController.text,
-      'name': nameController.text,
-      'phone': phoneController.text,
-      'gender': selectedGender,
-    }); // This will navigate back to the previous screen
+      Navigator.pop(context, {
+        'username': usernameController.text,
+        'name': nameController.text,
+        'phone': phoneController.text,
+        'gender': selectedGender,
+      }); // This will navigate back to the previous screen
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -124,75 +120,77 @@ class _EditProfileState extends State<EditProfile> {
                     ],
                   ),
                   SizedBox(height: 10),
-            Row(
-              children: [
-                SizedBox(
-                  width: 80, // Adjust this width to match the longest label
-                  child: Text(
-                    'Username:',
-                    style: TextStyle(fontSize: 16),
+                  Row(
+                    children: [
+                      SizedBox(
+                        width:
+                            80, // Adjust this width to match the longest label
+                        child: Text(
+                          'Username:',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ),
+                      SizedBox(
+                          width:
+                              10), // Adds spacing between label and text field
+                      Expanded(
+                        child: TextField(
+                          controller: usernameController,
+                          decoration: InputDecoration(
+                            labelText: 'Username',
+                            border: OutlineInputBorder(),
+                            isDense: true,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                SizedBox(width: 10), // Adds spacing between label and text field
-                Expanded(
-                  child: TextField(
-                    controller: usernameController,
-                    decoration: InputDecoration(
-                      labelText: 'Username',
-                      border: OutlineInputBorder(),
-                      isDense: true,
-                    ),
+                  SizedBox(height: 10),
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: 80, // Match the width with the previous label
+                        child: Text(
+                          'Name:',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      Expanded(
+                        child: TextField(
+                          controller: nameController,
+                          decoration: InputDecoration(
+                            labelText: 'Name',
+                            border: OutlineInputBorder(),
+                            isDense: true,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                ],
-              ),
-                SizedBox(height: 10),
-              Row(
-                children: [
-                  SizedBox(
-                    width: 80, // Match the width with the previous label
-                    child: Text(
-                    'Name:',
-                    style: TextStyle(fontSize: 16),
+                  SizedBox(height: 10),
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: 80, // Consistent width for alignment
+                        child: Text(
+                          'Phone:',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      Expanded(
+                        child: TextField(
+                          controller: phoneController,
+                          decoration: InputDecoration(
+                            labelText: 'Phone',
+                            border: OutlineInputBorder(),
+                            isDense: true,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              SizedBox(width: 10),
-              Expanded(
-                child: TextField(
-                  controller: nameController,
-                  decoration: InputDecoration(
-                    labelText: 'Name',
-                    border: OutlineInputBorder(),
-                    isDense: true,
-                  ),
-                ),
-              ),
-            ],
-          ),
-                SizedBox(height: 10),
-              Row(
-                children: [
-                  SizedBox(
-                    width: 80, // Consistent width for alignment
-                    child: Text(
-                      'Phone:',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  ),
-                  SizedBox(width: 10),
-                  Expanded(
-                    child: TextField(
-                      controller: phoneController,
-                      decoration: InputDecoration(
-                        labelText: 'Phone',
-                        border: OutlineInputBorder(),
-                      isDense: true,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
                   SizedBox(height: 10),
                   Row(
                     children: [
@@ -247,17 +245,17 @@ class _EditProfileState extends State<EditProfile> {
                     ],
                   ),
                   SizedBox(height: 10),
-
                   DropdownButton<String>(
                     value: selectedGender,
                     items: ['Female', 'Male', 'Other'].map((gender) {
-                      return DropdownMenuItem(value: gender, child: Text(gender));
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      selectedGender = value!;
-                    });
-                  },
+                      return DropdownMenuItem(
+                          value: gender, child: Text(gender));
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        selectedGender = value!;
+                      });
+                    },
                   ),
                   SizedBox(height: 10),
                   Divider(
