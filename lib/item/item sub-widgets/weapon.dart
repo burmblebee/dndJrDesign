@@ -16,7 +16,6 @@ class AddWeaponWidget extends ConsumerWidget {
   List<String> diceLabels = ['d4', 'd6', 'd8', 'd10', 'd12', 'd20', 'd100'];
   String damageConfig1 = '';
   String damageConfig2 = '';
-  Currency selectedCurrency = Currency.gp;
   TextEditingController weightController = TextEditingController();
   TextEditingController nameController = TextEditingController();
   TextEditingController descriptionController =  TextEditingController();
@@ -157,7 +156,7 @@ class AddWeaponWidget extends ConsumerWidget {
     final selectedDamageType2 = ref.watch(selectedDamageType2Provider);
     final selectedWeaponCategory = ref.watch(selectedWeaponCategoryProvider);
     final selectedItemType = ref.watch(selectedItemTypeProvider);
-
+    final selectedCurrency = ref.watch(selectedCurrencyProvider);
 
     return Expanded(
       child: SingleChildScrollView(
@@ -262,7 +261,8 @@ class AddWeaponWidget extends ConsumerWidget {
                   (value: selectedCurrency,
                // hint: const Text("Select Currency"),
                 onChanged: (newValue) {
-                  selectedCurrency = newValue!;
+                    ref.read(selectedCurrencyProvider.notifier).state = newValue!;
+                    //_updateItem(currency: newValue, ref: ref);
                 },
                   items: Currency.values.map((Currency currency) {
                     return DropdownMenuItem<Currency>(
