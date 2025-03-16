@@ -21,7 +21,8 @@ class _DateandTimePickerState extends State<Dateandtimepicker> {
   @override
   void initState() {
     super.initState();
-    _selectedDay = _focusedDay; // Initialize selected day to today
+    // Initialize selected day to today
+    _selectedDay = _focusedDay; 
     _selectedEvents = ValueNotifier(_getEventsForDay(_selectedDay!));
   }
 
@@ -34,8 +35,10 @@ class _DateandTimePickerState extends State<Dateandtimepicker> {
     if (!isSameDay(_selectedDay, selectedDay)) {
       setState(() {
         _selectedDay = selectedDay;
-        _focusedDay = focusedDay; // Update the selected day
-        _selectedEvents.value = _getEventsForDay(selectedDay); // Update the event list
+        // Update the selected day
+        _focusedDay = focusedDay; 
+        // Update the event list
+        _selectedEvents.value = _getEventsForDay(selectedDay); 
       });
     }
   }
@@ -49,62 +52,126 @@ class _DateandTimePickerState extends State<Dateandtimepicker> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Calendar")),
+      backgroundColor: Color(0xFF464538),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white,),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        title:  Text(
+            "Calendar",
+            style:TextStyle(
+              color: Colors.white,
+            ),
+            ),
+            backgroundColor: Color(0xFF25291C),
+        ),
       floatingActionButton: FloatingActionButton(
+        //dark green bg
+        backgroundColor: Color(0xFF25291C), 
         onPressed: () {
           // Add functionality here
           showDialog(
               context: context,
               builder: (context) {
                 return AlertDialog(
+                  backgroundColor: Color(0xFF464538),
                     scrollable: true,
-                    title: const Text("Add Event"),
+                    title: const Text(
+                      "Add Session",
+                      style: TextStyle(
+                        color: Colors.white, 
+                        fontSize: 18)),
                     content: Padding(
                       padding: EdgeInsets.all(8),
                       child: TextField(
                         controller: _eventController,
+                        style:TextStyle(
+                          color: Colors.white, 
+                          fontSize: 16,
+                          ),
                       ),
                     ),
                     actions: [
                       ElevatedButton(
-          onPressed: () {
-            setState(() {
-              DateTime normalizedDate = DateTime(
-                _selectedDay!.year,
-                _selectedDay!.month,
-                _selectedDay!.day,
-              );
+                        style: ElevatedButton.styleFrom(
+                          //no bg or shadow 
+                          backgroundColor: Colors.transparent,
+                          elevation: 0,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            DateTime normalizedDate = DateTime(
+                              _selectedDay!.year,
+                              _selectedDay!.month,
+                              _selectedDay!.day,
+                            );
 
-          if (events.containsKey(normalizedDate)) {
-            events[normalizedDate]!.add(Event(_eventController.text));
-        } else {
-           events[normalizedDate] = [Event(_eventController.text)];
-        }
-      });
+                          if (events.containsKey(normalizedDate)) {
+                            events[normalizedDate]!.add(Event(_eventController.text));
+                        } else {
+                            events[normalizedDate] = [Event(_eventController.text)];
+                      }
+                  });
 
       _eventController.clear();
       Navigator.of(context).pop();
-      _selectedEvents.value = _getEventsForDay(_selectedDay!); // Update the event list
+      // Update the event list
+      _selectedEvents.value = _getEventsForDay(_selectedDay!); 
     },
-      child: Text("Save"),
+      child: Text(
+        "Save",
+        style: TextStyle(color: Colors.white,),),
   ),
 
     ]);
     });
     },
-        child: const Icon(Icons.add),
+    //white plus siign
+        child: const Icon(Icons.add, color: Colors.white),
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
             TableCalendar<Event>(
-                locale: 'en_US', // Correct locale format
+              //language
+                locale: 'en_US', 
                 rowHeight: 43,
                 headerStyle: const HeaderStyle(
                   formatButtonVisible: false,
                   titleCentered: true,
+                  //this will change the month color
+                   titleTextStyle: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,),
+                   //willl make arrows white
+                  leftChevronIcon: Icon(Icons.chevron_left, color: Colors.white),
+                  rightChevronIcon: Icon(Icons.chevron_right, color: Colors.white),
                 ),
+
+                calendarStyle: CalendarStyle(
+                  // first two are day and weekend color
+                  defaultTextStyle: TextStyle(color: Colors.white), 
+                  weekendTextStyle: TextStyle(color: Colors.white),
+                  // Selected day text color 
+                  selectedTextStyle: TextStyle(color: Colors.black), 
+                  // Today's text color
+                  todayTextStyle: TextStyle(color: Colors.black), 
+                  todayDecoration: BoxDecoration(
+                    // Background color for today
+                    color: const Color.fromARGB(147, 255, 255, 255), 
+                    shape: BoxShape.circle,
+                  ),
+                  selectedDecoration: BoxDecoration(
+                    // Background color for selected day
+                    color: const Color.fromARGB(255, 241, 241, 192), 
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              
                 availableGestures: AvailableGestures.all,
                 selectedDayPredicate: (day) => isSameDay(day, _focusedDay),
                 focusedDay: _focusedDay,
@@ -134,6 +201,8 @@ class _DateandTimePickerState extends State<Dateandtimepicker> {
                       return Container(
                         margin: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                         decoration: BoxDecoration(
+                          //this will be the yellowish bg color
+                          color: Color.fromARGB(255, 241, 241, 192),  
                           border: Border.all(),
                           borderRadius: BorderRadius.circular(12),
                         ),
