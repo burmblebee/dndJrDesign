@@ -1,6 +1,6 @@
 import 'package:dnd_jr_design/item/add_item.dart';
 import 'package:dnd_jr_design/item/item_provider.dart';
-import 'package:dnd_jr_design/item/weapon_details.dart';
+import 'package:dnd_jr_design/item/item%20sub-widgets/weapon_details.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

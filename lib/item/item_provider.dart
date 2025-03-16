@@ -9,7 +9,15 @@ final requiresAttunementProvider = StateProvider<bool>((ref) => false);
 final selectedDamageType1Provider = StateProvider<DamageType?>((ref) => null);
 final selectedDamageType2Provider = StateProvider<DamageType?>((ref) => null);
 final selectedWeaponTypeProvider = StateProvider<Set<WeaponType>>((ref) => {});
-final selectedWeaponCategoryProvider = StateProvider<WeaponCategory>((ref) => WeaponCategory.Simple);
+final selectedWeaponCategoryProvider =
+    StateProvider<WeaponCategory>((ref) => WeaponCategory.Simple);
+final selectedArmorTypeProvider = StateProvider<ArmorType?>((ref) => null);
+final selectedBaseArmorProvider = StateProvider<dynamic?>((ref) => null);
+final selectedCurrencyProvider = StateProvider<Currency>((ref) => Currency.gp);
+final stealthDisadvantageProvider = StateProvider<bool>((ref) => false);
+
+
+
 
 class ItemState {
   final List<Item> items;
@@ -20,7 +28,8 @@ class ItemState {
     this.selectedItem,
   });
 
-  CombatItem? get selectedWeapon => selectedItem is CombatItem ? selectedItem as CombatItem : null;
+  Item? get selectedWeapon =>
+      selectedItem is CombatItem ? selectedItem as CombatItem : selectedItem is ArmorItem ? selectedItem as ArmorItem : null;
 
   ItemState copyWith({
     List<Item>? items,
@@ -33,7 +42,8 @@ class ItemState {
   }
 }
 
-final itemProvider = StateNotifierProvider<ItemProvider, ItemState>((ref) => ItemProvider());
+final itemProvider =
+    StateNotifierProvider<ItemProvider, ItemState>((ref) => ItemProvider());
 
 class ItemProvider extends StateNotifier<ItemState> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -41,8 +51,10 @@ class ItemProvider extends StateNotifier<ItemState> {
   ItemProvider() : super(ItemState(items: [], selectedItem: null));
 
   Future<void> saveItem(Item item) async {
+    debugPrint("saveItem() was called");
     try {
-      bool isNewItem = item.id.isEmpty;  // Check if it's a new item
+      debugPrint("Saving item: ${item.toMap()}");
+      bool isNewItem = item.id.isEmpty; // Check if it's a new item
       final docRef = isNewItem
           ? _firestore.collection('items').doc() // Generate new ID
           : _firestore.collection('items').doc(item.id);
@@ -64,7 +76,6 @@ class ItemProvider extends StateNotifier<ItemState> {
     }
   }
 
-
   Future<void> fetchItems() async {
     try {
       final querySnapshot = await _firestore.collection('items').get();
@@ -76,6 +87,8 @@ class ItemProvider extends StateNotifier<ItemState> {
         switch (type) {
           case 'Weapon':
             return CombatItem.fromMap(id, data);
+          case 'Armor':
+            return ArmorItem.fromMap(id, data);
           default:
             return Item.fromMap(id, data);
         }
@@ -88,12 +101,14 @@ class ItemProvider extends StateNotifier<ItemState> {
   }
 
   void selectItem(Item item) {
-    if (item is CombatItem) {
-      state = state.copyWith(selectedItem: item);
-    } else if (item.itemType == ItemType.Weapon) {
+    if (item.itemType == ItemType.Weapon) {
       // Convert to CombatItem if it’s a weapon
       final combatItem = CombatItem.fromMap(item.id, item.toMap());
       state = state.copyWith(selectedItem: combatItem);
+    } else if (item is ArmorItem) {
+      // Convert to ArmorItem if it’s an armor
+      final armorItem = ArmorItem.fromMap(item.id, item.toMap());
+      state = state.copyWith(selectedItem: armorItem);
     } else {
       state = state.copyWith(selectedItem: item);
     }
@@ -102,7 +117,6 @@ class ItemProvider extends StateNotifier<ItemState> {
   void resetSelectedItem() {
     state = state.copyWith(selectedItem: null);
   }
-
 
   Future<void> deleteItem(String id) async {
     try {

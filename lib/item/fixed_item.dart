@@ -32,33 +32,6 @@ enum ResetCondition { longRest, shortRest, dawn, other, consumable }
 
 enum Currency { cp, sp, ep, gp, pp }
 
-// enum ModifierType {
-//   bonus,
-//   damage,
-//   advantage,
-//   disadvantage,
-//   resistance,
-//   immunity
-// }
-//
-// enum Condition {
-//   blinded,
-//   charmed,
-//   deafened,
-//   exhaustion,
-//   frightened,
-//   grappled,
-//   incapacitated,
-//   invisible,
-//   paralyzed,
-//   petrified,
-//   poisoned,
-//   prone,
-//   restrained,
-//   stunned,
-//   unconscious
-// }
-
 enum DamageType {
   Acid,
   Bludgeoning,
@@ -75,8 +48,18 @@ enum DamageType {
   Thunder
 }
 
+enum ArmorType {
+  Light,
+  Medium,
+  Heavy,
+  Shield,
+}
+
+
+
+
 class Item {
-  final String id; // Firestore document ID
+  final String id;
   final String name;
   final String description;
   final int price;
@@ -267,59 +250,108 @@ class CombatItem extends Item {
   }
 }
 
+enum LightArmor {
+  Padded,
+  Leather,
+  StuddedLeather,
+}
+enum MediumArmor {
+  Hide,
+  ChainShirt,
+  ScaleMail,
+  Breastplate,
+  HalfPlate,
+}
+enum HeavyArmor {
+  RingMail,
+  ChainMail,
+  Splint,
+  Plate,
+}
+
 class ArmorItem extends Item {
-  int armorClass;
-  String armorType; // "light", "medium", "heavy"
-  int strRequirement;
-  bool stealthDisadvantage;
+  final int armorClass;
+  final ArmorType armorType;
+  final bool stealthDisadvantage;
+  final dynamic baseArmor; // Can be LightArmor, MediumArmor, or HeavyArmor
 
   ArmorItem({
+    required String id,
     required String name,
     required String description,
     required int price,
     required this.armorClass,
     required this.armorType,
-    required this.strRequirement,
     required this.stealthDisadvantage,
+    this.baseArmor,
     required int weight,
     required bool requiresAttunement,
     String? attunementDescription,
+    required Currency currency,
   }) : super(
-          id: 'armor_${name.toLowerCase().replaceAll(' ', '_')}', // Unique ID based on name
-          itemType: ItemType.Armor,
-          name: name,
-          description: description,
-          price: price,
-          weight: weight,
-          requiresAttunement: requiresAttunement,
-          attunementDescription:
-              (requiresAttunement) ? attunementDescription : null,
-        );
+    id: id,
+    itemType: ItemType.Armor,
+    name: name,
+    description: description,
+    price: price,
+    weight: weight,
+    requiresAttunement: requiresAttunement,
+    attunementDescription:
+    (requiresAttunement) ? attunementDescription : null,
+    currency: currency,
+  );
 
   @override
   Map<String, dynamic> toMap() {
     var map = super.toMap();
     map.addAll({
       'armorClass': armorClass,
-      'armorType': armorType,
-      'strRequirement': strRequirement,
+      'armorType': armorType.name,
       'stealthDisadvantage': stealthDisadvantage,
+      'baseArmor': baseArmor.name,
     });
     return map;
   }
 
-  factory ArmorItem.fromMap(Map<String, dynamic> map) {
+  factory ArmorItem.fromMap(String id, Map<String, dynamic> map) {
+    ArmorType armorType = ArmorType.values.firstWhere(
+          (e) => e.name == map['armorType'],
+      orElse: () => ArmorType.Light,
+    );
+
+    dynamic baseArmor;
+    if (armorType == ArmorType.Light) {
+      baseArmor = LightArmor.values.firstWhere(
+            (e) => e.name == map['baseArmor'],
+        orElse: () => LightArmor.Leather,
+      );
+    } else if (armorType == ArmorType.Medium) {
+      baseArmor = MediumArmor.values.firstWhere(
+            (e) => e.name == map['baseArmor'],
+        orElse: () => MediumArmor.Hide,
+      );
+    } else if (armorType == ArmorType.Heavy) {
+      baseArmor = HeavyArmor.values.firstWhere(
+            (e) => e.name == map['baseArmor'],
+        orElse: () => HeavyArmor.ChainMail,
+      );
+    }
+
     return ArmorItem(
+      id: map['id'] ?? 'Unknown',
       name: map['name'],
       description: map['description'],
       price: map['price'] ?? 0,
       armorClass: map['armorClass'],
-      armorType: map['armorType'],
-      strRequirement: map['strRequirement'],
+      armorType: armorType,
       stealthDisadvantage: map['stealthDisadvantage'],
+      baseArmor: baseArmor,
       weight: map['weight'] ?? 0, // Default to 0 if not provided
       requiresAttunement: map['requiresAttunement'] ?? false,
       attunementDescription: map['attunementDescription'],
+      currency: Currency.values.firstWhere(
+          (e) => e.name == map['currency'],
+          orElse: () => Currency.gp),
     );
   }
 }

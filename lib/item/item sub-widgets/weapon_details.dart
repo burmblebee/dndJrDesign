@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'fixed_item.dart';
-import 'item_provider.dart';
+import '../fixed_item.dart';
+import '../item_provider.dart';
 
 class WeaponDetailsScreen extends ConsumerWidget {
   const WeaponDetailsScreen({super.key});
