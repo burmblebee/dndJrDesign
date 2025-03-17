@@ -22,22 +22,28 @@ final stealthDisadvantageProvider = StateProvider<bool>((ref) => false);
 class ItemState {
   final List<Item> items;
   final Item? selectedItem;
+  late final CombatItem? selectedWeapon;
+  late final ArmorItem? selectedArmor;
 
   ItemState({
     required this.items,
     this.selectedItem,
+    this.selectedWeapon,
+    this.selectedArmor,
   });
 
-  Item? get selectedWeapon =>
-      selectedItem is CombatItem ? selectedItem as CombatItem : selectedItem is ArmorItem ? selectedItem as ArmorItem : null;
+  // Item? get selectedWeapon =>
+  //     selectedItem is CombatItem ? selectedItem as CombatItem : selectedItem is ArmorItem ? selectedItem as ArmorItem : null;
 
   ItemState copyWith({
     List<Item>? items,
     Item? selectedItem,
+
   }) {
     return ItemState(
       items: items ?? this.items,
       selectedItem: selectedItem ?? this.selectedItem,
+
     );
   }
 }
@@ -51,9 +57,15 @@ class ItemProvider extends StateNotifier<ItemState> {
   ItemProvider() : super(ItemState(items: [], selectedItem: null));
 
   Future<void> saveItem(Item item) async {
-    debugPrint("saveItem() was called");
+
+    if (item is ArmorItem) {
+      debugPrint("Saving ArmorItem with armorClass: ${item.armorClass}");
+    }
+    debugPrint("Item to save: ${item.toMap()}");
+
+    // debugPrint("saveItem() was called");
     try {
-      debugPrint("Saving item: ${item.toMap()}");
+    //  debugPrint("Saving item: ${item.toMap()}");
       bool isNewItem = item.id.isEmpty; // Check if it's a new item
       final docRef = isNewItem
           ? _firestore.collection('items').doc() // Generate new ID
@@ -75,6 +87,8 @@ class ItemProvider extends StateNotifier<ItemState> {
       debugPrint("Error saving item: $e");
     }
   }
+
+
 
   Future<void> fetchItems() async {
     try {
@@ -101,22 +115,31 @@ class ItemProvider extends StateNotifier<ItemState> {
   }
 
   void selectItem(Item item) {
-    if (item.itemType == ItemType.Weapon) {
-      // Convert to CombatItem if it’s a weapon
-      final combatItem = CombatItem.fromMap(item.id, item.toMap());
-      state = state.copyWith(selectedItem: combatItem);
-    } else if (item is ArmorItem) {
-      // Convert to ArmorItem if it’s an armor
+    // debugPrint('Selecting item with type: ${item.itemType}');
+    if (item.itemType == ItemType.Armor) {
       final armorItem = ArmorItem.fromMap(item.id, item.toMap());
+      // debugPrint('Selected an armor item: ${armorItem.name}');
+      // debugPrint('ArmorType: ${armorItem.armorType}, BaseArmor: ${armorItem.baseArmor}');
       state = state.copyWith(selectedItem: armorItem);
+    } else if (item.itemType == ItemType.Weapon) {
+      final combatItem = CombatItem.fromMap(item.id, item.toMap());
+      // debugPrint('Selected a combat item: ${combatItem.name}');
+      state = state.copyWith(selectedItem: combatItem);
     } else {
+      // debugPrint('Selected a regular item: ${item.name}');
       state = state.copyWith(selectedItem: item);
     }
   }
 
+
+
+
+
   void resetSelectedItem() {
     state = state.copyWith(selectedItem: null);
+
   }
+
 
   Future<void> deleteItem(String id) async {
     try {

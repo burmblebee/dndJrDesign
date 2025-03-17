@@ -15,7 +15,7 @@ class AddItem extends ConsumerWidget {
       case ItemType.Weapon:
         return AddWeaponWidget();
       case ItemType.Armor:
-       return AddArmorWidget();
+        return AddArmorWidget();
       case ItemType.Potion:
       // return AddPotionWidget();
       case ItemType.Scroll:
@@ -44,9 +44,12 @@ class AddItem extends ConsumerWidget {
               value: selectedItemType,
               hint: const Text("Select Item Type"),
               onChanged: (ItemType? newValue) {
-                ref
-                    .read(selectedItemTypeProvider.notifier)
-                    .state = newValue;
+                ref.read(selectedItemTypeProvider.notifier).state = null;
+                ref.read(itemProvider.notifier).state = ItemState(
+                  items: [],
+                  selectedItem: null,
+                );
+                ref.read(selectedItemTypeProvider.notifier).state = newValue;
               },
               items: ItemType.values.map((ItemType type) {
                 return DropdownMenuItem<ItemType>(
@@ -55,7 +58,6 @@ class AddItem extends ConsumerWidget {
                 );
               }).toList(),
             ),
-            // Check if selectedItemType is not null
             if (selectedItemType != null) correctWidget(selectedItemType),
           ],
         ),

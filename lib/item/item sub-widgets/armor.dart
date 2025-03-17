@@ -182,12 +182,12 @@ class AddArmorWidget extends ConsumerWidget {
                   requiresAttunement: requiresAttunement,
                   attunementDescription: attunementDescriptionController.text,
                   currency: selectedCurrency,
-                  armorClass: int.tryParse(armorClassController.text)!,
+                  armorClass: int.tryParse(armorClassController.text) ?? 7,
                   armorType: selectedArmorType!,
                   stealthDisadvantage: stealthDisadvantage,
                   baseArmor: ref.watch(selectedBaseArmorProvider),
                 );
-                if(checkIfFieldsAreFilled()) {
+                if(checkIfFieldsAreFilled(ref)) {
                   await ref.read(itemProvider.notifier).saveItem(
                     toSave,
                   );
@@ -288,7 +288,13 @@ class AddArmorWidget extends ConsumerWidget {
     ref.read(selectedCurrencyProvider.notifier).state = Currency.gp;
   }
 
-  bool checkIfFieldsAreFilled() {
-    return true;
+  bool checkIfFieldsAreFilled(WidgetRef ref) {
+    return nameController.text.isNotEmpty &&
+        descriptionController.text.isNotEmpty &&
+        armorClassController.text.isNotEmpty &&
+        weightController.text.isNotEmpty &&
+        priceController.text.isNotEmpty &&
+        ref.watch(selectedArmorTypeProvider)!= null &&
+        ref.watch(selectedBaseArmorProvider) != null;
   }
 }

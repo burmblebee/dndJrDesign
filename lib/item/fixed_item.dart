@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 enum ItemType {
   Armor,
   Potion,
@@ -308,7 +310,7 @@ class ArmorItem extends Item {
       'armorClass': armorClass,
       'armorType': armorType.name,
       'stealthDisadvantage': stealthDisadvantage,
-      'baseArmor': baseArmor.name,
+      'baseArmor': baseArmor != null ? baseArmor.toString().split('.').last : null, // Get the enum name as string
     });
     return map;
   }
@@ -339,19 +341,20 @@ class ArmorItem extends Item {
 
     return ArmorItem(
       id: map['id'] ?? 'Unknown',
-      name: map['name'],
-      description: map['description'],
-      price: map['price'] ?? 0,
-      armorClass: map['armorClass'],
+      name: map['name'] ?? 'Unknown',  // Provide default for missing name
+      description: map['description'] ?? '',  // Provide default for missing description
+      price: map['price'] ?? 0,  // Default price if missing
+      armorClass: map['armorClass'] ?? 0,  // Default armorClass if missing
       armorType: armorType,
-      stealthDisadvantage: map['stealthDisadvantage'],
+      stealthDisadvantage: map['stealthDisadvantage'] ?? false,
       baseArmor: baseArmor,
-      weight: map['weight'] ?? 0, // Default to 0 if not provided
+      weight: map['weight'] ?? 0,  // Default weight if missing
       requiresAttunement: map['requiresAttunement'] ?? false,
-      attunementDescription: map['attunementDescription'],
+      attunementDescription: map['attunementDescription'] ?? '',  // Default to empty string if missing
       currency: Currency.values.firstWhere(
-          (e) => e.name == map['currency'],
-          orElse: () => Currency.gp),
+            (e) => e.name == map['currency'],
+        orElse: () => Currency.gp,
+      ),
     );
   }
 }
