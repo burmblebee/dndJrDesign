@@ -12,9 +12,11 @@ class CharacterNotifier extends StateNotifier<Character> {
           picture: '',
           abilityScores: {},
           weapons: [],
-          spells: {},
+          cantrips: [], // Updated
+          spells: [], // Updated
           proficiencies: [],
           languages: [],
+          traits: {},
         ));
 
   void updateCharacterName(String name) {
@@ -41,14 +43,18 @@ class CharacterNotifier extends StateNotifier<Character> {
     state = state.copyWith(weapons: weapons);
   }
 
-  void updateSpells(Map<String, dynamic> spells) {
+  void updateCantrips(List<String> cantrips) { // New method
+    state = state.copyWith(cantrips: cantrips);
+  }
+
+  void updateSpells(List<String> spells) { // Updated method
     state = state.copyWith(spells: spells);
   }
 
   void updateProficiencies(List<String> proficiencies) {
     state = state.copyWith(proficiencies: proficiencies);
   }
-  
+
   void updateLanguages(List<String> languages) {
     state = state.copyWith(languages: languages);
   }
@@ -57,7 +63,6 @@ class CharacterNotifier extends StateNotifier<Character> {
     state = state.copyWith(picture: picture);
   }
 
-  /// Updates a single trait value in the traits map.
   void updateTrait(String key, String value) {
     final currentTraits = state.traits;
     final newTraits = Map<String, String>.from(currentTraits);

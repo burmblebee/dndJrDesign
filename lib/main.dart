@@ -48,6 +48,7 @@ class MyApp extends StatelessWidget {
             style: ButtonStyle(
               backgroundColor: WidgetStateProperty.all<Color>(Color.fromARGB(255, 28, 28, 34)),
             ),
+            
           ),
           bottomNavigationBarTheme: const BottomNavigationBarThemeData(
             backgroundColor: Color(0xFF25291C),

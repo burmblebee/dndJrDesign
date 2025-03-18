@@ -674,20 +674,20 @@ class _SpellSelectionScreenState extends ConsumerState<SpellSelectionScreen> {
                                       const SizedBox(width: 30),
                                       ElevatedButton.icon(
                                         onPressed: () {
-                                          ref
-                                              .read(characterProvider.notifier)
-                                              .updateSpells({
-                                            'cantrips':
-                                                selectedCantrips.toList(),
-                                            'spells': selectedSpells.toList(),
-                                          });
+                                          // ref
+                                          //     .read(characterProvider.notifier)
+                                          //     .updateSpells({
+                                          //   'cantrips':
+                                          //       selectedCantrips.toList(),
+                                          //   'spells': selectedSpells.toList(),
+                                          // });
+                                          ref.read(characterProvider.notifier).updateSpells(selectedSpells.toList());
+                                          ref.read(characterProvider.notifier).updateCantrips(selectedCantrips.toList());
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
                                               builder: (context) =>
-                                                  CharacterTraitScreen(
-                                                      characterName:
-                                                          'HARDCODED SPELL SELECTION LINE 688'),
+                                                  CharacterTraitScreen(),
                                             ),
                                           );
                                         },
