@@ -102,32 +102,48 @@ class ArmorDetailsScreen extends ConsumerWidget {
               const SizedBox(
                 height: 20,
               ),
-              Column(
+              Row(
                 children: [
-                  const Text(
-                    'Armor Class:',
-                    style: TextStyle(fontSize: 24),
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Colors.black, width: 5),
-                    ),
-                    child: SizedBox(
-                      width: 70,
-                      height: 70,
-                      child: Column(
-                        children: [
-
-                          const SizedBox(height: 10),
-                          Text(
-                            '${armor.armorClass}',
-                            style: const TextStyle(fontSize: 40),
-                          ),
-                        ],
+                  const Spacer(),
+                  Column(
+                    children: [
+                      const Text(
+                        'Armor Class:',
+                        style: TextStyle(fontSize: 24),
                       ),
-                    ),
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.black, width: 5),
+                        ),
+                        child: SizedBox(
+                          width: 70,
+                          height: 70,
+                          child: Row(
+                            children: [
+                              const Spacer(),
+                              Column(
+                                children: [
+                                  const SizedBox(height: 10),
+                                  Text(
+                                    '${armor.armorClass}',
+                                    style: const TextStyle(fontSize: 40),
+                                  ),
+                                ],
+                              ),
+                              const Spacer(),
+                            ],
+                          ),
+                        ),
+                      ),
+                      ElevatedButton(
+                          onPressed: () {
+                            showACDetails(context, armor);
+                          },
+                          child: const Text('Details'))
+                    ],
                   ),
+                  const Spacer(),
                 ],
               ),
             ],
@@ -135,5 +151,54 @@ class ArmorDetailsScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  showACDetails(context, ArmorItem armor) {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text("AC Details"),
+            content: Consumer(
+              builder: (context, ref, _) {
+                int acState = armor.armorClass;
+                ArmorType armorType = armor.armorType;
+
+                return Column(mainAxisSize: MainAxisSize.min, children: [
+                  if (armorType == ArmorType.Light)
+                    Row(
+                      children: [
+                        const Text("Light Armor: ",
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        Text('$acState + Dex Modifier'),
+                      ],
+                    ),
+                  if (armorType == ArmorType.Medium)
+                    Row(
+                      children: [
+                        const Text("Medium Armor: ",
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        Text('$acState + Dex Modifier (max 2)'),
+                      ],
+                    ),
+                  if (armorType == ArmorType.Heavy)
+                    Row(
+                      children: [
+                        const Text("Heavy Armor: ",
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        Text('$acState'),
+                      ],
+                    ),
+                ]);
+              },
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Close"),
+              ),
+            ],
+          );
+        });
   }
 }

@@ -24,6 +24,7 @@ class AddArmorWidget extends ConsumerWidget {
     final requiresAttunement = ref.watch(requiresAttunementProvider);
     final stealthDisadvantage = ref.watch(stealthDisadvantageProvider);
     final selectedCurrency = ref.watch(selectedCurrencyProvider);
+    var ac = ref.watch(selectedACProvider);
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -173,6 +174,8 @@ class AddArmorWidget extends ConsumerWidget {
             ),
             ElevatedButton(
               onPressed: () async {
+                ac = int.tryParse(armorClassController.text) ?? 7;
+                ref.read(selectedACProvider.notifier).state = ac;
                 ArmorItem toSave = ArmorItem(
                   id: selectedItem?.id ?? '',
                   name: nameController.text,
@@ -182,11 +185,13 @@ class AddArmorWidget extends ConsumerWidget {
                   requiresAttunement: requiresAttunement,
                   attunementDescription: attunementDescriptionController.text,
                   currency: selectedCurrency,
-                  armorClass: int.tryParse(armorClassController.text) ?? 7,
+                  armorClass: ref.read(selectedACProvider),
                   armorType: selectedArmorType!,
                   stealthDisadvantage: stealthDisadvantage,
                   baseArmor: ref.watch(selectedBaseArmorProvider),
                 );
+                // debugPrint(toSave.toString());
+                debugPrint(toSave.toMap().toString());
                 if(checkIfFieldsAreFilled(ref)) {
                   await ref.read(itemProvider.notifier).saveItem(
                     toSave,

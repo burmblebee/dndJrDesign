@@ -15,6 +15,7 @@ final selectedArmorTypeProvider = StateProvider<ArmorType?>((ref) => null);
 final selectedBaseArmorProvider = StateProvider<dynamic?>((ref) => null);
 final selectedCurrencyProvider = StateProvider<Currency>((ref) => Currency.gp);
 final stealthDisadvantageProvider = StateProvider<bool>((ref) => false);
+final selectedACProvider = StateProvider<int>((ref) => 0);
 
 
 
@@ -22,14 +23,14 @@ final stealthDisadvantageProvider = StateProvider<bool>((ref) => false);
 class ItemState {
   final List<Item> items;
   final Item? selectedItem;
-  late final CombatItem? selectedWeapon;
-  late final ArmorItem? selectedArmor;
+  // late final CombatItem? selectedWeapon;
+  // late final ArmorItem? selectedArmor;
 
   ItemState({
     required this.items,
     this.selectedItem,
-    this.selectedWeapon,
-    this.selectedArmor,
+    // this.selectedWeapon,
+    // this.selectedArmor,
   });
 
   // Item? get selectedWeapon =>
@@ -58,12 +59,13 @@ class ItemProvider extends StateNotifier<ItemState> {
 
   Future<void> saveItem(Item item) async {
 
-    if (item is ArmorItem) {
-      debugPrint("Saving ArmorItem with armorClass: ${item.armorClass}");
-    }
-    debugPrint("Item to save: ${item.toMap()}");
+    // if (item is ArmorItem) {
+    //   debugPrint("Saving ArmorItem with armorClass: ${item.armorClass}");
+    // }
+    // debugPrint("Item to save: ${item.toMap()}");
 
     // debugPrint("saveItem() was called");
+    debugPrint("Saving item: ${item.toMap()}");
     try {
     //  debugPrint("Saving item: ${item.toMap()}");
       bool isNewItem = item.id.isEmpty; // Check if it's a new item

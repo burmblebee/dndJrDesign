@@ -93,7 +93,7 @@ class Item {
       'weight': weight,
       'requiresAttunement': requiresAttunement,
       'attunementDescription': attunementDescription,
-      'type': 'Miscellaneous',
+     // 'type': 'Miscellaneous',
       'currency': currency.name,
     };
   }
@@ -176,7 +176,7 @@ class CombatItem extends Item {
   Map<String, dynamic> toMap() {
     final baseMap = super.toMap();
     baseMap.addAll({
-      'type': 'Weapon',
+      'itemType': itemType.name,
       'damageType1': damageType1.name,
       'damage1': damage1,
       'damageType2': damageType2?.name,
@@ -310,7 +310,7 @@ class ArmorItem extends Item {
       'armorClass': armorClass,
       'armorType': armorType.name,
       'stealthDisadvantage': stealthDisadvantage,
-      'baseArmor': baseArmor != null ? baseArmor.toString().split('.').last : null, // Get the enum name as string
+      'baseArmor': baseArmor.toString().split('.').last, // Get the enum name as string
     });
     return map;
   }
@@ -321,7 +321,11 @@ class ArmorItem extends Item {
       orElse: () => ArmorType.Light,
     );
 
+    debugPrint("Retrieved armorType: ${map['armorType']}"); // Debugging line
+
     dynamic baseArmor;
+    debugPrint("Retrieved baseArmor: ${map['baseArmor']}"); // Debugging line
+
     if (armorType == ArmorType.Light) {
       baseArmor = LightArmor.values.firstWhere(
             (e) => e.name == map['baseArmor'],
@@ -340,21 +344,54 @@ class ArmorItem extends Item {
     }
 
     return ArmorItem(
-      id: map['id'] ?? 'Unknown',
-      name: map['name'] ?? 'Unknown',  // Provide default for missing name
-      description: map['description'] ?? '',  // Provide default for missing description
-      price: map['price'] ?? 0,  // Default price if missing
-      armorClass: map['armorClass'] ?? 0,  // Default armorClass if missing
+      id: id, // Use provided id
+      name: map['name'] ?? 'Unknown',
+      description: map['description'] ?? '',
+      price: map['price'] ?? 0,
+      armorClass: map['armorClass'] ?? 7,
       armorType: armorType,
       stealthDisadvantage: map['stealthDisadvantage'] ?? false,
       baseArmor: baseArmor,
-      weight: map['weight'] ?? 0,  // Default weight if missing
+      weight: map['weight'] ?? 0,
       requiresAttunement: map['requiresAttunement'] ?? false,
-      attunementDescription: map['attunementDescription'] ?? '',  // Default to empty string if missing
+      attunementDescription: map['attunementDescription'] ?? '',
       currency: Currency.values.firstWhere(
             (e) => e.name == map['currency'],
         orElse: () => Currency.gp,
       ),
     );
   }
+
+
+  ArmorItem copyWith({
+    String? id,
+    String? name,
+    String? description,
+    int? price,
+    int? armorClass,
+    ArmorType? armorType,
+    bool? stealthDisadvantage,
+    dynamic? baseArmor,
+    int? weight,
+    bool? requiresAttunement,
+    String? attunementDescription,
+    Currency? currency,
+  }) {
+    return ArmorItem(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      price: price ?? this.price,
+      armorClass: armorClass ?? this.armorClass,
+      armorType: armorType ?? this.armorType,
+      stealthDisadvantage: stealthDisadvantage ?? this.stealthDisadvantage,
+      baseArmor: baseArmor ?? this.baseArmor,
+      weight: weight ?? this.weight,
+      requiresAttunement: requiresAttunement ?? this.requiresAttunement,
+      attunementDescription: attunementDescription ??
+          this.attunementDescription,
+      currency: currency ?? this.currency,
+    );
+  }
+
 }
