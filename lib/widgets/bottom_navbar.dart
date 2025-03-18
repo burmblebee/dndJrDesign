@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:warlocks_of_the_beach/screens/campaign_screen.dart';
+import 'package:warlocks_of_the_beach/screens/prelaunchcampaignscreen.dart';
 import '../diceRoller.dart'; // Import the DiceRollScreen
+
 
 class MainBottomNavBar extends StatefulWidget {
   const MainBottomNavBar({super.key});
@@ -34,11 +36,12 @@ class _MainBottomNavBarState extends State<MainBottomNavBar> {
         );
         break;
       case 2:
-        // Navigate to Your Content
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(builder: (context) => YourContentScreen()),
-        // );
+         // Navigate to Your Content
+         Navigator.push(
+           context,
+           // Correct Code: MaterialPageRoute(builder: (context) => YourContentScreen()),
+            MaterialPageRoute(builder: (context) => PreLaunchCampaignScreen()),
+         );
         break;
       case 3:
         // Navigate to Campaigns
