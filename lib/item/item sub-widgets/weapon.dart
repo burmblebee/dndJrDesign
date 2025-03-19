@@ -157,12 +157,30 @@ class AddWeaponWidget extends ConsumerWidget {
     final selectedWeaponCategory = ref.watch(selectedWeaponCategoryProvider);
     final selectedItemType = ref.watch(selectedItemTypeProvider);
     final selectedCurrency = ref.watch(selectedCurrencyProvider);
+    final selectedRarity = ref.watch(rarityProvider);
 
     return Expanded(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                DropdownButton<Rarity>(
+                  value: selectedRarity,
+                  items: Rarity.values.map((type) {
+                    return DropdownMenuItem<Rarity>(
+                      value: type,
+                      child: Text(type.toString().split('.').last),
+                    );
+                  }).toList(),
+                  onChanged: (rarity) {
+                    ref.read(rarityProvider.notifier).state = rarity!;
+                  },
+                ),
+              ],
+            ),
             Row(
               children: [
         SizedBox(
@@ -384,6 +402,7 @@ class AddWeaponWidget extends ConsumerWidget {
                   weaponCategory: selectedWeaponCategory ?? WeaponCategory.Simple,
                   currency: selectedCurrency,
                   weaponTypes: ref.read(selectedWeaponTypeProvider.notifier).state.toSet(),
+                  rarity: selectedRarity,
                 );
                 if(checkIfFieldsAreFilled()) {
                   await ref.read(itemProvider.notifier).saveItem(
@@ -435,6 +454,8 @@ class AddWeaponWidget extends ConsumerWidget {
     ref.read(selectedWeaponTypeProvider.notifier).state = {};
     ref.read(requiresAttunementProvider.notifier).state = false;
     ref.read(selectedItemTypeProvider.notifier).state = null;
+    ref.read(selectedCurrencyProvider.notifier).state = Currency.gp;
+    ref.read(rarityProvider.notifier).state = Rarity.Common;
     ref.read(itemProvider.notifier).resetSelectedItem();
   }
 }

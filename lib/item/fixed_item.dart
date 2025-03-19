@@ -57,9 +57,6 @@ enum ArmorType {
   Shield,
 }
 
-
-
-
 class Item {
   final String id;
   final String name;
@@ -70,6 +67,7 @@ class Item {
   final String? attunementDescription;
   final ItemType itemType;
   final Currency currency;
+  final Rarity rarity;
 
   Item({
     required this.itemType,
@@ -80,7 +78,8 @@ class Item {
     required this.weight,
     required this.requiresAttunement,
     this.attunementDescription,
-    this.currency = Currency.gp,
+    required this.currency,
+    required this.rarity,
   });
 
   Map<String, dynamic> toMap() {
@@ -93,8 +92,9 @@ class Item {
       'weight': weight,
       'requiresAttunement': requiresAttunement,
       'attunementDescription': attunementDescription,
-     // 'type': 'Miscellaneous',
+      // 'type': 'Miscellaneous',
       'currency': currency.name,
+      'rarity': rarity.name,
     };
   }
 
@@ -111,6 +111,9 @@ class Item {
       attunementDescription: map['attunementDescription'] ?? '',
       currency: Currency.values.firstWhere((e) => e.name == map['currency'],
           orElse: () => Currency.gp),
+      rarity: Rarity.values.firstWhere(
+        (e) => e.name == map['rarity'],
+      ),
     );
   }
 
@@ -123,6 +126,7 @@ class Item {
     bool? requiresAttunement,
     String? attunementDescription,
     Currency? currency,
+    Rarity? rarity,
   }) {
     return Item(
       itemType: itemType,
@@ -135,6 +139,7 @@ class Item {
       attunementDescription:
           attunementDescription ?? this.attunementDescription,
       currency: currency ?? this.currency,
+      rarity: rarity ?? this.rarity,
     );
   }
 }
@@ -161,6 +166,7 @@ class CombatItem extends Item {
     required this.weaponCategory,
     required Currency currency,
     required this.weaponTypes,
+    required Rarity rarity,
   }) : super(
             itemType: ItemType.Weapon,
             id: id,
@@ -170,7 +176,8 @@ class CombatItem extends Item {
             weight: weight,
             requiresAttunement: requiresAttunement,
             attunementDescription: attunementDescription,
-            currency: currency);
+            currency: currency,
+            rarity: rarity);
 
   @override
   Map<String, dynamic> toMap() {
@@ -210,9 +217,11 @@ class CombatItem extends Item {
           orElse: () => WeaponCategory.Simple),
       currency: Currency.values.firstWhere((e) => e.name == map['currency'],
           orElse: () => Currency.gp),
-      weaponTypes: Set.from(
-          (map['weaponTypes'] as List<dynamic>?)?.map((e) => WeaponType.values.firstWhere((type) => type.name == e)) ?? []
-    ),
+      weaponTypes: Set.from((map['weaponTypes'] as List<dynamic>?)?.map(
+              (e) => WeaponType.values.firstWhere((type) => type.name == e)) ??
+          []),
+      rarity: Rarity.values.firstWhere((e) => e.name == map['rarity'],
+          orElse: () => Rarity.Common),
     );
   }
 
@@ -231,6 +240,7 @@ class CombatItem extends Item {
     WeaponCategory? weaponCategory,
     Currency? currency,
     Set<WeaponType?>? weaponTypes,
+    Rarity? rarity,
   }) {
     return CombatItem(
       id: id ?? this.id,
@@ -248,6 +258,7 @@ class CombatItem extends Item {
       weaponCategory: weaponCategory ?? this.weaponCategory,
       currency: currency ?? this.currency,
       weaponTypes: weaponTypes ?? this.weaponTypes,
+      rarity: rarity ?? this.rarity,
     );
   }
 }
@@ -257,6 +268,7 @@ enum LightArmor {
   Leather,
   StuddedLeather,
 }
+
 enum MediumArmor {
   Hide,
   ChainShirt,
@@ -264,6 +276,7 @@ enum MediumArmor {
   Breastplate,
   HalfPlate,
 }
+
 enum HeavyArmor {
   RingMail,
   ChainMail,
@@ -290,18 +303,20 @@ class ArmorItem extends Item {
     required bool requiresAttunement,
     String? attunementDescription,
     required Currency currency,
+    required Rarity rarity,
   }) : super(
-    id: id,
-    itemType: ItemType.Armor,
-    name: name,
-    description: description,
-    price: price,
-    weight: weight,
-    requiresAttunement: requiresAttunement,
-    attunementDescription:
-    (requiresAttunement) ? attunementDescription : null,
-    currency: currency,
-  );
+          id: id,
+          itemType: ItemType.Armor,
+          name: name,
+          description: description,
+          price: price,
+          weight: weight,
+          requiresAttunement: requiresAttunement,
+          attunementDescription:
+              (requiresAttunement) ? attunementDescription : null,
+          currency: currency,
+          rarity: rarity,
+        );
 
   @override
   Map<String, dynamic> toMap() {
@@ -310,7 +325,8 @@ class ArmorItem extends Item {
       'armorClass': armorClass,
       'armorType': armorType.name,
       'stealthDisadvantage': stealthDisadvantage,
-      'baseArmor': baseArmor.toString().split('.').last, // Get the enum name as string
+      'baseArmor':
+          baseArmor.toString().split('.').last, // Get the enum name as string
     });
     // debugPrint(map.toString()); // Debugging line
 
@@ -319,7 +335,7 @@ class ArmorItem extends Item {
 
   factory ArmorItem.fromMap(String id, Map<String, dynamic> map) {
     ArmorType armorType = ArmorType.values.firstWhere(
-          (e) => e.name == map['armorType'],
+      (e) => e.name == map['armorType'],
       orElse: () => ArmorType.Light,
     );
 
@@ -332,17 +348,17 @@ class ArmorItem extends Item {
 
     if (armorType == ArmorType.Light) {
       baseArmor = LightArmor.values.firstWhere(
-            (e) => e.name == map['baseArmor'],
+        (e) => e.name == map['baseArmor'],
         orElse: () => LightArmor.Leather,
       );
     } else if (armorType == ArmorType.Medium) {
       baseArmor = MediumArmor.values.firstWhere(
-            (e) => e.name == map['baseArmor'],
+        (e) => e.name == map['baseArmor'],
         orElse: () => MediumArmor.Hide,
       );
     } else if (armorType == ArmorType.Heavy) {
       baseArmor = HeavyArmor.values.firstWhere(
-            (e) => e.name == map['baseArmor'],
+        (e) => e.name == map['baseArmor'],
         orElse: () => HeavyArmor.ChainMail,
       );
     }
@@ -361,12 +377,15 @@ class ArmorItem extends Item {
       requiresAttunement: map['requiresAttunement'] ?? false,
       attunementDescription: map['attunementDescription'] ?? '',
       currency: Currency.values.firstWhere(
-            (e) => e.name == map['currency'],
+        (e) => e.name == map['currency'],
         orElse: () => Currency.gp,
+      ),
+      rarity: Rarity.values.firstWhere(
+        (e) => e.name == map['rarity'],
+        orElse: () => Rarity.Common,
       ),
     );
   }
-
 
   ArmorItem copyWith({
     String? id,
@@ -381,6 +400,7 @@ class ArmorItem extends Item {
     bool? requiresAttunement,
     String? attunementDescription,
     Currency? currency,
+    Rarity? rarity,
   }) {
     return ArmorItem(
       id: id ?? this.id,
@@ -393,10 +413,128 @@ class ArmorItem extends Item {
       baseArmor: baseArmor ?? this.baseArmor,
       weight: weight ?? this.weight,
       requiresAttunement: requiresAttunement ?? this.requiresAttunement,
-      attunementDescription: attunementDescription ??
-          this.attunementDescription,
+      attunementDescription:
+          attunementDescription ?? this.attunementDescription,
       currency: currency ?? this.currency,
+      rarity: rarity ?? this.rarity,
+    );
+  }
+}
+
+enum UseType { Wear, Wield, Other }
+
+class WondrousItem extends Item {
+  final bool activationRequirement;
+  final String? activationDescription;
+  final bool consumable;
+  final int? charges;
+  final UseType? useType;
+  final String? resetCondition;
+  WondrousItem(
+      {required String id,
+      required String name,
+      required String description,
+      required int price,
+      required int weight,
+      required bool requiresAttunement,
+      String? attunementDescription,
+      required Rarity rarity,
+      required Currency currency,
+      required this.activationRequirement,
+      this.activationDescription,
+      required this.consumable,
+      this.charges,
+      this.useType,
+      this.resetCondition})
+      : super(
+          id: id,
+          itemType: ItemType.Wondrous,
+          name: name,
+          description: description,
+          price: price,
+          weight: weight,
+          requiresAttunement: requiresAttunement,
+          attunementDescription:
+              (requiresAttunement) ? attunementDescription : null,
+          currency: currency,
+          rarity: rarity,
+        );
+
+  @override
+  Map<String, dynamic> toMap() {
+    var map = super.toMap();
+    map.addAll({
+      'activationRequirement': activationRequirement,
+      'activationDescription': activationDescription,
+      'consumable': consumable,
+      'charges': charges,
+      'useType': useType?.name,
+    });
+    return map;
+  }
+
+  factory WondrousItem.fromMap(String id, Map<String, dynamic> map) {
+    return WondrousItem(
+      id: id, // Use provided id
+      name: map['name'] ?? 'Unknown',
+      description: map['description'] ?? '',
+      price: map['price'] ?? 0,
+      weight: map['weight'] ?? 0,
+      requiresAttunement: map['requiresAttunement'] ?? false,
+      attunementDescription: map['attunementDescription'] ?? '',
+      rarity: Rarity.values.firstWhere(
+        (e) => e.name == map['rarity'],
+        orElse: () => Rarity.Common,
+      ),
+      currency: Currency.values.firstWhere(
+        (e) => e.name == map['currency'],
+        orElse: () => Currency.gp,
+      ),
+      activationRequirement: map['activationRequirement'] ?? false,
+      activationDescription: map['activationDescription'],
+      consumable: map['consumable'] ?? false,
+      charges: map['charges'],
+      useType: map['useType'] != null
+          ? UseType.values.firstWhere((e) => e.name == map['useType'],
+              orElse: () => UseType.Other)
+          : null,
     );
   }
 
+  WondrousItem copyWith({
+    String? id,
+    String? name,
+    String? description,
+    int? price,
+    int? weight,
+    bool? requiresAttunement,
+    String? attunementDescription, // Corrected this
+    Rarity? rarity,
+    Currency? currency,
+    bool? activationRequirement,
+    String? activationDescription,
+    bool? consumable,
+    int? charges,
+    UseType? useType,
+  }) {
+    return WondrousItem(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      price: price ?? this.price,
+      weight: weight ?? this.weight,
+      requiresAttunement: requiresAttunement ?? this.requiresAttunement,
+      attunementDescription: attunementDescription ??
+          this.attunementDescription, // Corrected reference
+      rarity: rarity ?? this.rarity,
+      currency: currency ?? this.currency,
+      activationRequirement:
+          activationRequirement ?? this.activationRequirement,
+      activationDescription:
+          activationDescription ?? this.activationDescription,
+      consumable: consumable ?? this.consumable,
+      charges: charges ?? this.charges,
+      useType: useType ?? this.useType,
+    );
+  }
 }

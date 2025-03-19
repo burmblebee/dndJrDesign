@@ -1,3 +1,4 @@
+import 'package:dnd_jr_design/item/item%20sub-widgets/wondrous.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'item sub-widgets/armor.dart';
@@ -18,8 +19,8 @@ class AddItem extends ConsumerWidget {
         return AddArmorWidget();
       case ItemType.Potion:
       // return AddPotionWidget();
-      case ItemType.Scroll:
-      // return AddScrollWidget();
+      case ItemType.Wondrous:
+        return AddWondrousWidget();
       case ItemType.Miscellaneous:
       // return AddMiscWidget();
       default:

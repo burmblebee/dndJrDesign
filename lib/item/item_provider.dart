@@ -16,6 +16,10 @@ final selectedBaseArmorProvider = StateProvider<dynamic?>((ref) => null);
 final selectedCurrencyProvider = StateProvider<Currency>((ref) => Currency.gp);
 final stealthDisadvantageProvider = StateProvider<bool>((ref) => false);
 final selectedACProvider = StateProvider<int>((ref) => 0);
+final activationProvider = StateProvider<bool>((ref) => false);
+final consumableProvider = StateProvider<bool>((ref) => false);
+final rarityProvider = StateProvider<Rarity>((ref) => Rarity.Common);
+final useTypeProvider = StateProvider<UseType?>((ref) => null);
 
 
 
