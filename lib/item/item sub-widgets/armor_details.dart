@@ -42,7 +42,7 @@ class ArmorDetailsScreen extends ConsumerWidget {
             children: [
               Text('Name: ${armor.name}', style: const TextStyle(fontSize: 24)),
               const SizedBox(height: 10),
-              Text('Description:',
+              const Text('Description:',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               Text(armor.description, style: const TextStyle(fontSize: 20)),
               const SizedBox(height: 20),

@@ -14,13 +14,20 @@ class WeaponDetailsScreen extends ConsumerWidget {
     if (weapon == null) {
       return Scaffold(
         appBar: AppBar(title: const Text('Weapon Details')),
-        body: const Center(child: Text('Weapon not found!')),
+        body: const Center(
+          child: Text(
+            'Weapon not found!',
+            style: TextStyle(fontSize: 20),
+          ),
+        ),
       );
     }
-
+//tybiljkjhgcfrtfyuhijkngfcdxesrfyujikhgfdsfyujik
     return Scaffold(
       appBar: AppBar(
-        title: Text(weapon.name),
+        title: Text(
+          weapon.name,
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.delete),
@@ -47,20 +54,30 @@ class WeaponDetailsScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Name: ${weapon.name}',
-                  style: const TextStyle(fontSize: 24)),
+              Text(
+                'Name: ${weapon.name}',
+                style: const TextStyle(fontSize: 24),
+              ),
               const SizedBox(height: 10),
-              Text('Description:',
-                  style: Theme.of(context).textTheme.titleMedium),
-              Text(weapon.description),
+              const Text(
+                'Description:',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              Text(
+                weapon.description,
+                style: const TextStyle(fontSize: 20),
+              ),
               const SizedBox(height: 20),
               Row(
                 children: [
                   const Text(
                     'Category: ',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
-                  Text(weapon.weaponCategory.name),
+                  Text(
+                    weapon.weaponCategory.name,
+                    style: const TextStyle(fontSize: 20),
+                  ),
                 ],
               ),
               const SizedBox(height: 20),
@@ -68,54 +85,90 @@ class WeaponDetailsScreen extends ConsumerWidget {
                 children: [
                   const Text(
                     'Price: ',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
-                  Text('${weapon.price} ${weapon.currency.name}'),
+                  Text(
+                    '${weapon.price} ${weapon.currency.name}',
+                    style: const TextStyle(fontSize: 20),
+                  ),
                 ],
               ),
               Row(
                 children: [
                   const Text(
                     'Weight: ',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
-                  Text('${weapon.weight} lbs'),
+                  Text(
+                    '${weapon.weight} lbs',
+                    style: const TextStyle(fontSize: 20),
+                  ),
                 ],
               ),
-              const Divider(height: 20),
+              const SizedBox(height: 20),
               if (weapon.requiresAttunement)
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Requires Attunement',
-                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    const Text(
+                      'Requires Attunement',
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
                     if (weapon.attunementDescription?.isNotEmpty ?? false)
-                      Text(weapon.attunementDescription!),
+                      Text(
+                        weapon.attunementDescription!,
+                        style: const TextStyle(fontSize: 20),
+                      ),
                     const SizedBox(height: 20),
                   ],
                 ),
-              Text('Damage:', style: Theme.of(context).textTheme.titleMedium),
+              const Text(
+                'Damage:',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
               Text(
-                  '${weapon.damage1} (${weapon.damageType1?.name ?? 'Unknown'})'),
+                '${weapon.damage1} (${weapon.damageType1.name})',
+                style: const TextStyle(fontSize: 20),
+              ),
               if (weapon.damage2 != null && weapon.damage2!.isNotEmpty)
                 Text(
-                    '${weapon.damage2} (${weapon.damageType2?.name ?? 'Unknown'})'),
-              const Divider(height: 20),
-              Text('Weapon Types:',
-                  style: Theme.of(context).textTheme.titleMedium),
+                  '${weapon.damage2} (${weapon.damageType2?.name})',
+                  style: const TextStyle(fontSize: 20),
+                ),
+              const SizedBox(height: 20),
+              const Text(
+                'Weapon Types:',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
               Wrap(
                 spacing: 8.0,
-                children: (weapon.weaponTypes?.isNotEmpty ?? false)
-                    ? weapon.weaponTypes!.map((type) {
-                        // Safely check if 'type' is non-null before accessing its properties
-                        if (type != null) {
-                          return Chip(label: Text(type.name));
-                        } else {
-                          return const Chip(label: Text('Unknown'));
-                        }
-                      }).toList()
-                    : [const Chip(label: Text('None'))],
-              )
+                children: (weapon.weaponTypes.isNotEmpty)
+                    ? weapon.weaponTypes.map((type) {
+                  if (type != null) {
+                    return Chip(
+                      label: Text(
+                        type.name,
+                        style: const TextStyle(fontSize: 20),
+                      ),
+                    );
+                  } else {
+                    return const Chip(
+                      label: Text(
+                        'Unknown',
+                        style: TextStyle(fontSize: 20),
+                      ),
+                    );
+                  }
+                }).toList()
+                    : [
+                  const Chip(
+                    label: Text(
+                      'None',
+                      style: TextStyle(fontSize: 20),
+                    ),
+                  )
+                ],
+              ),
             ],
           ),
         ),
