@@ -312,6 +312,8 @@ class ArmorItem extends Item {
       'stealthDisadvantage': stealthDisadvantage,
       'baseArmor': baseArmor.toString().split('.').last, // Get the enum name as string
     });
+    // debugPrint(map.toString()); // Debugging line
+
     return map;
   }
 
@@ -321,10 +323,12 @@ class ArmorItem extends Item {
       orElse: () => ArmorType.Light,
     );
 
-    debugPrint("Retrieved armorType: ${map['armorType']}"); // Debugging line
-
+    // debugPrint(map.toString()); // Debugging line
+    //
+    // debugPrint("Retrieved armorType: ${map['armorType']}"); // Debugging line
+    //
     dynamic baseArmor;
-    debugPrint("Retrieved baseArmor: ${map['baseArmor']}"); // Debugging line
+    // debugPrint("Retrieved baseArmor: ${map['baseArmor']}"); // Debugging line
 
     if (armorType == ArmorType.Light) {
       baseArmor = LightArmor.values.firstWhere(
@@ -342,6 +346,7 @@ class ArmorItem extends Item {
         orElse: () => HeavyArmor.ChainMail,
       );
     }
+    // debugPrint("Retrieved baseArmor: ${map['baseArmor']}"); // Debugging line
 
     return ArmorItem(
       id: id, // Use provided id

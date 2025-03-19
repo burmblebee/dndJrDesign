@@ -25,6 +25,7 @@ class AddArmorWidget extends ConsumerWidget {
     final stealthDisadvantage = ref.watch(stealthDisadvantageProvider);
     final selectedCurrency = ref.watch(selectedCurrencyProvider);
     var ac = ref.watch(selectedACProvider);
+    final selectedBaseArmor = ref.watch(selectedBaseArmorProvider);
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -188,7 +189,7 @@ class AddArmorWidget extends ConsumerWidget {
                   armorClass: ref.read(selectedACProvider),
                   armorType: selectedArmorType!,
                   stealthDisadvantage: stealthDisadvantage,
-                  baseArmor: ref.watch(selectedBaseArmorProvider),
+                  baseArmor: selectedBaseArmor,
                 );
                 // debugPrint(toSave.toString());
                 debugPrint(toSave.toMap().toString());

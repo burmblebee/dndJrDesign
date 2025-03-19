@@ -43,28 +43,27 @@ class ArmorDetailsScreen extends ConsumerWidget {
               Text('Name: ${armor.name}', style: const TextStyle(fontSize: 24)),
               const SizedBox(height: 10),
               Text('Description:',
-                  style: Theme.of(context).textTheme.titleMedium),
-              Text(armor.description),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              Text(armor.description, style: const TextStyle(fontSize: 20)),
               const SizedBox(height: 20),
               Row(
                 children: [
                   const Text(
                     'Type: ',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                   ),
-                  Text(armor.armorType.name),
+                  Text(armor.armorType.name, style: const TextStyle(fontSize: 20)),
                 ],
               ),
               Row(
                 children: [
                   const Text(
                     'Base Armor: ',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                   ),
                   Text(
-                    armor.baseArmor != null
-                        ? armor.baseArmor.toString().split('.').last
-                        : 'None', // Handle null case if baseArmor is not set
+                    armor.baseArmor.toString().split('.').last,
+                    style: const TextStyle(fontSize: 20),
                   ),
                 ],
               ),
@@ -73,29 +72,29 @@ class ArmorDetailsScreen extends ConsumerWidget {
                 children: [
                   const Text(
                     'Price: ',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                   ),
-                  Text('${armor.price} ${armor.currency.name}'),
+                  Text('${armor.price} ${armor.currency.name}', style: const TextStyle(fontSize: 20)),
                 ],
               ),
               Row(
                 children: [
                   const Text(
                     'Weight: ',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                   ),
-                  Text('${armor.weight} lbs'),
+                  Text('${armor.weight} lbs', style: const TextStyle(fontSize: 20)),
                 ],
               ),
-              const Divider(height: 20),
+              const SizedBox(height:20),
               if (armor.requiresAttunement)
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text('Requires Attunement',
-                        style: TextStyle(fontWeight: FontWeight.bold)),
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
                     if (armor.attunementDescription?.isNotEmpty ?? false)
-                      Text(armor.attunementDescription!),
+                      Text(armor.attunementDescription!, style: const TextStyle(fontSize: 16)),
                     const SizedBox(height: 20),
                   ],
                 ),
@@ -146,6 +145,18 @@ class ArmorDetailsScreen extends ConsumerWidget {
                   const Spacer(),
                 ],
               ),
+              const SizedBox(
+                height: 20,
+              ),
+              Row(
+                children: [
+                  const Text(
+                    'Stealth Disadvantage: ',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                  ),
+                  Text(armor.stealthDisadvantage ? 'Yes' : 'No', style: const TextStyle(fontSize: 20)),
+                ],
+              )
             ],
           ),
         ),

@@ -97,7 +97,7 @@ class ItemProvider extends StateNotifier<ItemState> {
       final querySnapshot = await _firestore.collection('items').get();
       final items = querySnapshot.docs.map((doc) {
         final data = doc.data();
-        final type = data['type'];
+        final type = data['itemType'];
         final id = doc.id;
 
         switch (type) {
@@ -119,7 +119,7 @@ class ItemProvider extends StateNotifier<ItemState> {
   void selectItem(Item item) {
     // debugPrint('Selecting item with type: ${item.itemType}');
     if (item.itemType == ItemType.Armor) {
-      final armorItem = ArmorItem.fromMap(item.id, item.toMap());
+      ArmorItem armorItem = ArmorItem.fromMap(item.id, item.toMap());
       // debugPrint('Selected an armor item: ${armorItem.name}');
       // debugPrint('ArmorType: ${armorItem.armorType}, BaseArmor: ${armorItem.baseArmor}');
       state = state.copyWith(selectedItem: armorItem);
