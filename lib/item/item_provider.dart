@@ -109,6 +109,8 @@ class ItemProvider extends StateNotifier<ItemState> {
             return CombatItem.fromMap(id, data);
           case 'Armor':
             return ArmorItem.fromMap(id, data);
+          case 'Wondrous':
+            return WondrousItem.fromMap(id, data);
           default:
             return Item.fromMap(id, data);
         }
@@ -131,7 +133,12 @@ class ItemProvider extends StateNotifier<ItemState> {
       final combatItem = CombatItem.fromMap(item.id, item.toMap());
       // debugPrint('Selected a combat item: ${combatItem.name}');
       state = state.copyWith(selectedItem: combatItem);
-    } else {
+    } else if(item.itemType == ItemType.Wondrous) {
+      final wondrousItem = WondrousItem.fromMap(item.id, item.toMap());
+      state = state.copyWith(selectedItem: wondrousItem);
+    }
+
+    else {
       // debugPrint('Selected a regular item: ${item.name}');
       state = state.copyWith(selectedItem: item);
     }

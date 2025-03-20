@@ -22,12 +22,10 @@ class WeaponDetailsScreen extends ConsumerWidget {
         ),
       );
     }
-//tybiljkjhgcfrtfyuhijkngfcdxesrfyujikhgfdsfyujik
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          weapon.name,
-        ),
+        title: Text(weapon.name),
         actions: [
           IconButton(
             icon: const Icon(Icons.delete),
@@ -112,7 +110,8 @@ class WeaponDetailsScreen extends ConsumerWidget {
                   children: [
                     const Text(
                       'Requires Attunement',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                     if (weapon.attunementDescription?.isNotEmpty ?? false)
                       Text(
@@ -144,30 +143,30 @@ class WeaponDetailsScreen extends ConsumerWidget {
                 spacing: 8.0,
                 children: (weapon.weaponTypes.isNotEmpty)
                     ? weapon.weaponTypes.map((type) {
-                  if (type != null) {
-                    return Chip(
-                      label: Text(
-                        type.name,
-                        style: const TextStyle(fontSize: 20),
-                      ),
-                    );
-                  } else {
-                    return const Chip(
-                      label: Text(
-                        'Unknown',
-                        style: TextStyle(fontSize: 20),
-                      ),
-                    );
-                  }
-                }).toList()
+                        if (type != null) {
+                          return Chip(
+                            label: Text(
+                              type.name,
+                              style: const TextStyle(fontSize: 20),
+                            ),
+                          );
+                        } else {
+                          return const Chip(
+                            label: Text(
+                              'Unknown',
+                              style: TextStyle(fontSize: 20),
+                            ),
+                          );
+                        }
+                      }).toList()
                     : [
-                  const Chip(
-                    label: Text(
-                      'None',
-                      style: TextStyle(fontSize: 20),
-                    ),
-                  )
-                ],
+                        const Chip(
+                          label: Text(
+                            'None',
+                            style: TextStyle(fontSize: 20),
+                          ),
+                        )
+                      ],
               ),
             ],
           ),
