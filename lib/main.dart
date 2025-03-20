@@ -3,6 +3,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'combat/DMcombatScreen.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(); // Make sure Firebase is initialized
@@ -10,7 +12,7 @@ Future<void> main() async {
   runApp(
     ProviderScope( // Wrap with ProviderScope
       child: MaterialApp(
-        home: const NPCListScreen(),
+        home: const DMCombatScreen(campaignId: '',),
         //DMCombatScreen(campaignId: '15'),
         theme: ThemeData(
           brightness: Brightness.dark,

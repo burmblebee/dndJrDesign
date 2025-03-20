@@ -1,3 +1,4 @@
+import 'package:dnd_jr_design/combat/premade_attacks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'character.dart';
@@ -9,7 +10,7 @@ class DMCombatScreen extends ConsumerWidget {
   final String campaignId;
 
   void attackBottomSheet(
-      BuildContext context, List<Character> characters, WidgetRef ref) {
+      BuildContext context, List<Character> characters, WidgetRef ref, int currentTurnIndex) {
     int damage = 0;
     String? selectedCharacter;
 
@@ -65,17 +66,33 @@ class DMCombatScreen extends ConsumerWidget {
                             },
                           ),
                           const SizedBox(height: 20),
-                          TextField(
-                            decoration: const InputDecoration(
-                              labelText: 'Damage',
-                              border: OutlineInputBorder(),
-                            ),
-                            keyboardType: TextInputType.number,
-                            onChanged: (value) {
-                              damage = int.tryParse(value) ?? 0;
-                            },
+                          // TextField(
+                          //   decoration: const InputDecoration(
+                          //     labelText: 'Damage',
+                          //     border: OutlineInputBorder(),
+                          //   ),
+                          //   keyboardType: TextInputType.number,
+                          //   onChanged: (value) {
+                          //     damage = int.tryParse(value) ?? 0;
+                          //   },
+                          // ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              ElevatedButton(onPressed: (){},
+                                  child: const Text('Premade Attack')),
+                              ElevatedButton(onPressed: (){
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => PremadeAttack(
+                                            campaignId: campaignId, attackOptions: characters[currentTurnIndex].attacks,)));
+                              },
+                                  child: const Text('Roll For Damage')),
+                            ],
                           ),
-                          const SizedBox(height: 20),
+
+                          const SizedBox(height: 10),
                           ElevatedButton(
                               onPressed: () {
                                 Navigator.push(
@@ -85,6 +102,7 @@ class DMCombatScreen extends ConsumerWidget {
                                             campaignId: campaignId)));
                               },
                               child: const Text('Roll for Damage')),
+                          const SizedBox(height: 20),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
@@ -644,7 +662,7 @@ class DMCombatScreen extends ConsumerWidget {
             children: [
               ElevatedButton(
                   onPressed: () {
-                    attackBottomSheet(context, characters, ref);
+                    attackBottomSheet(context, characters, ref, currentTurnIndex);
                   },
                   child: const Text('Attack')),
               const SizedBox(width: 20),

@@ -6,6 +6,8 @@ import 'npc_provider.dart';
 class NPCDetailScreen extends ConsumerWidget {
   const NPCDetailScreen({super.key});
 
+  //TODO: Add ability to add and remove attacks from this screen
+
   @override
   @override
   Widget build(BuildContext context, WidgetRef ref) {
