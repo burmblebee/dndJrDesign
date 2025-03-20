@@ -74,6 +74,14 @@ class _CharacterNameState extends ConsumerState<CharacterName> {
                 const SizedBox(width: 30),
                 ElevatedButton.icon(
                   onPressed: () {
+                    if (_characterNameController.text.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Character name cannot be empty!'),
+                        ),
+                      );
+                      return;
+                    }
                     ref.read(characterProvider.notifier).updateCharacterName(_characterNameController.text);
                     Navigator.push(
                       context,

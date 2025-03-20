@@ -23,7 +23,13 @@ class _ClassDataWidgetState extends State<ClassDataWidget> {
         children: [
           Text(
             widget.className,
-            style: theme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+            // style: theme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+            
           ),
           const SizedBox(height: 10),
 
@@ -68,7 +74,12 @@ class _ClassDataWidgetState extends State<ClassDataWidget> {
             padding: const EdgeInsets.symmetric(vertical: 8.0),
             child: Text(
               'Skills:',
-              style: theme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              // style: theme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
             ),
           ),
           Text(

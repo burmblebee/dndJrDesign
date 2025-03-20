@@ -898,7 +898,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                 const SizedBox(width: 30),
                 ElevatedButton.icon(
                   onPressed: () {
-                    pushCharacterToFirebase('12345');
+                    // pushCharacterToFirebase('12345');
                     if (pointsLeft > 0) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(

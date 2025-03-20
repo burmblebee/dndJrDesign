@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../widgets/navigation/main_appbar.dart';
 import '../widgets/navigation/main_drawer.dart';
@@ -13,46 +16,35 @@ class CampaignScreen extends StatefulWidget {
 }
 
 class _CampaignScreenState extends State<CampaignScreen> {
-  final List<Campaign> _campaigns = [
-    Campaign(
-        id: '1',
-        imageUrl: 'assets/Wizard_Lady.jpg',
-        title: 'Journey to Waterdeep',
-        isDM: true),
-    Campaign(
-        id: '2',
-        imageUrl: 'assets/evocation-wizard-dnd-2024-2.webp',
-        title: 'The Lost Mines of Phandelver',
-        isDM: false),
-    Campaign(
-        id: '3',
-        imageUrl: 'assets/Wizard_Lady.jpg',
-        title: 'The Curse of Strahd',
-        isDM: false),
-    Campaign(
-        id: '4',
-        imageUrl: 'assets/Wizard_Lady.jpg',
-        title: 'The Rise of Tiamat',
-        isDM: true),
-    Campaign(
-        id: '5',
-        imageUrl: 'assets/Wizard_Lady.jpg',
-        title: 'The Tomb of Annihilation',
-        isDM: false),
-    Campaign(
-        id: '6',
-        imageUrl: 'assets/Wizard_Lady.jpg',
-        title: 'The Dragon Heist',
-        isDM: true),
-  ];
+  final List<Campaign> _campaigns = [];
 
   String _gameType(bool isDm) {
     return isDm ? 'Dungeon Master' : 'Player';
   }
 
   Stream<List<Campaign>> _getCampaigns() async* {
-    await Future.delayed(const Duration(seconds: 1));
-    yield _campaigns;
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      yield [];
+      return;
+    }
+
+    final snapshot = await FirebaseFirestore.instance
+        .collection('app_user_profiles')
+        .doc(user.uid)
+        .collection('campaigns')
+        .get();
+
+    final campaigns = snapshot.docs
+        .map((doc) => Campaign(
+              id: doc.id,
+              imageUrl: doc['imageUrl'],
+              title: doc['title'],
+              isDM: doc['isDM'],
+            ))
+        .toList();
+
+    yield campaigns;
   }
 
   @override
@@ -116,10 +108,15 @@ class _CampaignScreenState extends State<CampaignScreen> {
                                     ),
                                   ],
                                 ),
-                                child: Image.asset(
-                                  campaign.imageUrl,
-                                  fit: BoxFit.cover,
-                                ),
+                                child: campaign.imageUrl != null
+                                    ? Image.file(
+                                        File(campaign.imageUrl!),
+                                        fit: BoxFit.cover,
+                                      )
+                                    : Image.asset(
+                                        'assets/evocation-wizard-dnd-2024-2.webp',
+                                        fit: BoxFit.cover,
+                                      ),
                               ),
                             ),
                             Center(

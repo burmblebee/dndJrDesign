@@ -1,37 +1,155 @@
 import 'package:flutter/material.dart';
-import 'google_sign_in.dart';
+import '../home_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
+class LoginScreen extends StatelessWidget {
+  const LoginScreen({Key? key}) : super(key: key);
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  void loginPopup(BuildContext context) {
+    TextEditingController emailController = TextEditingController();
+    TextEditingController passwordController = TextEditingController();
 
-  @override
-  _LoginScreenState createState() => _LoginScreenState();
-}
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Login"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: emailController,
+                decoration: const InputDecoration(labelText: 'Email'),
+              ),
+              TextField(
+                controller: passwordController,
+                decoration: const InputDecoration(labelText: 'Password'),
+                obscureText: true,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                try {
+                  await FirebaseAuth.instance.signInWithEmailAndPassword(
+                    email: emailController.text.trim(),
+                    password: passwordController.text.trim(),
+                  );
+                  Navigator.pop(context); // Close popup
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => HomePage()),
+                  );
+                } catch (e) {
+                  Navigator.pop(context); // Close popup on failure
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Login failed: $e")),
+                  );
+                }
+              },
+              child: const Text("Login"),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
-class _LoginScreenState extends State<LoginScreen> {
-  final GoogleSignInProvider _googleSignInProvider = GoogleSignInProvider();
+  void signupPopup(BuildContext context) {
+    TextEditingController emailController = TextEditingController();
+    TextEditingController passwordController = TextEditingController();
 
-  Future<void> _handleGoogleSignIn() async {
-    final userCredential = await _googleSignInProvider.signInWithGoogle();
-    if (userCredential != null) {
-      print("Google Sign-In Successful: ${userCredential.user?.displayName}");
-      // Navigate to next screen (e.g., home screen)
-    } else {
-      print("Google Sign-In Canceled");
-    }
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Sign Up"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: emailController,
+                decoration: const InputDecoration(labelText: 'Email'),
+              ),
+              TextField(
+                controller: passwordController,
+                decoration: const InputDecoration(labelText: 'Password'),
+                obscureText: true,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                try {
+                  await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                    email: emailController.text.trim(),
+                    password: passwordController.text.trim(),
+                  );
+                  Navigator.pop(context); // Close popup
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => HomePage()),
+                  );
+                } catch (e) {
+                  Navigator.pop(context); // Close popup on failure
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Signup failed: $e")),
+                  );
+                }
+              },
+              child: const Text("Sign Up"),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
-      body: Center(
-        child: ElevatedButton.icon(
-          icon: Image.asset('assets/google_logo.png', height: 24), // Ensure asset exists
-          label: const Text("Sign in with Google"),
-          onPressed: _handleGoogleSignIn,
-        ),
+      appBar: AppBar(title: const Text('Authentication')),
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Center(
+              // Centers the scaled image
+              child: FractionallySizedBox(
+                widthFactor: 1.2, // 120% of the screen width
+                heightFactor: 1.2, // 120% of the screen height
+                child: ColorFiltered(
+                  colorFilter: ColorFilter.mode(
+                      Colors.amberAccent.withOpacity(0.7), BlendMode.srcATop),
+                  child: Image.asset(
+                    'assets/dragon.png',
+                    fit: BoxFit
+                        .contain, // Ensures the image scales while maintaining aspect ratio
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.email),
+                  label: const Text("Sign in with Email"),
+                  onPressed: () => loginPopup(context), // Open login popup
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.person_add),
+                  label: const Text("Sign Up"),
+                  onPressed: () => signupPopup(context), // Open signup popup
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

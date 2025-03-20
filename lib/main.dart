@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:warlocks_of_the_beach/login_screen.dart';
 import 'package:warlocks_of_the_beach/screens/campaign_screen.dart';
 import 'package:warlocks_of_the_beach/screens/dnd_forms/character_name.dart';
-import 'package:warlocks_of_the_beach/screens/dnd_forms/race_selection.dart';
-import 'package:warlocks_of_the_beach/screens/dnd_forms/equipment_selection.dart';
-import 'firebase_options.dart'; 
-
-
+import 'firebase_options.dart';
+import 'splash_screen.dart'; // Import the SplashScreen
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Ensure this is the first line
@@ -15,7 +13,7 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  runApp(const MyApp(),); // Run app AFTER Firebase initializes
+  runApp(const MyApp()); // Run app AFTER Firebase initializes
 }
 
 class MyApp extends StatelessWidget {
@@ -26,7 +24,7 @@ class MyApp extends StatelessWidget {
     return ProviderScope(
       child: MaterialApp(
         title: 'Warlocks of the Beach',
-        theme: ThemeData( 
+        theme: ThemeData(
           brightness: Brightness.dark,
           primaryColor: const Color(0xFF464538), // Dark olive green
           scaffoldBackgroundColor: const Color(0xFF464538), // Deep earthy green
@@ -48,7 +46,6 @@ class MyApp extends StatelessWidget {
             style: ButtonStyle(
               backgroundColor: WidgetStateProperty.all<Color>(Color.fromARGB(255, 28, 28, 34)),
             ),
-            
           ),
           bottomNavigationBarTheme: const BottomNavigationBarThemeData(
             backgroundColor: Color(0xFF25291C),
@@ -77,11 +74,11 @@ class MyApp extends StatelessWidget {
         ),
         initialRoute: '/',
         routes: {
+          '/': (context) => const SplashScreen(), 
           '/character_creator': (context) => const CharacterName(),
-
+          '/campaign_screen': (context) => const CampaignScreen(),
+          '/login_screen': (context) => const LoginScreen(),
         },
-        home: const CampaignScreen(),
-        
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:warlocks_of_the_beach/home_screen.dart';
 
 class MainDrawer extends StatelessWidget{
   const MainDrawer({super.key});
@@ -25,7 +26,7 @@ class MainDrawer extends StatelessWidget{
             leading: const Icon(Icons.home),
             title: const Text('Home', style: TextStyle(color: Colors.white),),
             onTap: () {
-              Navigator.of(context).pushReplacementNamed('/');
+              Navigator.of(context).push(MaterialPageRoute(builder: (context) => HomePage()));
             },
           ),
           const Divider(),

@@ -1,14 +1,83 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
 import 'package:warlocks_of_the_beach/providers/character_provider.dart';
 import 'package:warlocks_of_the_beach/widgets/main_appbar.dart';
 import 'package:warlocks_of_the_beach/widgets/navigation/bottom_navbar.dart';
 import 'package:warlocks_of_the_beach/widgets/navigation/main_drawer.dart';
-import 'package:warlocks_of_the_beach/widgets/dnd_form_widgets/spell_tile.dart';
-import 'package:warlocks_of_the_beach/data/spell and cantrips/spell_data.dart';
+import 'package:warlocks_of_the_beach/screens/campaign_screen.dart';
 
 class SummarizationScreen extends ConsumerWidget {
   const SummarizationScreen({super.key});
+
+ 
+
+  Future<void> _sendCharacterDataToFirestore(BuildContext context, WidgetRef ref) async {
+    final character = ref.read(characterProvider);
+    if (FirebaseAuth.instance.currentUser == null) {
+      return null;
+    } else {
+    final User user = FirebaseAuth.instance.currentUser!;
+    final uuid = user.uid;
+    // final uuid = userCredential.user?.uid;
+
+    final characterData = {
+      
+      'name': character.name,
+      'race': character.race,
+      'class': character.characterClass,
+      'background': character.background,
+      'alignment': character.traits['alignment'] ?? '',
+      'faith': character.traits['faith'] ?? '',
+      'lifestyle': character.traits['lifestyle'] ?? '',
+      'hair': character.traits['hair'] ?? '',
+      'eyes': character.traits['eyes'] ?? '',
+      'skin': character.traits['skin'] ?? '',
+      'height': character.traits['height'] ?? '',
+      'weight': character.traits['weight'] ?? '',
+      'age': character.traits['age'] ?? '',
+      'gender': character.traits['gender'] ?? '',
+      'personalityTraits': character.traits['personalityTraits'] ?? '',
+      'ideals': character.traits['ideals'] ?? '',
+      'bonds': character.traits['bonds'] ?? '',
+      'flaws': character.traits['flaws'] ?? '',
+      'organizations': character.traits['organization'] ?? '',
+      'allies': character.traits['allies'] ?? '',
+      'enemies': character.traits['enemies'] ?? '',
+      'backstory': character.traits['backstory'] ?? '',
+      'other': character.traits['other'] ?? '',
+      'abilityScores': {
+        'Strength': character.abilityScores['Strength'],
+        'Dexterity': character.abilityScores['Dexterity'],
+        'Constitution': character.abilityScores['Constitution'],
+        'Intelligence': character.abilityScores['Intelligence'],
+        'Wisdom': character.abilityScores['Wisdom'],
+        'Charisma': character.abilityScores['Charisma'],
+      },
+      'weapons': character.weapons,
+      'cantrips': character.cantrips,
+      'spells': character.spells,
+    };
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('app_user_profiles')
+          .doc(uuid)
+          .collection('characters')
+          .doc('${character.name}')
+          .set(characterData);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Character data sent to Firestore successfully!')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to send character data: $e')),
+      );
+    }
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -74,21 +143,63 @@ class SummarizationScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 20),
             Text(
-              'Cantrips',
+              'Spells & Cantrips',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
             const SizedBox(height: 10),
-            Column(
-              children: character.cantrips.map((cantrip) => _buildCantripTile(context, cantrip)).toList(),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'Spells',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            const SizedBox(height: 10),
-            Column(
-              children: character.spells.map((spell) => _buildSpellTile(context, spell)).toList(),
+            if (character.cantrips.isNotEmpty) ...[
+              Text(
+                'Cantrips',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 5),
+              Column(
+                children: character.cantrips.map((cantrip) => _buildMagicTile(context, cantrip)).toList(),
+              ),
+            ],
+            if (character.spells.isNotEmpty) ...[
+              const SizedBox(height: 15),
+              Text(
+                'Level 1 Spells',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 5),
+              Column(
+                children: character.spells.map((spell) => _buildMagicTile(context, spell)).toList(),
+              ),
+            ],
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  label: const Text("Back"),
+                  style: ElevatedButton.styleFrom(
+                    // backgroundColor: customColor,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+                const SizedBox(width: 30),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    _sendCharacterDataToFirestore(context, ref);
+                    // ref.read(characterProvider.notifier).updateSelectedRace(_selectedRace);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CampaignScreen(),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.arrow_forward, color: Colors.white),
+                  label: const Text("Finish"),
+                  style: ElevatedButton.styleFrom(
+                    // backgroundColor: ,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -113,167 +224,17 @@ class SummarizationScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildSpellTile(BuildContext context, String spell) {
+  Widget _buildMagicTile(BuildContext context, String name) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: ListTile(
         tileColor: Theme.of(context).listTileTheme.tileColor,
         title: Text(
-          spell,
+          name,
           style: Theme.of(context).textTheme.bodyMedium,
         ),
-        trailing: IconButton(
-          icon: Icon(Icons.info_outline, color: Theme.of(context).iconTheme.color),
-          onPressed: () => _showSpellInfoDialog(context, spell),
-        ),
+        // No trailing icon button
       ),
     );
-  }
-
-  Widget _buildCantripTile(BuildContext context, String cantrip) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: ListTile(
-        tileColor: Theme.of(context).listTileTheme.tileColor,
-        title: Text(
-          cantrip,
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
-        trailing: IconButton(
-          icon: Icon(Icons.info_outline, color: Theme.of(context).iconTheme.color),
-          onPressed: () => _showCantripInfoDialog(context, cantrip),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _showSpellInfoDialog(BuildContext context, String spellName) async {
-    final spellData = await _getSpellData(spellName);
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: Colors.black,
-          title: Text(
-            spellName,
-            style: const TextStyle(
-                fontWeight: FontWeight.bold, fontSize: 20, color: Colors.white),
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  spellData['description'] ?? 'No description available',
-                  style: const TextStyle(color: Colors.white),
-                ),
-                const Divider(height: 30, color: Colors.grey),
-                Text(
-                  'Range: ${spellData['range'] ?? 'N/A'}',
-                  style: const TextStyle(color: Colors.white),
-                ),
-                Text(
-                  'Components: ${spellData['components']?.join(', ') ?? 'N/A'}',
-                  style: const TextStyle(color: Colors.white),
-                ),
-                Text(
-                  'Duration: ${spellData['duration'] ?? 'N/A'}',
-                  style: const TextStyle(color: Colors.white),
-                ),
-                Text(
-                  'Level: ${spellData['level'] ?? 'N/A'}',
-                  style: const TextStyle(color: Colors.white),
-                ),
-                Text(
-                  'School: ${spellData['school'] ?? 'N/A'}',
-                  style: const TextStyle(color: Colors.white),
-                ),
-                Text(
-                  'Cast Time: ${spellData['castTime'] ?? 'N/A'}',
-                  style: const TextStyle(color: Colors.white),
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Close', style: TextStyle(color: Colors.white)),
-            )
-          ],
-        );
-      },
-    );
-  }
-
-  Future<void> _showCantripInfoDialog(BuildContext context, String cantripName) async {
-    final cantripData = await _getCantripData(cantripName);
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: Colors.black,
-          title: Text(
-            cantripName,
-            style: const TextStyle(
-                fontWeight: FontWeight.bold, fontSize: 20, color: Colors.white),
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  cantripData['description'] ?? 'No description available',
-                  style: const TextStyle(color: Colors.white),
-                ),
-                const Divider(height: 30, color: Colors.grey),
-                Text(
-                  'Range: ${cantripData['range'] ?? 'N/A'}',
-                  style: const TextStyle(color: Colors.white),
-                ),
-                Text(
-                  'Components: ${cantripData['components']?.join(', ') ?? 'N/A'}',
-                  style: const TextStyle(color: Colors.white),
-                ),
-                Text(
-                  'Duration: ${cantripData['duration'] ?? 'N/A'}',
-                  style: const TextStyle(color: Colors.white),
-                ),
-                Text(
-                  'Level: ${cantripData['level'] ?? 'N/A'}',
-                  style: const TextStyle(color: Colors.white),
-                ),
-                Text(
-                  'School: ${cantripData['school'] ?? 'N/A'}',
-                  style: const TextStyle(color: Colors.white),
-                ),
-                Text(
-                  'Cast Time: ${cantripData['castTime'] ?? 'N/A'}',
-                  style: const TextStyle(color: Colors.white),
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Close', style: TextStyle(color: Colors.white)),
-            )
-          ],
-        );
-      },
-    );
-  }
-
-  Future<Map<String, dynamic>> _getSpellData(String spellName) async {
-    // Replace this with your actual logic to fetch the spell data
-    // For example, you might fetch it from a JSON file or a database
-    return spellsByClass['Wizard']?['FirstLevel']?.firstWhere((spell) => spell['name'] == spellName, orElse: () => {}) ?? {};
-  }
-
-  Future<Map<String, dynamic>> _getCantripData(String cantripName) async {
-    // Replace this with your actual logic to fetch the cantrip data
-    // For example, you might fetch it from a JSON file or a database
-    return spellsByClass['Wizard']?['Cantrips']?.firstWhere((cantrip) => cantrip['name'] == cantripName, orElse: () => {}) ?? {};
   }
 }
