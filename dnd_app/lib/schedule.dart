@@ -1,6 +1,8 @@
 import 'package:dnd_app/add_session.dart';
 import 'package:flutter/material.dart';
 import 'package:dnd_app/event.dart';
+import 'package:intl/intl.dart';
+
 
 class Schedule extends StatefulWidget {
   final Map<DateTime, List<Event>> events; // Receiving events from AddSession
@@ -42,8 +44,8 @@ class _ScheduleState extends State<Schedule> {
 
   // Format the next scheduled session date
   String nextSessionText = nextSession != null
-      ? '${nextSession.month}/${nextSession.day}/${nextSession.year}'
-      : '';
+       ? '${nextSession.month}/${nextSession.day}/${nextSession.year}'
+       : 'No upcoming session';
 
     return Scaffold(
       backgroundColor: Color(0xFF464538),
@@ -79,7 +81,7 @@ class _ScheduleState extends State<Schedule> {
           SizedBox(height: 10),
           //this is the next scheduled session text + date
           Text(
-            'Next Scheduled Session: $nextSessionText',
+            'Next Session: $nextSessionText',
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.white,
@@ -118,7 +120,7 @@ class _ScheduleState extends State<Schedule> {
             width: 328,
             decoration: BoxDecoration(
               //should be grey bg with white text
-               color: Color.fromARGB(255, 241, 241, 192),
+               color: Color.fromARGB(81, 0, 0, 0),
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
                 color: Colors.black,
@@ -130,67 +132,67 @@ class _ScheduleState extends State<Schedule> {
               children: [
                 // Scheduled Sessions text
                 Text(
-                  "Scheduled Sessions:",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.black,
-                  ),
-                ),
-                SizedBox(height: 20),
-                // If no events, show this message
-                widget.events.isEmpty
-                    ? Center(
-                        child: Text(
-                          'No scheduled sessions yet!',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 16,
-                          ),
-                        ),
-                      )
-                    : Expanded(
-                        child: ListView.builder(
-                          itemCount: widget.events.length,
-                          itemBuilder: (context, index) {
-                            DateTime eventDate = widget.events.keys.elementAt(index);
-                            List<Event> eventsForDate = widget.events[eventDate]!;
+  "Upcoming Sessions:",
+  textAlign: TextAlign.center,
+  style: TextStyle(
+    fontSize: 20,
+    color: Colors.white,
+  ),
+),
+SizedBox(height: 20),
+// If no events, show this message
+widget.events.isEmpty
+    ? Center(
+        child: Text(
+          'No scheduled sessions yet!',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+          ),
+        ),
+      )
+    : Expanded(
+        child: ListView.builder(
+          itemCount: widget.events.length,
+          itemBuilder: (context, index) {
+            DateTime eventDate = widget.events.keys.elementAt(index);
+            List<Event> eventsForDate = widget.events[eventDate]!;
 
-                            return Center(  // Centers the event item
-                              child: Container(
-                                margin: EdgeInsets.symmetric(vertical: 8),
-                                padding: EdgeInsets.all(8), // Half the height of the container
-                                width: 164, // Keep the width same as the parent container
-                                decoration: BoxDecoration(
-                                  color: Color(0xFF25291C),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: Colors.black),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.center,  // Ensures the date and events are centered
-                                  children: [
-                                    Text(
-                                      '${eventDate.toLocal()}'.split(' ')[0], // Format the date
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    SizedBox(height: 4),
-                                    ...eventsForDate.map((event) {
-                                      return Text(
-                                        event.title,
-                                        style: TextStyle(color: Colors.white),
-                                      );
-                                    }).toList(),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                        ),
+            return Center(  // Centers the event item
+              child: Container(
+                margin: EdgeInsets.symmetric(vertical: 8),
+                padding: EdgeInsets.all(8), // Half the height of the container
+                width: 164, // Keep the width same as the parent container
+                decoration: BoxDecoration(
+                  color: Color.fromARGB(255, 241, 241, 192),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.black),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,  // Ensures the date and events are centered
+                  children: [
+                    Text(
+                      DateFormat('M/d/y').format(eventDate), // Format the date
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: Colors.black,
                       ),
+                    ),
+                    SizedBox(height: 4),
+                    ...eventsForDate.map((event) {
+                      return Text(
+                        event.title,
+                        style: TextStyle(color: Colors.black),
+                      );
+                    }).toList(),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
                       SizedBox(height: 10),
           //will add session button
           ElevatedButton(
