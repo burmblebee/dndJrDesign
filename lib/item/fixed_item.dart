@@ -516,6 +516,7 @@ class WondrousItem extends Item {
     bool? consumable,
     int? charges,
     UseType? useType,
+    String? resetCondition,
   }) {
     return WondrousItem(
       id: id ?? this.id,
@@ -535,6 +536,7 @@ class WondrousItem extends Item {
       consumable: consumable ?? this.consumable,
       charges: charges ?? this.charges,
       useType: useType ?? this.useType,
+      resetCondition: resetCondition ?? this.resetCondition,
     );
   }
 }
