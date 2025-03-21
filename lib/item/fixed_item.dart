@@ -2,16 +2,23 @@ import 'package:flutter/material.dart';
 
 enum ItemType {
   Armor,
-  Potion,
-  Ring,
-  Rod,
-  Scroll,
-  Staff,
-  Wand,
   Weapon,
   Wondrous,
-  Miscellaneous
+//  Miscellaneous
 }
+
+// enum ItemType {
+//   Armor,
+//   Potion,
+//   Ring,
+//   Rod,
+//   Scroll,
+//   Staff,
+//   Wand,
+//   Weapon,
+//   Wondrous,
+//   Miscellaneous
+// }
 
 enum WeaponType {
   melee,
