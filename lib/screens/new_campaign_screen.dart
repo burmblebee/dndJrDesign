@@ -24,11 +24,13 @@ class _NewCampaignScreenState extends State<NewCampaignScreen> {
   bool _isDM = false;
 
   Future<void> _pickImage() async {
-    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    final pickedFile =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       final directory = await getApplicationDocumentsDirectory();
       final fileName = path.basename(pickedFile.path);
-      final savedImage = await File(pickedFile.path).copy('${directory.path}/$fileName');
+      final savedImage =
+          await File(pickedFile.path).copy('${directory.path}/$fileName');
       setState(() {
         _imageFile = savedImage;
       });
@@ -126,14 +128,15 @@ class _NewCampaignScreenState extends State<NewCampaignScreen> {
         child: Column(
           children: [
             Text("Join a Campaign", style: TextStyle(fontSize: 24)),
-            const Divider(color: Colors.black),
+            const Divider(color: Colors.grey),
             Form(
               key: _joinFormKey,
               child: Column(
                 children: [
                   TextFormField(
                     controller: _campaignCodeController,
-                    decoration: const InputDecoration(labelText: 'Campaign Code'),
+                    decoration:
+                        const InputDecoration(labelText: 'Campaign Code'),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter a campaign code';
@@ -143,22 +146,29 @@ class _NewCampaignScreenState extends State<NewCampaignScreen> {
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton(
-                    onPressed: () => _joinCampaign(_campaignCodeController.text),
-                    child: const Text('Join Campaign'),
+                    onPressed: () =>
+                        _joinCampaign(_campaignCodeController.text),
+                    child: Text('Join Campaign',
+                        style: TextStyle(
+                          color: Theme.of(context).textTheme.bodyMedium?.color,
+                        )),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 40),
             Text("Create a New Campaign", style: TextStyle(fontSize: 24)),
-            const Divider(color: Colors.black),
+            const Divider(
+              color: Colors.grey,
+            ),
             Form(
               key: _createFormKey,
               child: Column(
                 children: [
                   TextFormField(
                     controller: _titleController,
-                    decoration: const InputDecoration(labelText: 'Campaign Title'),
+                    decoration:
+                        const InputDecoration(labelText: 'Campaign Title'),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter a campaign title';
@@ -169,16 +179,22 @@ class _NewCampaignScreenState extends State<NewCampaignScreen> {
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: _pickImage,
-                    child: const Text('Pick Image'),
+                    child: Text('Pick Image',
+                        style: TextStyle(
+                          color: Theme.of(context).textTheme.bodyMedium?.color,
+                        )),
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: _saveCampaignToFirestore,
-                    child: const Text('Save Campaign'),
+                    child: Text('Save Campaign',
+                        style: TextStyle(
+                          color: Theme.of(context).textTheme.bodyMedium?.color,
+                        )),
                   ),
-                  _imageFile != null
-                      ? Image.file(_imageFile!)
-                      : const Text('No image selected'),
+                  // _imageFile != null
+                  //     ? Image.file(_imageFile!)
+                  //     : const Text('No image selected'),
                 ],
               ),
             ),

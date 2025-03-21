@@ -29,20 +29,33 @@ class _CampaignScreenState extends State<CampaignScreen> {
       return;
     }
 
-    final snapshot = await FirebaseFirestore.instance
+    // Fetch the list of campaign IDs from the user's profile
+    final userCampaignsSnapshot = await FirebaseFirestore.instance
         .collection('app_user_profiles')
         .doc(user.uid)
-        .collection('campaigns')
+        .collection('your_campaigns')
         .get();
 
-    final campaigns = snapshot.docs
-        .map((doc) => Campaign(
-              id: doc.id,
-              imageUrl: doc['imageUrl'],
-              title: doc['title'],
-              isDM: doc['isDM'],
-            ))
-        .toList();
+    final campaignIds = userCampaignsSnapshot.docs.map((doc) => doc.id).toList();
+
+    // Fetch the actual campaign data using the campaign IDs
+    final campaigns = <Campaign>[];
+    for (final campaignId in campaignIds) {
+      final campaignSnapshot = await FirebaseFirestore.instance
+          .collection('user_campaigns')
+          .doc(campaignId)
+          .get();
+
+      if (campaignSnapshot.exists) {
+        final campaignData = campaignSnapshot.data()!;
+        campaigns.add(Campaign(
+          id: campaignId,
+          imageUrl: campaignData['imageUrl'],
+          title: campaignData['title'],
+          isDM: campaignData['DM'] == user.uid,
+        ));
+      }
+    }
 
     yield campaigns;
   }
@@ -108,7 +121,7 @@ class _CampaignScreenState extends State<CampaignScreen> {
                                     ),
                                   ],
                                 ),
-                                child: campaign.imageUrl != null
+                                child: campaign.imageUrl != null && campaign.imageUrl!.isNotEmpty
                                     ? Image.file(
                                         File(campaign.imageUrl!),
                                         fit: BoxFit.cover,
