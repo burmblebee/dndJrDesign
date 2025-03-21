@@ -22,11 +22,10 @@ class _CampaignScreenState extends State<CampaignScreen> {
     return isDm ? 'Dungeon Master' : 'Player';
   }
 
-  Stream<List<Campaign>> _getCampaigns() async* {
+  Future<List<Campaign>> _getCampaigns() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      yield [];
-      return;
+      return [];
     }
 
     // Fetch the list of campaign IDs from the user's profile
@@ -57,7 +56,7 @@ class _CampaignScreenState extends State<CampaignScreen> {
       }
     }
 
-    yield campaigns;
+    return campaigns;
   }
 
   @override
@@ -72,8 +71,8 @@ class _CampaignScreenState extends State<CampaignScreen> {
       body: Column(
         children: [
           Expanded(
-            child: StreamBuilder<List<Campaign>>(
-              stream: _getCampaigns(),
+            child: FutureBuilder<List<Campaign>>(
+              future: _getCampaigns(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -171,12 +170,13 @@ class _CampaignScreenState extends State<CampaignScreen> {
                 shadowColor: Colors.black,
                 elevation: 10,
               ),
-              onPressed: () {
-                Navigator.of(context).push(
+              onPressed: () async {
+                await Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) => const NewCampaignScreen(),
                   ),
                 );
+                setState(() {}); // Trigger a rebuild to refresh the campaigns
               },
               child: Text(
                 'Create or Join a New Campaign',
