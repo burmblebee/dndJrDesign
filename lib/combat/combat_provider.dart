@@ -1,7 +1,13 @@
+import 'package:dnd_jr_design/dice/dice_provider.dart';
 import 'package:dnd_jr_design/npc/npc.dart';
 import 'package:riverpod/riverpod.dart';
 import 'character.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+final diceRollProvider = StateProvider<int>((ref) => 0);
+
+
+
 
 class CombatState {
   final List<Character> characters;
@@ -20,7 +26,7 @@ class CombatState {
 class CombatStateNotifier extends StateNotifier<CombatState> {
   CombatStateNotifier()
       : super(CombatState(characters: [
-    Character(name: 'Suffering', health: 2, maxHealth: 100, armorClass: 17, attacks: [AttackOption(name: 'help', diceConfig: [1, 4, 6, 0, 0, 0])]),
+    Character(name: 'Suffering', health: 2, maxHealth: 100, armorClass: 17, attacks: [AttackOption(name: 'help', diceConfig: [1, 4, 6, 0, 0, 0]), AttackOption(name: 'pain', diceConfig: [1, 4, 6, 0, 0, 0]), AttackOption(name: 'fear', diceConfig: [1, 4, 6, 0, 0, 0])]),
     Character(name: 'Help', health: 17, maxHealth: 100, armorClass: 9, attacks: []),
     Character(name: 'Pain', health: 9, maxHealth: 100, armorClass: 10, attacks: []),
     Character(name: 'Fear', health: 2, maxHealth: 100, armorClass: 17, attacks: []),

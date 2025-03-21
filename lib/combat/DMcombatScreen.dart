@@ -1,3 +1,4 @@
+import 'package:dnd_jr_design/combat/attack_roll.dart';
 import 'package:dnd_jr_design/combat/premade_attacks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,152 +10,206 @@ class DMCombatScreen extends ConsumerWidget {
   const DMCombatScreen({super.key, required this.campaignId});
   final String campaignId;
 
-  void attackBottomSheet(
-      BuildContext context, List<Character> characters, WidgetRef ref, int currentTurnIndex) {
-    int damage = 0;
+  void attackBottomSheet(BuildContext context, List<Character> characters,
+      WidgetRef ref, int currentTurnIndex) {
     String? selectedCharacter;
+
+    void handleRollComplete(int total) {
+      ref.read(diceRollProvider.notifier).state = total;
+    }
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            List<String> characterNames = characters
-                .where((character) => character.health > 0)
-                .map((character) => character.name)
-                .toList();
+        return Expanded(
+          child: Consumer(
+            builder: (context, ref, child) {
+              int damage = ref.watch(diceRollProvider);
 
-            return Padding(
-              padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).viewInsets.bottom),
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: Color.fromARGB(255, 159, 158, 154),
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                ),
-                child: Wrap(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
+              return StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  List<String> characterNames = characters
+                      .where((character) => character.health > 0)
+                      .map((character) => character.name)
+                      .toList();
+
+                  return Padding(
+                    padding: EdgeInsets.only(
+                        bottom: MediaQuery.of(context).viewInsets.bottom),
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        color: Color.fromARGB(255, 159, 158, 154),
+                        borderRadius:
+                            BorderRadius.vertical(top: Radius.circular(16)),
+                      ),
+                      child: Wrap(
                         children: [
-                          const Text(
-                            'Attack',
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          DropdownButton<String>(
-                            hint: const Text("Select a Character"),
-                            value: selectedCharacter,
-                            items: characterNames.map((name) {
-                              return DropdownMenuItem<String>(
-                                value: name,
-                                child: Text(name),
-                              );
-                            }).toList(),
-                            onChanged: (value) {
-                              setState(() {
-                                selectedCharacter = value;
-                              });
-                            },
-                          ),
-                          const SizedBox(height: 20),
-                          // TextField(
-                          //   decoration: const InputDecoration(
-                          //     labelText: 'Damage',
-                          //     border: OutlineInputBorder(),
-                          //   ),
-                          //   keyboardType: TextInputType.number,
-                          //   onChanged: (value) {
-                          //     damage = int.tryParse(value) ?? 0;
-                          //   },
-                          // ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              ElevatedButton(onPressed: (){},
-                                  child: const Text('Premade Attack')),
-                              ElevatedButton(onPressed: (){
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => PremadeAttack(
-                                            campaignId: campaignId, attackOptions: characters[currentTurnIndex].attacks,)));
-                              },
-                                  child: const Text('Roll For Damage')),
-                            ],
-                          ),
-
-                          const SizedBox(height: 10),
-                          ElevatedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => DiceRollScreen(
-                                            campaignId: campaignId)));
-                              },
-                              child: const Text('Roll for Damage')),
-                          const SizedBox(height: 20),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              ElevatedButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                                child: const Text('Cancel'),
-                              ),
-                              ElevatedButton(
-                                onPressed: () {
-                                  if (selectedCharacter != null) {
-                                    int newHealth = characters
-                                            .firstWhere((char) =>
-                                                char.name == selectedCharacter)
-                                            .health -
-                                        damage;
-                                    ref
-                                        .read(combatProvider.notifier)
-                                        .updateHealth(
-                                            selectedCharacter!, newHealth);
-                                    Navigator.pop(context);
-                                  } else {
-                                    showDialog(
-                                      context: context,
-                                      builder: (context) => AlertDialog(
-                                        title:
-                                            const Text('No Character Selected'),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.of(context).pop();
-                                            },
-                                            child: const Text('OK'),
-                                          ),
-                                        ],
-                                      ),
+                          Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                const Text(
+                                  'Attack',
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                const SizedBox(height: 20),
+                                DropdownButton<String>(
+                                  hint: const Text("Select a Character"),
+                                  value: selectedCharacter,
+                                  items: characterNames.map((name) {
+                                    return DropdownMenuItem<String>(
+                                      value: name,
+                                      child: Text(name),
                                     );
-                                  }
-                                },
-                                child: const Text('Attack'),
-                              ),
-                            ],
+                                  }).toList(),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      selectedCharacter = value;
+                                    });
+                                  },
+                                ),
+                                const SizedBox(height: 20),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    ElevatedButton(
+                                        onPressed: () {
+                                          Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      PremadeAttack(
+                                                        campaignId: campaignId,
+                                                        attackOptions: characters[
+                                                                currentTurnIndex]
+                                                            .attacks,
+                                                        onRollComplete:
+                                                            handleRollComplete,
+                                                      )));
+                                        },
+                                        child: const Text('Premade Attack')),
+                                    ElevatedButton(
+                                        onPressed: () {
+                                          showDialog(
+                                              context: context,
+                                              builder: (context) => AlertDialog(
+                                                title: const Text('Enter Damage'),
+                                                content: TextField(
+                                                  decoration: const InputDecoration(
+                                                    labelText: 'Damage Amount',
+                                                    border: OutlineInputBorder(),
+                                                  ),
+                                                  keyboardType: TextInputType.number,
+                                                  onChanged: (value) {
+                                                    setState(() {
+                                                      damage = int.tryParse(value) ?? 0;
+                                                    });
+                                                  },
+                                                ),
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed: () {
+                                                      Navigator.pop(context);
+                                                    },
+                                                    child: const Text('Cancel'),
+                                                  ),
+                                                  TextButton(onPressed: (){
+                                                    ref.read(diceRollProvider.notifier).state = damage;
+                                                    Navigator.pop(context);
+                                                  }, child: const Text('Save'))
+                                                ],
+                                              ));
+                                        },
+                                        child: const Text('Enter Damage')),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  AttackRoll(
+                                                      campaignId: campaignId, onRollComplete: handleRollComplete,)));
+                                    },
+                                    child: const Text('Roll for Damage')),
+                                const SizedBox(height: 20),
+                                Text(
+                                  'Damage: $damage',
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                const SizedBox(height: 20),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        ref.read(diceRollProvider.notifier).state = 0;
+                                        Navigator.pop(context);
+                                      },
+                                      child: const Text('Cancel'),
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        if (selectedCharacter != null) {
+                                          int newHealth = characters
+                                                  .firstWhere((char) =>
+                                                      char.name ==
+                                                      selectedCharacter)
+                                                  .health -
+                                              damage;
+                                          ref
+                                              .read(combatProvider.notifier)
+                                              .updateHealth(
+                                                  selectedCharacter!, newHealth);
+                                          Navigator.pop(context);
+                                        } else {
+                                          showDialog(
+                                            context: context,
+                                            builder: (context) => AlertDialog(
+                                              title: const Text(
+                                                  'No Character Selected'),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                  child: const Text('OK'),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        }
+                                      },
+                                      child: const Text('Attack'),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
                     ),
-                  ],
-                ),
-              ),
-            );
-          },
+                  );
+                },
+              );
+            },
+          ),
         );
       },
     );
@@ -520,7 +575,6 @@ class DMCombatScreen extends ConsumerWidget {
   }
 
   void startNewCombatBottomSheet() {}
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     List<Character> characters = ref.read(combatProvider).characters;
@@ -565,7 +619,6 @@ class DMCombatScreen extends ConsumerWidget {
             const SizedBox(height: 20),
             currentTurn(context, characters, currentTurnIndex, ref),
             const Spacer(),
-
 
             const SizedBox(height: 20),
           ],
@@ -636,8 +689,8 @@ class DMCombatScreen extends ConsumerWidget {
     );
   }
 
-  Widget currentTurn(
-      context, List<Character> characters, int currentTurnIndex, WidgetRef ref) {
+  Widget currentTurn(context, List<Character> characters, int currentTurnIndex,
+      WidgetRef ref) {
     return Container(
       padding: const EdgeInsets.all(8.0),
       height: 300,
@@ -647,22 +700,22 @@ class DMCombatScreen extends ConsumerWidget {
       ),
       child: Column(
         children: [
-
-              Text(
-                'Current Turn: ${characters[currentTurnIndex].name}',
-                style: const TextStyle(color: Colors.white, fontSize: 22),
-              ),
-              Text(
-                'Health: ${characters[currentTurnIndex].health}/${characters[0].maxHealth}',
-                style: const TextStyle(color: Colors.white, fontSize: 18),
-              ),
+          Text(
+            'Current Turn: ${characters[currentTurnIndex].name}',
+            style: const TextStyle(color: Colors.white, fontSize: 22),
+          ),
+          Text(
+            'Health: ${characters[currentTurnIndex].health}/${characters[0].maxHealth}',
+            style: const TextStyle(color: Colors.white, fontSize: 18),
+          ),
           const SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               ElevatedButton(
                   onPressed: () {
-                    attackBottomSheet(context, characters, ref, currentTurnIndex);
+                    attackBottomSheet(
+                        context, characters, ref, currentTurnIndex);
                   },
                   child: const Text('Attack')),
               const SizedBox(width: 20),

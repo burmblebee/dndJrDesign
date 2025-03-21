@@ -1,23 +1,22 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dnd_jr_design/npc/npc.dart';
 import 'package:flutter/material.dart';
 import 'package:hexagon/hexagon.dart';
+
 import '../dice/die.dart';
 
-class PremadeAttack extends StatefulWidget {
-  PremadeAttack({required this.campaignId, required this.attackOptions, required this.onRollComplete, super.key});
+class AttackRoll extends StatefulWidget {
+  AttackRoll({this.campaignId, required this.onRollComplete, super.key});
 
-  final String campaignId;
-  final List<AttackOption> attackOptions;
+  String? campaignId;
   final void Function(int total) onRollComplete;
 
   @override
-  _PremadeAttackState createState() => _PremadeAttackState();
+  _AttackRollState createState() => _AttackRollState();
 }
 
-class _PremadeAttackState extends State<PremadeAttack>
+class _AttackRollState extends State<AttackRoll>
     with TickerProviderStateMixin {
   final Random _random = Random();
   List<int> diceValues = [];
@@ -35,7 +34,6 @@ class _PremadeAttackState extends State<PremadeAttack>
   ]; // d4, d6, d8, d10, d12, d20, d100
   late int width;
   late int height;
-  late AttackOption attackOption;
 
   List<int> doubleRoll = [0, 0];
 
@@ -59,8 +57,6 @@ class _PremadeAttackState extends State<PremadeAttack>
       vsync: this,
       duration: const Duration(seconds: 1),
     )..repeat(reverse: true); // Keep it animating while rolling
-    (widget.attackOptions.isNotEmpty) ? attackOption = widget.attackOptions[0] : attackOption = AttackOption(name: 'Default', diceConfig: [0, 0, 0, 0, 0, 0, 0]);
-    diceToRoll = attackOption.diceConfig;
   }
 
   void rollDice() {
@@ -230,6 +226,71 @@ class _PremadeAttackState extends State<PremadeAttack>
     );
   }
 
+  Widget buildDice(String label, Widget shape, int index) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          decoration: BoxDecoration(
+              border: Border.all(color: Colors.black),
+              borderRadius: BorderRadius.circular(10),
+              color: const Color(0xFF25291C)),
+          height: 150,
+          width: 150,
+          child: Column(
+            children: [
+              const Spacer(),
+              Stack(
+                alignment: Alignment.center, // Centers the text
+                children: [
+                  shape, // Draws the dice shape
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: onDiceColor, // Ensure contrast
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  const Spacer(),
+                  IconButton(
+                    onPressed: () {
+                      if (diceToRoll[index] > 0) {
+                        setState(() {
+                          diceToRoll[index]--;
+                        });
+                      }
+                    },
+                    icon: const Icon(Icons.arrow_downward),
+                  ),
+                  Text(
+                    diceToRoll[index].toString(),
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        diceToRoll[index]++;
+                      });
+                    },
+                    icon: const Icon(Icons.arrow_upward),
+                  ),
+                  const Spacer()
+                ],
+              ),
+              const Spacer()
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   void advantageToggle() {
     setState(() {
       advantage = !advantage;
@@ -243,8 +304,7 @@ class _PremadeAttackState extends State<PremadeAttack>
     setState(() {
       disadvantage = !disadvantage;
       advantage = false;
-      disadvantageButtonColor =
-          disadvantage ? Colors.red : const Color(0xFF25291C);
+      disadvantageButtonColor = disadvantage ? Colors.red : const Color(0xFF25291C);
       advantageButtonColor = const Color(0xFF25291C);
     });
   }
@@ -295,7 +355,7 @@ class _PremadeAttackState extends State<PremadeAttack>
             builder: (context, child) {
               return Transform.rotate(
                 angle:
-                    diceRotations[index] + _animationController.value * 2 * pi,
+                diceRotations[index] + _animationController.value * 2 * pi,
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
@@ -318,6 +378,40 @@ class _PremadeAttackState extends State<PremadeAttack>
     );
   }
 
+  Widget removeDiceContainer() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          decoration: BoxDecoration(
+              border: Border.all(color: Colors.black),
+              borderRadius: BorderRadius.circular(10),
+              color: const Color(0xFF25291C)),
+          height: 150,
+          width: 150,
+          child: Column(
+            children: [
+              const Spacer(),
+              Icon(Icons.cancel_outlined, size: 75, color: diceColor),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  const Spacer(),
+                  ElevatedButton(
+                      onPressed: removeDice(),
+                      child: const Text("Remove Dice",
+                          style: TextStyle(color: Colors.white))),
+                  const Spacer(),
+                ],
+              ),
+              const Spacer()
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   void dispose() {
     _animationController.dispose();
@@ -328,86 +422,136 @@ class _PremadeAttackState extends State<PremadeAttack>
   Widget build(BuildContext context) {
     width = MediaQuery.of(context).size.width.toInt();
     height = MediaQuery.of(context).size.height.toInt();
-    if (widget.attackOptions.isEmpty) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('No Attack Options')),
-        body: const Center(child: Text('No attack options available.')),
-      );
-    }
-    if (!showDice) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Premade Attack')),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 20),
-              DropdownButton(
-                  items: widget.attackOptions.map((AttackOption option) {
-                    return DropdownMenuItem<AttackOption>(
-                      value: option,
-                      child: Text(option.name),
-                    );
-                  }).toList(),
-                  onChanged: (AttackOption? selectedOption) {
-                    if (selectedOption != null) {
-                      setState(() {
-                        attackOption = selectedOption;
-                        diceToRoll = attackOption.diceConfig;
-                      });
-                    }
-                  },
-                  value: attackOption,
-                  hint: const Text("Select Attack Option")),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+
+    return Scaffold(
+      appBar: AppBar(title: const Text("Dice Roller")),
+      body: Stack(
+        children: [
+          if (showDice) rollDiceWidget(),
+          if (!showDice)
+            Center(
+              child: Column(
+                mainAxisSize:
+                MainAxisSize.min, // Prevents unnecessary expansion
                 children: [
-                  ElevatedButton(
-                    onPressed: advantageToggle,
-                    style: ButtonStyle(
-                        backgroundColor:
+                  const SizedBox(height: 15), // Added spacing
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      buildDice(
+                          "d4",
+                          CustomPaint(
+                              painter: TrianglePainter(diceColor),
+                              size: const Size(75, 75)),
+                          0),
+                      buildDice(
+                          "d6",
+                          Container(color: diceColor, width: 75, height: 75),
+                          1),
+                    ],
+                  ),
+                  const SizedBox(height: 15), // Added spacing
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      buildDice(
+                          "d8",
+                          Transform.rotate(
+                              angle: pi / 4,
+                              child: Container(
+                                  color: diceColor, width: 65, height: 65)),
+                          2),
+                      buildDice(
+                          "d10",
+                          CustomPaint(
+                              painter: DecagonPainter(diceColor),
+                              size: const Size(80, 80)),
+                          3),
+                    ],
+                  ),
+                  const SizedBox(height: 15),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      buildDice(
+                          "d12",
+                          CustomPaint(
+                              painter: PentagonPainter(diceColor),
+                              size: const Size(75, 75)),
+                          4),
+                      buildDice(
+                          "d20",
+                          HexagonWidget.pointy(
+                            width: 60,
+                            color: diceColor,
+                          ),
+                          5),
+                    ],
+                  ),
+                  const SizedBox(height: 15),
+                  Row(
+                    children: [
+                      const Spacer(),
+                      buildDice(
+                          "d100",
+                          CustomPaint(
+                              painter: DecagonPainter(diceColor),
+                              size: const Size(80, 80)),
+                          6),
+                      const Spacer(),
+                      removeDiceContainer(),
+                      const Spacer(),
+                    ],
+                  ),
+                  const SizedBox(height: 15),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton(
+                        onPressed: advantageToggle,
+                        style: ButtonStyle(
+                            backgroundColor:
                             WidgetStateProperty.all(advantageButtonColor)),
-                    child: Text("Advantage",
-                        style: TextStyle(
-                            color: ((advantage)
-                                ? const Color(0xFF25291C)
-                                : Colors.white))),
+                        child: Text("Advantage",
+                            style: TextStyle(
+                                color: ((advantage)
+                                    ? const Color(0xFF25291C)
+                                    : Colors.white))),
+                      ),
+                      ElevatedButton(
+                          onPressed: () {
+                            rollDice();
+                          },
+                          child: const Text("Roll Dice",
+                              style: TextStyle(color: Colors.white))),
+                      ElevatedButton(
+                        onPressed: disadvantageToggle,
+                        style: ButtonStyle(
+                            backgroundColor: WidgetStateProperty.all(
+                                disadvantageButtonColor)),
+                        child: Text("Disadvantage",
+                            style: TextStyle(
+                                color: ((disadvantage)
+                                    ? const Color(0xFF25291C)
+                                    : Colors.white))),
+                      ),
+                    ],
                   ),
-                  ElevatedButton(
-                      onPressed: () {
-                        debugPrint("Dice to roll: $diceToRoll");
-                        rollDice();
-                      },
-                      child: const Text("Roll Dice",
-                          style: TextStyle(color: Colors.white))),
-                  ElevatedButton(
-                    onPressed: disadvantageToggle,
-                    style: ButtonStyle(
-                        backgroundColor:
-                            WidgetStateProperty.all(disadvantageButtonColor)),
-                    child: Text("Advantage",
-                        style: TextStyle(
-                            color: ((disadvantage)
-                                ? const Color(0xFF25291C)
-                                : Colors.white))),
-                  ),
+                  const SizedBox(height: 25),
                 ],
               ),
-              const SizedBox(height: 20),
-            ],
-          ),
-        ),
-      );
-    } else {
-      return Scaffold(
-        appBar: AppBar(title: const Text("Premade Attack")),
-        body: Center(
-          child: rollDiceWidget(),
-        ),
-      );
-    }
+            )
+        ],
+      ),
+    );
+  }
+
+  removeDice() {
+    return () {
+      setState(() {
+        diceToRoll = [0, 0, 0, 0, 0, 0, 0];
+      });
+    };
   }
 }
 
