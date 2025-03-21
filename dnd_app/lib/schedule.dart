@@ -29,24 +29,17 @@ class _ScheduleState extends State<Schedule> {
   @override
   Widget build(BuildContext context) {
 
-    // Get all scheduled dates and sort them
-  List<DateTime> scheduledDates = widget.events.keys.toList();
-  scheduledDates.sort();
+  // Get all scheduled dates and sort them
+  List<DateTime> sortedDates = widget.events.keys.toList()..sort();
 
   // Find the next scheduled session
-  DateTime? nextSession;
-  for (DateTime date in scheduledDates) {
-    if (date.isAfter(DateTime.now()) || date.isAtSameMomentAs(DateTime.now())) {
-      nextSession = date;
-      break;
-    }
-  }
+  DateTime? nextSession = sortedDates.isNotEmpty ? sortedDates.first : null;
 
   // Format the next scheduled session date
   String nextSessionText = nextSession != null
-       ? '${nextSession.month}/${nextSession.day}/${nextSession.year}'
-       : 'No upcoming session';
-
+    ? DateFormat('M/d/y').format(nextSession)  
+    : 'No upcoming session';
+ 
     return Scaffold(
       backgroundColor: Color(0xFF464538),
       //this is a placeholder appbar
@@ -132,31 +125,33 @@ class _ScheduleState extends State<Schedule> {
               children: [
                 // Scheduled Sessions text
                 Text(
-  "Upcoming Sessions:",
-  textAlign: TextAlign.center,
-  style: TextStyle(
-    fontSize: 20,
-    color: Colors.white,
-  ),
-),
-SizedBox(height: 20),
-// If no events, show this message
-widget.events.isEmpty
-    ? Center(
-        child: Text(
-          'No scheduled sessions yet!',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-          ),
-        ),
-      )
-    : Expanded(
-        child: ListView.builder(
-          itemCount: widget.events.length,
-          itemBuilder: (context, index) {
-            DateTime eventDate = widget.events.keys.elementAt(index);
-            List<Event> eventsForDate = widget.events[eventDate]!;
+                  "Upcoming Sessions:",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 20,
+                    color: Colors.white,
+                  ),
+                ),
+              SizedBox(height: 20),
+              // If no events, show this message
+              widget.events.isEmpty
+                ? Center(
+                  child: Text(
+                  'No scheduled sessions yet!',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                  ),
+                ),
+              )
+      
+                : Expanded(
+                  child: ListView.builder(
+                    itemCount: widget.events.length,
+                    itemBuilder: (context, index) {
+                    // Get sorted date
+                      DateTime eventDate = sortedDates[index]; 
+                     List<Event> eventsForDate = widget.events[eventDate]!;
 
             return Center(  // Centers the event item
               child: Container(
