@@ -4,7 +4,7 @@ enum ItemType {
   Armor,
   Weapon,
   Wondrous,
-//  Miscellaneous
+  Miscellaneous
 }
 
 // enum ItemType {
