@@ -2,10 +2,12 @@ import 'package:dnd_app/add_session.dart';
 import 'package:flutter/material.dart';
 import 'package:dnd_app/event.dart';
 import 'package:intl/intl.dart';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Schedule extends StatefulWidget {
-  final Map<DateTime, List<Event>> events; // Receiving events from AddSession
+
+  // Receiving events from AddSession
+  final Map<DateTime, List<Event>> events; 
 
   const Schedule({super.key, required this.events});
 
@@ -14,7 +16,42 @@ class Schedule extends StatefulWidget {
 }
 
 class _ScheduleState extends State<Schedule> {
-  
+  Map<DateTime, List<Event>> events = {};
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize events with the events passed from AddSession
+    events = Map<DateTime, List<Event>>.from(widget.events);
+    _fetchEventsFromFirestore();
+  }
+
+  void _fetchEventsFromFirestore() async {
+    //clear events from map to avoid duplicates
+    events.clear();
+
+    CollectionReference sessions = FirebaseFirestore.instance.collection('sessions');
+    QuerySnapshot querySnapshot = await sessions.get();
+
+    for (var doc in querySnapshot.docs) {
+      String dateString = doc['session_date'];
+      if (dateString.isNotEmpty) {
+        DateTime date = DateFormat('M/d/y').parse(dateString);
+        String title = doc['session_name'];
+
+        if (events.containsKey(date)) {
+          // Avoid adding duplicate event names
+          if (!events[date]!.any((event) => event.title == title)) {
+            events[date]!.add(Event(title));
+          }
+        } else {
+          events[date] = [Event(title)];
+        }
+      }
+    }
+    setState(() {});
+  }
+
   //this is the function that will take you to the add session page
   void _goToAddSession() async {
     Navigator.push(
@@ -25,21 +62,19 @@ class _ScheduleState extends State<Schedule> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
+    // Get all scheduled dates and sort them
+    List<DateTime> sortedDates = events.keys.toList()..sort();
 
-  // Get all scheduled dates and sort them
-  List<DateTime> sortedDates = widget.events.keys.toList()..sort();
+    // Find the next scheduled session
+   DateTime? nextSession = sortedDates.isNotEmpty ? sortedDates.first : null;
 
-  // Find the next scheduled session
-  DateTime? nextSession = sortedDates.isNotEmpty ? sortedDates.first : null;
+    // Format the next scheduled session date
+    String nextSessionText = nextSession != null
+        ? DateFormat('M/d/y').format(nextSession)
+        : 'No upcoming session';
 
-  // Format the next scheduled session date
-  String nextSessionText = nextSession != null
-    ? DateFormat('M/d/y').format(nextSession)  
-    : 'No upcoming session';
- 
     return Scaffold(
       backgroundColor: Color(0xFF464538),
       //this is a placeholder appbar
@@ -82,9 +117,9 @@ class _ScheduleState extends State<Schedule> {
             ),
           ),
           SizedBox(height: 6),
-          //this is the return to campain button 
+          //this is the return to campain button
           TextButton(
-            onPressed: _goToAddSession, 
+            onPressed: _goToAddSession,
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 26, vertical: 13),
               decoration: BoxDecoration(
@@ -105,7 +140,7 @@ class _ScheduleState extends State<Schedule> {
               ),
             ),
           ),
-            //this is the schedules session text + sessions + button
+          //this is the schedules session text + sessions + button
           SizedBox(height: 10),
           // Scheduled sessions container with centered content
           Container(
@@ -113,7 +148,7 @@ class _ScheduleState extends State<Schedule> {
             width: 328,
             decoration: BoxDecoration(
               //should be grey bg with white text
-               color: Color.fromARGB(81, 0, 0, 0),
+              color: Color.fromARGB(81, 0, 0, 0),
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
                 color: Colors.black,
@@ -132,86 +167,82 @@ class _ScheduleState extends State<Schedule> {
                     color: Colors.white,
                   ),
                 ),
-              SizedBox(height: 20),
-              // If no events, show this message
-              widget.events.isEmpty
-                ? Center(
-                  child: Text(
-                  'No scheduled sessions yet!',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                  ),
-                ),
-              )
-      
-                : Expanded(
-                  child: ListView.builder(
-                    itemCount: widget.events.length,
-                    itemBuilder: (context, index) {
-                    // Get sorted date
-                      DateTime eventDate = sortedDates[index]; 
-                     List<Event> eventsForDate = widget.events[eventDate]!;
+               SizedBox(height: 20),
+                events.isEmpty
+                    ? Center(
+                        child: Text(
+                          'No scheduled sessions yet!',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                          ),
+                        ),
+                      )
+                    : Expanded(
+                        child: ListView.builder(
+                          itemCount: events.length,
+                          itemBuilder: (context, index) {
+                            DateTime eventDate = sortedDates[index];
+                            List<Event> eventsForDate = events[eventDate]!;
 
-            return Center(  // Centers the event item
-              child: Container(
-                margin: EdgeInsets.symmetric(vertical: 8),
-                padding: EdgeInsets.all(8), // Half the height of the container
-                width: 164, // Keep the width same as the parent container
-                decoration: BoxDecoration(
-                  color: Color.fromARGB(255, 241, 241, 192),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.black),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,  // Ensures the date and events are centered
-                  children: [
-                    Text(
-                      DateFormat('M/d/y').format(eventDate), // Format the date
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                            return Center(
+                              child: Container(
+                                margin: EdgeInsets.symmetric(vertical: 8),
+                                padding: EdgeInsets.all(8),
+                                width: 168,
+                                decoration: BoxDecoration(
+                                  color: Color.fromARGB(255, 241, 241, 192),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: Colors.black),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      DateFormat('M/d/y').format(eventDate),
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                    SizedBox(height: 4),
+                                    ...eventsForDate.map((event) {
+                                      return Text(
+                                        event.title,
+                                        style: TextStyle(color: Colors.black),
+                                      );
+                                    }).toList(),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                SizedBox(height: 10),
+                //will add session button
+                ElevatedButton(
+                  onPressed: _goToAddSession,
+                  style: ElevatedButton.styleFrom(
+                    // But background color
+                    backgroundColor: Color.fromARGB(255, 241, 187, 87),
+                    // Text Color
+                    foregroundColor: Colors.black,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      side: BorderSide(
                         color: Colors.black,
+                        width: 1,
                       ),
                     ),
-                    SizedBox(height: 4),
-                    ...eventsForDate.map((event) {
-                      return Text(
-                        event.title,
-                        style: TextStyle(color: Colors.black),
-                      );
-                    }).toList(),
-                  ],
+                  ),
+                  child: Text('Add Session'),
                 ),
-              ),
-            );
-          },
-        ),
-      ),
-                      SizedBox(height: 10),
-          //will add session button
-          ElevatedButton(
-            onPressed: _goToAddSession, 
-            style: ElevatedButton.styleFrom(
-              // But background color
-              backgroundColor: Color.fromARGB(255, 241, 187, 87), 
-              // Text Color 
-              foregroundColor: Colors.black, 
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-                side: BorderSide(
-                  color: Colors.black,
-                  width: 1,
-                ),
-              ),
+              ],
             ),
-            child: Text('Add Session'),
-            ),
-          ],
-        ),
-        ),
+          ),
           SizedBox(height: 14),
-
         ],
       ),
       //a place holder navbar

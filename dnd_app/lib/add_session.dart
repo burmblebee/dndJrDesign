@@ -1,7 +1,11 @@
+
+
 import 'package:dnd_app/event.dart';
 import 'package:dnd_app/schedule.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AddSession extends StatefulWidget {
   const AddSession({super.key});
@@ -25,6 +29,36 @@ class _AddSessionState extends State<AddSession> {
     // Initialize selected day to today
     _selectedDay = _focusedDay;
     _selectedEvents = ValueNotifier(_getEventsForDay(_selectedDay!));
+    _fetchEventsFromFirestore();
+  }
+
+  void _fetchEventsFromFirestore() async {
+    // Clear the events map to prevent duplication
+    events.clear();
+
+    CollectionReference sessions = FirebaseFirestore.instance.collection('sessions');
+    QuerySnapshot querySnapshot = await sessions.get();
+
+    for (var doc in querySnapshot.docs) {
+      String dateString = doc['session_date'];
+      if (dateString.isNotEmpty) {
+        DateTime date = DateFormat('M/d/y').parse(dateString);
+        String title = doc['session_name'];
+
+        if (events.containsKey(date)) {
+          // Avoid adding duplicate event names
+          if (!events[date]!.any((event) => event.title == title)) {
+            events[date]!.add(Event(title));
+          }
+        } else {
+          events[date] = [Event(title)];
+        }
+      }
+    }
+
+    setState(() {
+      _selectedEvents.value = _getEventsForDay(_selectedDay!);
+    });
   }
 
   void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
@@ -52,6 +86,26 @@ class _AddSessionState extends State<AddSession> {
         builder: (context) => Schedule(events: events), // Passing events
       ),
     );
+  }
+
+  void _saveEventToFirestore(DateTime date, String title) async {
+    CollectionReference sessions = FirebaseFirestore.instance.collection('sessions');
+    await sessions.add({
+      'session_date': DateFormat('M/d/y').format(date),
+      'session_name': title,
+    });
+  }
+
+  void _deleteEventFromFirestore(DateTime date, String title) async {
+    CollectionReference sessions = FirebaseFirestore.instance.collection('sessions');
+    QuerySnapshot querySnapshot = await sessions
+        .where('session_date', isEqualTo: DateFormat('M/d/y').format(date))
+        .where('session_name', isEqualTo: title)
+        .get();
+
+    for (var doc in querySnapshot.docs) {
+      await doc.reference.delete();
+    }
   }
 
   @override
@@ -113,29 +167,30 @@ class _AddSessionState extends State<AddSession> {
                             );
 
                             if (events.containsKey(normalizedDate)) {
-                              events[normalizedDate]!
-                                  .add(Event(_eventController.text));
-                            } else {
-                              events[normalizedDate] = [
-                                Event(_eventController.text)
-                              ];
-                            }
-                          });
+                          events[normalizedDate]!.add(Event(_eventController.text));
+                        } else {
+                          events[normalizedDate] = [Event(_eventController.text)];
+                        }
 
-                          _eventController.clear();
-                          Navigator.of(context).pop();
-                          // Update the event list
-                          _selectedEvents.value = _getEventsForDay(_selectedDay!);
-                        },
-                        child: Text(
-                          "Save",
-                          style: TextStyle(
-                            color: Colors.white,
-                          ),
-                        ),
+                        // Save the event to Firestore
+                        _saveEventToFirestore(normalizedDate, _eventController.text);
+                      });
+
+                      _eventController.clear();
+                      Navigator.of(context).pop();
+                      _selectedEvents.value = _getEventsForDay(_selectedDay!);
+                    },
+                    child: Text(
+                      "Save",
+                      style: TextStyle(
+                        color: Colors.white,
                       ),
-                    ]);
-              });
+                    ),
+                  ),
+                ],
+              );
+            },
+          );
         },
         //white plus siign
         child: const Icon(Icons.add, color: Colors.white),
@@ -216,28 +271,28 @@ class _AddSessionState extends State<AddSession> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: ListTile(
-                              onTap: () => print(""),
-                              title: Text('${value[index].title}'),
-                              trailing: IconButton(
-                                icon: Icon(Icons.delete, color: Colors.red),
-                                onPressed: () {
-                                  setState(() {
-                                    DateTime normalizedDate = DateTime(
-                                      _selectedDay!.year,
-                                      _selectedDay!.month,
-                                      _selectedDay!.day,
-                                    );
+                          title: Text('${value[index].title}'),
+                          trailing: IconButton(
+                            icon: Icon(Icons.delete, color: Colors.red),
+                            onPressed: () {
+                              setState(() {
+                                DateTime normalizedDate = DateTime(
+                                  _selectedDay!.year,
+                                  _selectedDay!.month,
+                                  _selectedDay!.day,
+                                );
 
-                                    events[normalizedDate]?.removeAt(
-                                        index); // Remove event from list
-                                    if (events[normalizedDate]!.isEmpty) {
-                                      events.remove(
-                                          normalizedDate); // Remove key if no events remain
-                                    }
-                                  });
+                                String title = value[index].title;
+                                events[normalizedDate]?.removeAt(index);
+                                if (events[normalizedDate]!.isEmpty) {
+                                  events.remove(normalizedDate);
+                                }
 
-                                  _selectedEvents.value = _getEventsForDay(
-                                      _selectedDay!); // Update UI
+                                // Delete the event from Firestore
+                                _deleteEventFromFirestore(normalizedDate, title);
+                              });
+
+                              _selectedEvents.value = _getEventsForDay(_selectedDay!);
                                 },
                               ),
                             ),
