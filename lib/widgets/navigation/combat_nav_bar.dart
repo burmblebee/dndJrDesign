@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:warlocks_of_the_beach/screens/campaign_screen.dart';
-import '../../diceRoller.dart'; // Import the DiceRollScreen
 
 class CombatBottomNavBar extends StatefulWidget {
   const CombatBottomNavBar({super.key});

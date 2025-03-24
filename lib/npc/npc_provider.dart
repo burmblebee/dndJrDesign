@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'npc.dart';
 
@@ -46,43 +47,60 @@ class NPCProvider extends StateNotifier<NPCState> {
   ));
 
   Future<void> addNPC(NPC npc, String npcId) async {
-    try {
-      await _firestore.collection('npcs').doc(npcId).set({
-        'name': npc.name,
-        'attacks': npc.attacks.map((attack) =>
-        {
-          'name': attack.name,
-          'diceConfig': attack.diceConfig,
-        }).toList(),
-      });
+    final String? currentUserUid = FirebaseAuth.instance.currentUser?.uid;
+    if (currentUserUid != null) {
+      try {
+        await _firestore
+            .collection('app_user_profiles')
+            .doc(currentUserUid)
+            .collection('npcs')
+            .doc(npcId)
+            .set({
+          'name': npc.name,
+          'attacks': npc.attacks.map((attack) => {
+            'name': attack.name,
+            'diceConfig': attack.diceConfig,
+          }).toList(),
+        });
 
-      state = state.copyWith(npcs: [...state.npcs, npc]);
-    } catch (e) {
-      print("Error adding NPC to Firestore: $e");
+        state = state.copyWith(npcs: [...state.npcs, npc]);
+      } catch (e) {
+        print("Error adding NPC to Firestore: $e");
+      }
+    } else {
+      print("Error: No authenticated user.");
     }
   }
 
 
-  Future<void> fetchNPCs() async {
-    try {
-      final querySnapshot = await _firestore.collection('npcs').get();
-      final npcs = querySnapshot.docs.map((doc) {
-        final data = doc.data();
-        return NPC(
-          id: doc.id,
-          name: data['name'],
-          attacks: (data['attacks'] as List<dynamic>).map((attack) {
-            return AttackOption(
-              name: attack['name'],
-              diceConfig: List<int>.from(attack['diceConfig']),
-            );
-          }).toList(),
-        );
-      }).toList();
 
-      state = state.copyWith(npcs: npcs);
-    } catch (e) {
-      print("Error fetching NPCs: $e");
+  Future<void> fetchNPCs() async {
+    final String? currentUserUid = FirebaseAuth.instance.currentUser?.uid;
+    if (currentUserUid != null) {
+      try {
+        final npcCollectionRef = FirebaseFirestore.instance
+            .collection('app_user_profiles')
+            .doc(currentUserUid)
+            .collection('npcs'); // Adjust if NPCs are stored elsewhere
+
+        final querySnapshot = await npcCollectionRef.get();
+
+        final npcs = querySnapshot.docs.map((doc) {
+          final data = doc.data();
+          return NPC(
+            id: doc.id,
+            name: data['name'],
+            attacks: (data['attacks'] as List<dynamic>).map((attack) {
+              return AttackOption(
+                name: attack['name'],
+                diceConfig: List<int>.from(attack['diceConfig']),
+              );
+            }).toList(),
+          );
+        }).toList();
+      } catch (e) {
+        print('Error fetching user-specific NPCs: $e');
+      }
     }
   }
 

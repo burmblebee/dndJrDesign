@@ -31,7 +31,7 @@ class NPCListScreen extends ConsumerWidget {
         child: const Icon(Icons.add),
       ),
       body: npcState.npcs.isEmpty
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: Text('No NPCs available. Please add an NPC.'))
           : ListView.builder(
 
         itemCount: npcState.npcs.length,

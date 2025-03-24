@@ -116,6 +116,7 @@ class AddNPCScreen extends ConsumerWidget {
     );
   }
 
+
   void _editAttack(BuildContext context, NPCProvider npcNotifier, AttackOption attack, int index) {
     final attackNameController = TextEditingController(text: attack.name);
     List<int> diceConfig = List.from(attack.diceConfig);
@@ -148,36 +149,38 @@ class AddNPCScreen extends ConsumerWidget {
   }
 
   Widget _attackForm(TextEditingController nameController, List<int> diceConfig) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        TextField(
-          controller: nameController,
-          decoration: const InputDecoration(labelText: 'Attack Name'),
-        ),
-        const SizedBox(height: 20),
-        const Text('Dice Configuration (e.g., 1d4, 2d6)'),
-        Column(
-          children: List.generate(7, (index) {
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(diceLabels[index]),
-                SizedBox(
-                  width: 60,
-                  child: TextFormField(
-                    initialValue: diceConfig[index].toString(),
-                    keyboardType: TextInputType.number,
-                    onChanged: (value) {
-                      diceConfig[index] = int.tryParse(value) ?? 0;
-                    },
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: nameController,
+            decoration: const InputDecoration(labelText: 'Attack Name'),
+          ),
+          const SizedBox(height: 20),
+          const Text('Dice Configuration (e.g., 1d4, 2d6)'),
+          Column(
+            children: List.generate(7, (index) {
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(diceLabels[index]),
+                  SizedBox(
+                    width: 60,
+                    child: TextFormField(
+                      initialValue: diceConfig[index].toString(),
+                      keyboardType: TextInputType.number,
+                      onChanged: (value) {
+                        diceConfig[index] = int.tryParse(value) ?? 0;
+                      },
+                    ),
                   ),
-                ),
-              ],
-            );
-          }),
-        ),
-      ],
+                ],
+              );
+            }),
+          ),
+        ],
+      ),
     );
   }
 }
