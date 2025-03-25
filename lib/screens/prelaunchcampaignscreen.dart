@@ -5,7 +5,9 @@ import '../widgets/bottom_navbar.dart';
 import 'campaign_screen.dart';
 
 class PreLaunchCampaignScreen extends StatelessWidget {
-  const PreLaunchCampaignScreen({super.key});
+  const PreLaunchCampaignScreen({super.key, required this.campaignID});
+
+  final campaignID;
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +32,7 @@ class PreLaunchCampaignScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const CampaignScreen()),
+                  MaterialPageRoute(builder: (context) => const DMCombatScreen(campaignID: campaignID)),
                 );
               },
               child: const Text('Launch Campaign'),
