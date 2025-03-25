@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:warlocks_of_the_beach/widgets/main_appbar.dart';
 import 'package:warlocks_of_the_beach/widgets/navigation/bottom_navbar.dart';
 
-import '../widgets/main_drawer.dart';
+import '../widgets/navigation/main_drawer.dart';
 import 'add_item.dart';
 import 'fixed_item.dart';
 import 'item sub-widgets/armor_details.dart';

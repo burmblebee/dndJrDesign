@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
 
-enum ItemType {
-  Armor,
-  Weapon,
-  Wondrous,
-  Miscellaneous
-}
+enum ItemType { Armor, Weapon, Wondrous, Miscellaneous }
 
 // enum ItemType {
 //   Armor,
@@ -99,7 +94,6 @@ class Item {
       'weight': weight,
       'requiresAttunement': requiresAttunement,
       'attunementDescription': attunementDescription,
-      // 'type': 'Miscellaneous',
       'currency': currency.name,
       'rarity': rarity.name,
     };
@@ -175,16 +169,17 @@ class CombatItem extends Item {
     required this.weaponTypes,
     required Rarity rarity,
   }) : super(
-            itemType: ItemType.Weapon,
-            id: id,
-            name: name,
-            description: description,
-            price: price,
-            weight: weight,
-            requiresAttunement: requiresAttunement,
-            attunementDescription: attunementDescription,
-            currency: currency,
-            rarity: rarity);
+          itemType: ItemType.Weapon,
+          id: id,
+          name: name,
+          description: description,
+          price: price,
+          weight: weight,
+          requiresAttunement: requiresAttunement,
+          attunementDescription: attunementDescription,
+          currency: currency,
+          rarity: rarity,
+        );
 
   @override
   Map<String, dynamic> toMap() {

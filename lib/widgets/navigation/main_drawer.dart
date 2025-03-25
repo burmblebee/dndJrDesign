@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:warlocks_of_the_beach/home_screen.dart';
+import 'package:warlocks_of_the_beach/profile.dart';
 
 class MainDrawer extends StatelessWidget{
   const MainDrawer({super.key});
@@ -46,7 +47,7 @@ class MainDrawer extends StatelessWidget{
             leading: const Icon(Icons.person),
             title: const Text('Profile', style: TextStyle(color: Colors.white),),
             onTap: () {
-              Navigator.of(context).pushReplacementNamed('/');
+              Navigator.of(context).push(MaterialPageRoute(builder: (context) => ProfilePage()));
             },
           ),
          

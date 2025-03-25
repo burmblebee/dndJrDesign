@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:warlocks_of_the_beach/screens/browse_content/browse_content';
+import 'package:warlocks_of_the_beach/screens/browse_content/browse_content.dart';
 import 'package:warlocks_of_the_beach/screens/campaign_screen.dart';
 
 class CombatBottomNavBar extends StatefulWidget {
