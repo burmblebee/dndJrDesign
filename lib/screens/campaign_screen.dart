@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:uuid/uuid.dart';
+import 'package:warlocks_of_the_beach/combat/DMcombatScreen.dart';
 import '../widgets/navigation/main_appbar.dart';
 import '../widgets/navigation/main_drawer.dart';
 import '../widgets/navigation/bottom_navbar.dart';
@@ -309,7 +310,11 @@ class _CampaignScreenState extends State<CampaignScreen> {
                             ),
                             GestureDetector(
                               onTap: () {
-                                // Handles the tap - will link to another page later
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => DMCombatScreen(campaignId: campaign.id,),
+                                  ),
+                                );
                               },
                               child: Container(
                                 margin: const EdgeInsets.all(8.0),
