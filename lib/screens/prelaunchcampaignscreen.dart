@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../widgets/main_appbar.dart';
 import '../widgets/main_drawer.dart';
@@ -8,6 +10,17 @@ class PreLaunchCampaignScreen extends StatelessWidget {
   const PreLaunchCampaignScreen({super.key, required this.campaignID});
 
   final campaignID;
+
+  Stream<List<players>> _getPlayers() async* {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if(user == null) {
+      yield[];
+      return;
+    }
+
+    final playersRef = FirebaseFirestore.instance.collection('user_campaigns').doc(campaignID).get('players');
+  }
 
   @override
   Widget build(BuildContext context) {
