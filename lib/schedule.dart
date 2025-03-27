@@ -3,6 +3,10 @@ import 'package:warlocks_of_the_beach/event.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:warlocks_of_the_beach/screens/campaign_screen.dart';
+import 'package:warlocks_of_the_beach/widgets/main_appbar.dart';
+import 'package:warlocks_of_the_beach/widgets/navigation/bottom_navbar.dart';
+import 'package:warlocks_of_the_beach/widgets/navigation/main_drawer.dart';
 
 class Schedule extends StatefulWidget {
 
@@ -78,12 +82,16 @@ class _ScheduleState extends State<Schedule> {
     return Scaffold(
       backgroundColor: Color(0xFF464538),
       //this is a placeholder appbar
-      appBar: AppBar(
-        backgroundColor: Color(0xFF25291C),
-        title: const Text(
-          'this is appbar',
-        ),
-      ),
+      // appBar: AppBar(
+      //   backgroundColor: Color(0xFF25291C),
+      //   title: const Text(
+      //     'this is appbar',
+      //   ),
+      // ),
+      appBar: MainAppbar(),
+      drawer: MainDrawer(),
+      //the bottom nav bar
+      
       body: Column(
         mainAxisSize: MainAxisSize.max,
         children: [
@@ -119,7 +127,10 @@ class _ScheduleState extends State<Schedule> {
           SizedBox(height: 6),
           //this is the return to campain button
           TextButton(
-            onPressed: _goToAddSession,
+            // onPressed: _goToAddSession,
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => CampaignScreen()));
+            },
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 26, vertical: 13),
               decoration: BoxDecoration(

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:warlocks_of_the_beach/schedule.dart';
 import 'package:warlocks_of_the_beach/widgets/navigation/bottom_navbar.dart';
 import 'package:warlocks_of_the_beach/widgets/navigation/main_appbar.dart';
 import 'package:warlocks_of_the_beach/widgets/navigation/main_drawer.dart';
 import 'edit_profile.dart';
+import 'event.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -13,7 +15,20 @@ class ProfilePage extends StatefulWidget {
   _ProfilePageState createState() => _ProfilePageState();
 }
 
+
+
 class _ProfilePageState extends State<ProfilePage> {
+  
+  final Map<DateTime, List<Event>> testEvents = {
+  DateTime(2025, 3, 26): [
+    Event("Morning Meeting"),
+    Event("Lunch with Team"),
+  ],
+  DateTime(2025, 3, 27): [
+    Event("Code Review"),
+  ],
+};
+
   String username = "";
   String name = "";
   String email = "";
@@ -125,6 +140,14 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                       ),
                     ),
+                    TextButton(onPressed: (){
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => Schedule(events: testEvents),
+                        ),
+                      ); // Navigate to RaceSelection
+                    }, child: Text('Schedule Session')),
         
                     //info section
                     SizedBox(height: 10),

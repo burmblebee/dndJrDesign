@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:warlocks_of_the_beach/home_screen.dart';
+import 'package:warlocks_of_the_beach/login_screen.dart';
 import 'package:warlocks_of_the_beach/profile.dart';
 
 class MainDrawer extends StatelessWidget{
@@ -63,7 +64,7 @@ class MainDrawer extends StatelessWidget{
                   leading: const Icon(Icons.logout),
                   title: const Text('Logout', style: TextStyle(color: Colors.white),),
                   onTap: () {
-                    Navigator.of(context).pushReplacementNamed('/login');
+                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => LoginScreen()));
                   },
                 ),
                 const Divider(),
