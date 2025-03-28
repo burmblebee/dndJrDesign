@@ -62,7 +62,7 @@ class CombatStateNotifier extends StateNotifier<CombatState> {
     );
   }
 
-  void addCharacter(String name, int health, int maxHealth, int armorClass) {
+  void addCharacter(String name, int health, int maxHealth, int armorClass, List<AttackOption> attacks) {
     state = state.copyWith(
       characters: [
         ...state.characters,
@@ -71,7 +71,7 @@ class CombatStateNotifier extends StateNotifier<CombatState> {
           health: health,
           maxHealth: maxHealth,
           armorClass: armorClass,
-          attacks: [],
+          attacks: attacks,
         ),
       ],
     );

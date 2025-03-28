@@ -356,7 +356,7 @@ class DMCombatScreen extends ConsumerWidget {
     String? removeCharacter;
     ref.read(npcProvider.notifier).fetchNPCs();
     final npcState = ref.watch(npcProvider);
-    String? npc = npcState.npcs[0].name;
+    String? npc;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -461,22 +461,21 @@ class DMCombatScreen extends ConsumerWidget {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          //drop down list of all npc names from firestore
-                          // DropdownButton<String>(
-                          //   hint: const Text("Select a Character"),
-                          //   value: npc,
-                          //   items: npcState.npcs.map((npc) {
-                          //     return DropdownMenuItem<String>(
-                          //       value: npc.name,
-                          //       child: Text(npc.name),
-                          //     );
-                          //   }).toList(),
-                          //   onChanged: (value) {
-                          //     setState(() {
-                          //       npc = value;
-                          //     });
-                          //   },
-                          // ),
+                          DropdownButton<String>(
+                            hint: const Text("Select a Character"),
+                            value: npc,
+                            items: npcState.npcs.map((npc) {
+                              return DropdownMenuItem<String>(
+                                value: npc.name,
+                                child: Text(npc.name),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                npc = value;
+                              });
+                            },
+                          ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
@@ -493,7 +492,18 @@ class DMCombatScreen extends ConsumerWidget {
                                     ref
                                         .read(combatProvider.notifier)
                                         .addCharacter(selectedName!, hp!,
-                                            maxHealth!, ac!);
+                                            maxHealth!, ac!, []);
+                                    Navigator.pop(context);
+                                  } else if(npc!.isNotEmpty) {
+                                    NPC selectedNpc = npcState.npcs
+                                        .firstWhere((n) => n.name == npc);
+                                    ref.read(combatProvider.notifier).addCharacter(
+                                        selectedNpc.name,
+                                        selectedNpc.maxHealth,
+                                        selectedNpc.maxHealth,
+                                        selectedNpc.ac,
+                                        selectedNpc.attacks
+                                    );
                                     Navigator.pop(context);
                                   } else {
                                     showDialog(

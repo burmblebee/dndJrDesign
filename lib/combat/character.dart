@@ -5,7 +5,7 @@ class Character {
   final int health;
   final int maxHealth;
   final int armorClass;
-  List<AttackOption> attacks = [];
+  List<AttackOption> attacks;
 
   Character({
     required this.name,

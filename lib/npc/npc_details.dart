@@ -6,11 +6,16 @@ import 'npc_provider.dart';
 class NPCDetailScreen extends ConsumerWidget {
   const NPCDetailScreen({super.key});
 
+  //TODO: Add ability to add and remove attacks from this screen
+
+  @override
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final npcState = ref.watch(npcProvider);
     final npc = npcState.selectedNPC;
+    int maxHealth = npc?.maxHealth ?? 0;
 
+    // Handle the case where no NPC is selected
     if (npc == null) {
       return Scaffold(
         appBar: AppBar(title: const Text('NPC Details')),
@@ -22,6 +27,7 @@ class NPCDetailScreen extends ConsumerWidget {
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.save),
         onPressed: () {
+          // Implement save functionality
           ref.read(npcProvider.notifier).updateNPC(npc);
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('NPC details saved!')),
@@ -62,61 +68,67 @@ class NPCDetailScreen extends ConsumerWidget {
             const SizedBox(height: 20),
             const Text('Attack Options:', style: TextStyle(fontSize: 20)),
             Expanded(
-              child: Column(
-                children: [
-                  ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: npc.attacks.length,
-                    itemBuilder: (context, index) {
-                      final attack = npc.attacks[index];
-                      return Column(
-                        children: [
-                          const SizedBox(height: 10),
-                          ListTile(
-                            tileColor: const Color(0xFFD4C097).withOpacity(0.5),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            title: Text(attack.name),
-                            subtitle: Text(getDiceString(attack.diceConfig)),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.edit),
-                                  onPressed: () {
-                                    _editAttack(context, ref.read(npcProvider.notifier), attack, index);
-                                  },
-                                ),
-                                IconButton(
-                                  icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
-                                  onPressed: () {
-                                    ref.read(npcProvider.notifier).removeAttackOption(index);
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                        ],
-                      );
-                    },
-                  ),
-
-                  ListTile(
-                    title: const Text('Add Attack Option'),
-                    leading: const Icon(Icons.add),
-                    tileColor: const Color(0xFF25291C),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    onTap: () {
-                      _addAttack(context, ref.read(npcProvider.notifier));
-                    },
-                  ),
-                ],
+              child: ListView.builder(
+                itemCount: npc.attacks.length,
+                itemBuilder: (context, index) {
+                  final attack = npc.attacks[index];
+                  return Column(
+                    children: [
+                      const SizedBox(height: 10),
+                      ListTile(
+                        tileColor: const Color(0xFFD4C097).withOpacity(0.5),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        title: Text(attack.name),
+                        subtitle: Text(getDiceString(attack.diceConfig)),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.edit),
+                          onPressed: () {
+                            _editAttack(context, ref.read(npcProvider.notifier),
+                                attack, index);
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                    ],
+                  );
+                },
               ),
             ),
+            const SizedBox(height: 20),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const Text('Armor Class:', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.black, width: 5),
+                  ),
+                  padding: const EdgeInsets.all(10),
+                  child: SizedBox(
+                    height: 100,
+                    width: 100,
+                    child: Text('${npc.ac}', // Display the armor class)
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 50,
+                          fontWeight: FontWeight.bold,
+                        )),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text('Max Health: ', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                    Text('$maxHealth', style: const TextStyle(fontSize: 20)),
+                  ],
+                ),
+              ],
+            ),
+            const Spacer(),
           ],
         ),
       ),
@@ -142,7 +154,8 @@ class NPCDetailScreen extends ConsumerWidget {
               if (nameController.text.isNotEmpty) {
                 await npcNotifier.editNPCName(npcNotifier.state.selectedNPC!, nameController.text);
                 npcNotifier.updateNPC(npcNotifier.state.selectedNPC!);
-                Navigator.pop(context);
+
+                Navigator.pop(context); // Close the dialog after updating
               }
             },
             child: const Text('Update'),
@@ -152,7 +165,10 @@ class NPCDetailScreen extends ConsumerWidget {
     );
   }
 
-  void _editAttack(BuildContext context, NPCProvider npcNotifier, AttackOption attack, int index) {
+
+
+  void _editAttack(BuildContext context, NPCProvider npcNotifier,
+      AttackOption attack, int index) {
     final attackNameController = TextEditingController(text: attack.name);
     List<int> diceConfig = List.from(attack.diceConfig);
 
@@ -169,7 +185,11 @@ class NPCDetailScreen extends ConsumerWidget {
           ElevatedButton(
             onPressed: () {
               if (attackNameController.text.isNotEmpty) {
-                npcNotifier.editAttackOption(npcNotifier.state.selectedNPC!.id, index, AttackOption(name: attackNameController.text, diceConfig: diceConfig));
+                npcNotifier.updateAttackOption(
+                  index,
+                  AttackOption(
+                      name: attackNameController.text, diceConfig: diceConfig),
+                );
                 Navigator.pop(context);
               }
             },
@@ -180,77 +200,52 @@ class NPCDetailScreen extends ConsumerWidget {
     );
   }
 
-  void _addAttack(BuildContext context, NPCProvider npcNotifier) {
-    final attackNameController = TextEditingController();
-    List<int> diceConfig = List.filled(6, 0);
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Add Attack Option'),
-        content: _attackForm(attackNameController, diceConfig),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+  Widget _attackForm(
+      TextEditingController attackNameController, List<int> diceConfig) {
+    List<String> diceNames = ['d4', 'd6', 'd8', 'd10', 'd12', 'd20'];
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: attackNameController,
+            decoration: const InputDecoration(labelText: 'Attack Name'),
           ),
-          ElevatedButton(
-            onPressed: () {
-              if (attackNameController.text.isNotEmpty) {
-                npcNotifier.addAttackOption(AttackOption(
-                  name: attackNameController.text,
-                  diceConfig: diceConfig,
-                ));
-                Navigator.pop(context);
-              }
-            },
-            child: const Text('Add'),
-          ),
+          const SizedBox(height: 10),
+          const Text('Dice Configuration:', style: TextStyle(fontSize: 16)),
+          ...List.generate(6, (index) {
+            return Row(
+              children: [
+                Text('${diceNames[index]}: '),
+                Expanded(
+                    child: TextField(
+                  controller:
+                      TextEditingController(text: diceConfig[index].toString()),
+                  keyboardType: TextInputType.number,
+                  onChanged: (value) {
+                    if (value.isNotEmpty) {
+                      diceConfig[index] = int.parse(value);
+                    } else {
+                      diceConfig[index] = 0;
+                    }
+                  },
+                )),
+              ],
+            );
+          }),
         ],
       ),
     );
   }
 
-
-  Widget _attackForm(TextEditingController attackNameController, List<int> diceConfig) {
-    List<String> diceNames = ['d4', 'd6', 'd8', 'd10', 'd12', 'd20'];
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        TextField(
-          controller: attackNameController,
-          decoration: const InputDecoration(labelText: 'Attack Name'),
-        ),
-        const SizedBox(height: 10),
-        const Text('Dice Configuration:', style: TextStyle(fontSize: 16)),
-        ...List.generate(6, (index) {
-          return Row(
-            children: [
-              Text('${diceNames[index]}: '),
-              Expanded(
-                child: TextField(
-                  controller: TextEditingController(text: diceConfig[index].toString()),
-                  keyboardType: TextInputType.number,
-                  onChanged: (value) {
-                    diceConfig[index] = value.isNotEmpty ? int.parse(value) : 0;
-                  },
-                ),
-              ),
-            ],
-          );
-        }),
-      ],
-    );
-  }
-
   String getDiceString(List<int> diceConfig) {
     List<String> diceNames = ['d4', 'd6', 'd8', 'd10', 'd12', 'd20'];
-    List<String> diceStrings = [];
+    List<String> dice = [];
     for (int i = 0; i < diceConfig.length; i++) {
       if (diceConfig[i] > 0) {
-        diceStrings.add('${diceConfig[i]} ${diceNames[i]}');
+        dice.add('${diceConfig[i]}${diceNames[i]}');
       }
     }
-    return diceStrings.join(', ');
+    return dice.isNotEmpty ? dice.join(' + ') : 'No dice configured';
   }
 }

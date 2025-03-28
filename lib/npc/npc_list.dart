@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:warlocks_of_the_beach/widgets/navigation/bottom_navbar.dart';
-import '../widgets/main_drawer.dart';
 import 'npc_creator.dart';
 import 'npc_details.dart';
 import 'npc_provider.dart';
@@ -17,8 +15,14 @@ class NPCListScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('NPC List')),
-      drawer: const MainDrawer(),
-      bottomNavigationBar: MainBottomNavBar(),
+      bottomNavigationBar: BottomAppBar(
+        color: const Color(0xFF25291C),
+        child: Container(
+          height: 50,
+          alignment: Alignment.center,
+          child: const Text('Bottom Navigation Bar', style: TextStyle(color: Colors.white)),
+        ),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
@@ -31,7 +35,7 @@ class NPCListScreen extends ConsumerWidget {
         child: const Icon(Icons.add),
       ),
       body: npcState.npcs.isEmpty
-          ? const Center(child: Text('No NPCs available. Please add an NPC.'))
+          ? const Center(child: Text('No NPCs available', style: TextStyle(fontSize: 20, color: Colors.white)))
           : ListView.builder(
 
         itemCount: npcState.npcs.length,
@@ -60,7 +64,6 @@ class NPCListScreen extends ConsumerWidget {
               const SizedBox(height: 10),
             ],
           );
-
         },
       ),
     );

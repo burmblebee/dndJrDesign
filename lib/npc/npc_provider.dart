@@ -47,74 +47,59 @@ class NPCProvider extends StateNotifier<NPCState> {
   ));
 
   Future<void> addNPC(NPC npc, String npcId) async {
-    final String? currentUserUid = FirebaseAuth.instance.currentUser?.uid;
-    if (currentUserUid != null) {
-      try {
-        await _firestore
-            .collection('app_user_profiles')
-            .doc(currentUserUid)
-            .collection('npcs')
-            .doc(npcId)
-            .set({
-          'name': npc.name,
-          'attacks': npc.attacks.map((attack) => {
-            'name': attack.name,
-            'diceConfig': attack.diceConfig,
-          }).toList(),
-        });
-
-        state = state.copyWith(npcs: [...state.npcs, npc]);
-      } catch (e) {
-        print("Error adding NPC to Firestore: $e");
-      }
-    } else {
-      print("Error: No authenticated user.");
+    try {
+      final userId = FirebaseAuth.instance.currentUser?.uid;
+      await _firestore.collection('app_user_profiles').doc(userId).collection('npcs').doc(npcId).set({
+        'name': npc.name,
+        'attacks': npc.attacks.map((attack) => {
+          'name': attack.name,
+          'diceConfig': attack.diceConfig,
+        }).toList(),
+        'ac': npc.ac,
+        'maxHealth': npc.maxHealth,
+      });
+    } catch (e) {
+      print("Error adding NPC: $e");
     }
   }
 
-
-
   Future<void> fetchNPCs() async {
-    final String? currentUserUid = FirebaseAuth.instance.currentUser?.uid;
-    if (currentUserUid != null) {
-      try {
-        final npcCollectionRef = FirebaseFirestore.instance
-            .collection('app_user_profiles')
-            .doc(currentUserUid)
-            .collection('npcs'); // Adjust if NPCs are stored elsewhere
-
-        final querySnapshot = await npcCollectionRef.get();
-
-        final npcs = querySnapshot.docs.map((doc) {
-          final data = doc.data();
-          return NPC(
-            id: doc.id,
-            name: data['name'],
-            attacks: (data['attacks'] as List<dynamic>).map((attack) {
-              return AttackOption(
-                name: attack['name'],
-                diceConfig: List<int>.from(attack['diceConfig']),
-              );
-            }).toList(),
-          );
-        }).toList();
-      } catch (e) {
-        print('Error fetching user-specific NPCs: $e');
-      }
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    try {
+      final querySnapshot = await _firestore.collection('app_user_profiles').doc(userId).collection('npcs').get();
+      final npcs = querySnapshot.docs.map((doc) {
+        final data = doc.data();
+        return NPC(
+          id: doc.id,
+          name: data['name'],
+          attacks: (data['attacks'] as List<dynamic>).map((attack) {
+            return AttackOption(
+              name: attack['name'],
+              diceConfig: List<int>.from(attack['diceConfig']),
+            );
+          }).toList(),
+          maxHealth: data['maxHealth'],
+          ac: data['ac'],
+        );
+      }).toList();
+      state = state.copyWith(npcs: npcs);
+    } catch (e) {
+      print("Error fetching NPCs: $e");
     }
   }
 
   Future<void> updateNPC(NPC npc) async {
+    final userId = FirebaseAuth.instance.currentUser?.uid;
     try {
-      await _firestore.collection('npcs').doc(npc.id).update({
+      await _firestore.collection('app_user_profiles').doc(userId).collection('npcs').doc(npc.id).update({
         'name': npc.name,
-        'attacks': npc.attacks.map((attack) =>
-        {
+        'attacks': npc.attacks.map((attack) => {
           'name': attack.name,
           'diceConfig': attack.diceConfig,
         }).toList(),
+        'ac': npc.ac,
+        'maxHealth': npc.maxHealth,
       });
-
       state = state.copyWith(npcs: [
         ...state.npcs.where((existingNpc) => existingNpc.id != npc.id),
         npc,
@@ -125,68 +110,35 @@ class NPCProvider extends StateNotifier<NPCState> {
   }
 
   Future<void> editNPCName(NPC npc, String newName) async {
+    final userId = FirebaseAuth.instance.currentUser?.uid;
     try {
-      await _firestore.collection('npcs').doc(npc.id).update({
+      await _firestore.collection('app_user_profiles').doc(userId).collection('npcs').doc(npc.id).update({
         'name': newName,
       });
-
       final updatedNpcs = state.npcs.map((currNpc) {
         if (currNpc.id == npc.id) {
           return currNpc.copyWith(name: newName);
         }
         return currNpc;
       }).toList();
-
       final updatedSelectedNPC = state.selectedNPC?.id == npc.id
           ? state.selectedNPC!.copyWith(name: newName)
           : state.selectedNPC;
-
-      state =
-          state.copyWith(npcs: updatedNpcs, selectedNPC: updatedSelectedNPC);
+      state = state.copyWith(npcs: updatedNpcs, selectedNPC: updatedSelectedNPC);
     } catch (e) {
       print("Error updating NPC name: $e");
     }
   }
 
-
-  Future<void> editAttackOption(String npcId, int attackIndex,
-      AttackOption updatedAttack) async {
-    try {
-      final npcIndex = state.npcs.indexWhere((npc) => npc.id == npcId);
-      if (npcIndex == -1) return; // NPC not found
-
-      final updatedAttacks = List<AttackOption>.from(
-          state.npcs[npcIndex].attacks);
-      updatedAttacks[attackIndex] = updatedAttack;
-
-      await _firestore.collection('npcs').doc(npcId).update({
-        'attacks': updatedAttacks.map((attack) =>
-        {
-          'name': attack.name,
-          'diceConfig': attack.diceConfig,
-        }).toList(),
-      });
-
-      final updatedNpc = state.npcs[npcIndex].copyWith(attacks: updatedAttacks);
-      final updatedNpcs = [...state.npcs]..[npcIndex] = updatedNpc;
-
-      state = state.copyWith(npcs: updatedNpcs, selectedNPC: updatedNpc);
-    } catch (e) {
-      print("Error updating attack option: $e");
-    }
-  }
-
-
   Future<void> deleteNPC(String npcId) async {
+    final userId = FirebaseAuth.instance.currentUser?.uid;
     try {
-      await _firestore.collection('npcs').doc(npcId).delete();
-      state =
-          state.copyWith(npcs: state.npcs.where((n) => n.id != npcId).toList());
+      await _firestore.collection('app_user_profiles').doc(userId).collection('npcs').doc(npcId).delete();
+      state = state.copyWith(npcs: state.npcs.where((n) => n.id != npcId).toList());
     } catch (e) {
       print("Error deleting NPC: $e");
     }
   }
-
 
   void selectNPC(NPC npc) {
     state = state.copyWith(selectedNPC: npc);
@@ -197,38 +149,23 @@ class NPCProvider extends StateNotifier<NPCState> {
   }
 
   void addAttackOption(AttackOption attack) {
-    var currentNPC = state.selectedNPC;
-    if (currentNPC != null) {
-      final updatedAttacks = [...currentNPC.attacks, attack];
-      final updatedNPC = currentNPC.copyWith(attacks: updatedAttacks);
-
-      state = state.copyWith(selectedNPC: updatedNPC);
-      updateNPC(updatedNPC); // Save changes to Firestore
-    }
+    state = state.copyWith(attackOptions: [...state.attackOptions, attack]);
   }
 
   void updateAttackOption(int index, AttackOption newAttack) {
     var currentNPC = state.selectedNPC;
     if (currentNPC != null) {
-      final updatedAttacks = List<AttackOption>.from(currentNPC.attacks);
-      updatedAttacks[index] = newAttack;
-
-      final updatedNPC = currentNPC.copyWith(attacks: updatedAttacks);
-      state = state.copyWith(selectedNPC: updatedNPC);
-      updateNPC(updatedNPC); // Save changes to Firestore
+      currentNPC.attacks[index] = newAttack;
+      state = state.copyWith(selectedNPC: currentNPC);
     }
   }
 
   void removeAttackOption(int index) {
-    var currentNPC = state.selectedNPC;
-    if (currentNPC != null && index < currentNPC.attacks.length) {
-      final updatedAttacks = List<AttackOption>.from(currentNPC.attacks)
-        ..removeAt(index);
-      final updatedNPC = currentNPC.copyWith(attacks: updatedAttacks);
-
-      state = state.copyWith(selectedNPC: updatedNPC);
-      updateNPC(updatedNPC); // Save changes to Firestore
-    }
+    final updatedOptions = [...state.attackOptions]..removeAt(index);
+    state = state.copyWith(attackOptions: updatedOptions);
   }
 
+  void clearAttackOptions() {
+    state = state.copyWith(attackOptions: []);
+  }
 }
