@@ -1,5 +1,6 @@
 import 'package:dnd_jr_design/item/add_item.dart';
 import 'package:dnd_jr_design/item/item%20sub-widgets/armor_details.dart';
+import 'package:dnd_jr_design/item/item%20sub-widgets/misc_details.dart';
 import 'package:dnd_jr_design/item/item%20sub-widgets/wondrous_details.dart';
 import 'package:dnd_jr_design/item/item_provider.dart';
 import 'package:dnd_jr_design/item/item%20sub-widgets/weapon_details.dart';
@@ -82,6 +83,14 @@ class itemListScreen extends ConsumerWidget {
                             MaterialPageRoute(
                               builder: (context) =>
                                   const WondrousDetailsScreen(),
+                            ),
+                          );
+                        } else if (item.itemType == ItemType.Miscellaneous) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                              const MiscDetailsScreen(),
                             ),
                           );
                         } else {
