@@ -2,6 +2,8 @@ import 'package:dnd_jr_design/combat/attack_roll.dart';
 import 'package:dnd_jr_design/combat/premade_attacks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../npc/npc.dart';
+import '../npc/npc_provider.dart';
 import 'character.dart';
 import '../dice/diceRoller.dart';
 import 'combat_provider.dart';
@@ -351,7 +353,9 @@ class DMCombatScreen extends ConsumerWidget {
     int? ac;
     int? maxHealth;
     String? removeCharacter;
-
+    ref.read(npcProvider.notifier).fetchNPCs();
+    final npcState = ref.watch(npcProvider);
+    String? npc = npcState.npcs[0].name;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -456,7 +460,22 @@ class DMCombatScreen extends ConsumerWidget {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          //TODO: Add a dropdown to select a character to add. Only possible once user has a list of characters
+                          //drop down list of all npc names from firestore
+                          DropdownButton<String>(
+                            hint: const Text("Select a Character"),
+                            value: npc,
+                            items: npcState.npcs.map((npc) {
+                              return DropdownMenuItem<String>(
+                                value: npc.name,
+                                child: Text(npc.name),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                npc = value;
+                              });
+                            },
+                          ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [

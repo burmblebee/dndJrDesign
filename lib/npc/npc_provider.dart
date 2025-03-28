@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'npc.dart';
 
@@ -53,6 +54,8 @@ class NPCProvider extends StateNotifier<NPCState> {
           'name': attack.name,
           'diceConfig': attack.diceConfig,
         }).toList(),
+        'ac': npc.ac,
+        'maxHealth': npc.maxHealth,
       });
 
       state = state.copyWith(npcs: [...state.npcs, npc]);
@@ -67,6 +70,7 @@ class NPCProvider extends StateNotifier<NPCState> {
       final querySnapshot = await _firestore.collection('npcs').get();
       final npcs = querySnapshot.docs.map((doc) {
         final data = doc.data();
+        debugPrint('Fetched NPC data: $data');
         return NPC(
           id: doc.id,
           name: data['name'],
@@ -76,6 +80,8 @@ class NPCProvider extends StateNotifier<NPCState> {
               diceConfig: List<int>.from(attack['diceConfig']),
             );
           }).toList(),
+          maxHealth: data['maxHealth'],
+          ac: data['ac'],
         );
       }).toList();
 
@@ -93,6 +99,8 @@ class NPCProvider extends StateNotifier<NPCState> {
           'name': attack.name,
           'diceConfig': attack.diceConfig,
         }).toList(),
+        'ac': npc.ac,
+        'maxHealth': npc.maxHealth,
       });
 
       state = state.copyWith(npcs: [
@@ -189,5 +197,9 @@ class NPCProvider extends StateNotifier<NPCState> {
   void removeAttackOption(int index) {
     final updatedOptions = [...state.attackOptions]..removeAt(index);
     state = state.copyWith(attackOptions: updatedOptions);
+  }
+
+  void clearAttackOptions() {
+    state = state.copyWith(attackOptions: []);
   }
 }

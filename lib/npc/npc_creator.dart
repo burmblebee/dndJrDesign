@@ -20,6 +20,9 @@ class AddNPCScreen extends ConsumerWidget {
     return diceParts.isNotEmpty ? diceParts.join(' + ') : 'No dice set';
   }
 
+  final TextEditingController armorClassController = TextEditingController();
+  final TextEditingController healthController = TextEditingController();
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final npcNotifier = ref.read(npcProvider.notifier);
@@ -34,6 +37,47 @@ class AddNPCScreen extends ConsumerWidget {
             TextField(
               controller: nameController,
               decoration: const InputDecoration(labelText: 'NPC Name'),
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                const Text('Max Health: ', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                Expanded(
+                  child: TextField(
+                    controller: healthController,
+                    decoration: const InputDecoration(labelText: 'Health'),
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.black, width: 5),
+              ),
+              padding: const EdgeInsets.all(10),
+              child: SizedBox(
+                height: 100,
+                width: 100,
+                child: TextField(
+                  textAlign: TextAlign.center,
+                  scrollPadding: const EdgeInsets.all(10),
+                  controller: armorClassController,
+                  decoration: const InputDecoration(
+                      labelText: 'AC',
+                      labelStyle: TextStyle(
+                        fontSize: 24,
+                      )),
+                  keyboardType: TextInputType.number,
+                  expands: false,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
             ),
             const SizedBox(height: 20),
             Expanded(
@@ -71,9 +115,16 @@ class AddNPCScreen extends ConsumerWidget {
                     id: newDocRef.id, // Use the Firestore document ID
                     name: nameController.text,
                     attacks: attackOptions,
+                    maxHealth: int.tryParse(healthController.text) ?? -1,
+                    ac: int.tryParse(armorClassController.text) ?? 10,
                   );
 
                   await npcNotifier.addNPC(newNPC, newDocRef.id);
+                  // Clear the fields after saving
+                  nameController.clear();
+                  healthController.clear();
+                  armorClassController.clear();
+                  npcNotifier.clearAttackOptions();
                   Navigator.pop(context);
                 }
               },

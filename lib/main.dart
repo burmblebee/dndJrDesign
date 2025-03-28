@@ -12,7 +12,7 @@ Future<void> main() async {
   runApp(
     ProviderScope( // Wrap with ProviderScope
       child: MaterialApp(
-        home: const DMCombatScreen(campaignId: '',),
+        home: const NPCListScreen(),
         //DMCombatScreen(campaignId: '15'),
         theme: ThemeData(
           brightness: Brightness.dark,

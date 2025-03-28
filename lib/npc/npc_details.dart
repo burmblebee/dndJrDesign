@@ -13,6 +13,7 @@ class NPCDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final npcState = ref.watch(npcProvider);
     final npc = npcState.selectedNPC;
+    int maxHealth = npc?.maxHealth ?? 0;
 
     // Handle the case where no NPC is selected
     if (npc == null) {
@@ -95,6 +96,39 @@ class NPCDetailScreen extends ConsumerWidget {
                 },
               ),
             ),
+            const SizedBox(height: 20),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const Text('Armor Class:', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.black, width: 5),
+                  ),
+                  padding: const EdgeInsets.all(10),
+                  child: SizedBox(
+                    height: 100,
+                    width: 100,
+                    child: Text('${npc.ac}', // Display the armor class)
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 50,
+                          fontWeight: FontWeight.bold,
+                        )),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text('Max Health: ', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                    Text('$maxHealth', style: const TextStyle(fontSize: 20)),
+                  ],
+                ),
+              ],
+            ),
+            const Spacer(),
           ],
         ),
       ),
