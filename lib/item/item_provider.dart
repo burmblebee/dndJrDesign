@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -63,81 +62,65 @@ class ItemProvider extends StateNotifier<ItemState> {
   ItemProvider() : super(ItemState(items: [], selectedItem: null));
 
   Future<void> saveItem(Item item) async {
-    final String? currentUserUid = FirebaseAuth.instance.currentUser?.uid;
-    if (currentUserUid != null) {
-      try {
-        debugPrint("Saving item: ${item.toMap()}");
 
-        bool isNewItem = item.id.isEmpty; // Check if it's a new item
-        final docRef = isNewItem
-            ? _firestore
-            .collection('app_user_profiles')
-            .doc(currentUserUid)
-            .collection('items')
-            .doc() // Generate new ID
-            : _firestore
-            .collection('app_user_profiles')
-            .doc(currentUserUid)
-            .collection('items')
-            .doc(item.id);
+    // if (item is ArmorItem) {
+    //   debugPrint("Saving ArmorItem with armorClass: ${item.armorClass}");
+    // }
+    // debugPrint("Item to save: ${item.toMap()}");
 
-        if (isNewItem) {
-          item = item.copyWith(id: docRef.id);
-        }
+    // debugPrint("saveItem() was called");
+    debugPrint("Saving item: ${item.toMap()}");
+    try {
+    //  debugPrint("Saving item: ${item.toMap()}");
+      bool isNewItem = item.id.isEmpty; // Check if it's a new item
+      final docRef = isNewItem
+          ? _firestore.collection('items').doc() // Generate new ID
+          : _firestore.collection('items').doc(item.id);
 
-        await docRef.set(item.toMap(), SetOptions(merge: true));
-
-        state = state.copyWith(
-          items: isNewItem
-              ? [...state.items, item]
-              : state.items.map((i) => i.id == item.id ? item : i).toList(),
-          selectedItem: null,
-        );
-      } catch (e) {
-        debugPrint("Error saving item: $e");
+      if (isNewItem) {
+        item = item.copyWith(id: docRef.id);
       }
-    } else {
-      debugPrint("Error: No authenticated user.");
+
+      await docRef.set(item.toMap(), SetOptions(merge: true));
+
+      state = state.copyWith(
+        items: isNewItem
+            ? [...state.items, item]
+            : state.items.map((i) => i.id == item.id ? item : i).toList(),
+        selectedItem: null,
+      );
+    } catch (e) {
+      debugPrint("Error saving item: $e");
     }
   }
+
 
 
   Future<void> fetchItems() async {
-    final String? currentUserUid = FirebaseAuth.instance.currentUser?.uid;
-    if (currentUserUid != null) {
-      try {
-        final querySnapshot = await _firestore
-            .collection('app_user_profiles')
-            .doc(currentUserUid)
-            .collection('items')
-            .get();
+    try {
+      final querySnapshot = await _firestore.collection('items').get();
+      final items = querySnapshot.docs.map((doc) {
+        final data = doc.data();
+        final type = data['itemType'];
+        final id = doc.id;
 
-        final items = querySnapshot.docs.map((doc) {
-          final data = doc.data();
-          final type = data['itemType'];
-          final id = doc.id;
+        switch (type) {
+          case 'Weapon':
+            return CombatItem.fromMap(id, data);
+          case 'Armor':
+            return ArmorItem.fromMap(id, data);
+          case 'Wondrous':
+            return WondrousItem.fromMap(id, data);
+          default:
+            return Item.fromMap(id, data);
+        }
+      }).toList();
 
-          switch (type) {
-            case 'Weapon':
-              return CombatItem.fromMap(id, data);
-            case 'Armor':
-              return ArmorItem.fromMap(id, data);
-            case 'Wondrous':
-              return WondrousItem.fromMap(id, data);
-            default:
-              return Item.fromMap(id, data);
-          }
-        }).toList();
-
-        state = state.copyWith(items: items);
-      } catch (e) {
-        debugPrint("Error fetching items: $e");
-      }
-    } else {
-      debugPrint("Error: No authenticated user.");
+      state = state.copyWith(items: items);
+    } catch (e) {
+      debugPrint("Error fetching items: $e");
     }
   }
-
 
   void selectItem(Item item) {
     // debugPrint('Selecting item with type: ${item.itemType}');

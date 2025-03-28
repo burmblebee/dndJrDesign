@@ -1,12 +1,11 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:warlocks_of_the_beach/widgets/main_appbar.dart';
-import 'package:warlocks_of_the_beach/widgets/navigation/bottom_navbar.dart';
 
-import '../widgets/main_drawer.dart';
 import 'add_item.dart';
 import 'fixed_item.dart';
 import 'item sub-widgets/armor_details.dart';
+import 'item sub-widgets/misc_details.dart';
 import 'item sub-widgets/weapon_details.dart';
 import 'item sub-widgets/wondrous_details.dart';
 import 'item_provider.dart';
@@ -21,11 +20,16 @@ class itemListScreen extends ConsumerWidget {
     final itemState = ref.watch(itemProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Item List'),
+      appBar: AppBar(title: const Text('Item List')),
+      bottomNavigationBar: BottomAppBar(
+        color: const Color(0xFF25291C),
+        child: Container(
+          height: 50,
+          alignment: Alignment.center,
+          child: const Text('Bottom Navigation Bar',
+              style: TextStyle(color: Colors.white)),
+        ),
       ),
-      drawer: const MainDrawer(),
-
-      bottomNavigationBar: MainBottomNavBar(),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           ref.read(itemProvider.notifier).resetSelectedItem();
@@ -40,7 +44,7 @@ class itemListScreen extends ConsumerWidget {
         child: const Icon(Icons.add),
       ),
       body: itemState.items.isEmpty
-          ? const Center(child: Text('No items available. Please add an item.'))
+          ? const Center(child: CircularProgressIndicator())
           : ListView.builder(
               itemCount: itemState.items.length,
               itemBuilder: (context, index) {
@@ -80,6 +84,14 @@ class itemListScreen extends ConsumerWidget {
                             MaterialPageRoute(
                               builder: (context) =>
                                   const WondrousDetailsScreen(),
+                            ),
+                          );
+                        } else if (item.itemType == ItemType.Miscellaneous) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                              const MiscDetailsScreen(),
                             ),
                           );
                         } else {

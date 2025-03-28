@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'item sub-widgets/armor.dart';
+import 'item sub-widgets/misc.dart';
 import 'item sub-widgets/weapon.dart';
 import 'fixed_item.dart';
 import 'item sub-widgets/wondrous.dart';
@@ -22,7 +23,7 @@ class AddItem extends ConsumerWidget {
       case ItemType.Wondrous:
         return AddWondrousWidget();
       case ItemType.Miscellaneous:
-        return Container();
+        return AddMiscWidget();
     }
   }
 
