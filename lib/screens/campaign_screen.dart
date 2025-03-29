@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:warlocks_of_the_beach/combat/DMcombatScreen.dart';
+import 'package:warlocks_of_the_beach/combat/dm_combat_screen.dart';
+import 'package:warlocks_of_the_beach/combat/player_combat_screen.dart';
 import '../widgets/navigation/main_appbar.dart';
 import '../widgets/navigation/main_drawer.dart';
 import '../widgets/navigation/bottom_navbar.dart';
@@ -101,7 +102,7 @@ class _CampaignScreenState extends State<CampaignScreen> {
                               onTap: () {
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
-                                    builder: (context) => DMCombatScreen(campaignId: '',),
+                                    builder: (context) => PlayerCombatScreen(campaignId: '',),
                                   ),
                                 );
                               },
