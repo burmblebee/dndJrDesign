@@ -1,7 +1,7 @@
 
 
-import 'package:dnd_app/event.dart';
-import 'package:dnd_app/schedule.dart';
+import 'package:dnd_app/screens/event.dart';
+import 'package:dnd_app/screens/schedule.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
