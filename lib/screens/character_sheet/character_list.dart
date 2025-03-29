@@ -61,14 +61,73 @@ class _CharacterListState extends State<CharacterList> {
     }
   }
 
+  Future<void> _deleteCharacter(String characterID, int index) async {
+    final User user = FirebaseAuth.instance.currentUser!;
+    final uuid = user.uid;
+
+    try {
+      String characterName = characters[index]['name'] ?? 'Character';
+
+      await FirebaseFirestore.instance
+          .collection('app_user_profiles')
+          .doc(uuid)
+          .collection('characters')
+          .doc(characterID)
+          .delete();
+
+      setState(() {
+        characters.removeAt(index);
+        characterIDs.removeAt(index);
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('$characterName was deleted.'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    } catch (e) {
+      print('Error deleting character: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to delete character: $e'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  void _showDeleteConfirmationDialog(String characterID, int index) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Character'),
+        content: const Text('Are you sure you want to delete this character?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _deleteCharacter(characterID, index);
+            },
+            child: const Text('Confirm'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: MainDrawer(),
-      bottomNavigationBar: MainBottomNavBar(),
       appBar: AppBar(
         title: const Text('Character List'),
       ),
+      bottomNavigationBar: MainBottomNavBar(),
+      drawer: MainDrawer(),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : characters.isEmpty
@@ -86,43 +145,81 @@ class _CharacterListState extends State<CharacterList> {
                     final assetName =
                         'assets/${character['class'] ?? 'default'}.svg';
 
-                    return Card(
-                      margin: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 5),
-                      child: ListTile(
-                        title: Text(
-                          character['name'] ?? 'Unknown',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
+                    return Dismissible(
+                      key: ValueKey(characterID),
+                      direction: DismissDirection.endToStart,
+                      background: Container(
+                        color: Colors.red,
+                        alignment: Alignment.centerRight,
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: const Icon(
+                          Icons.delete,
+                          color: Colors.white,
+                        ),
+                      ),
+                      confirmDismiss: (direction) async {
+                        // Show confirmation dialog
+                        bool? confirm = await showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Delete Character'),
+                            content: const Text(
+                                'Are you sure you want to delete this character?'),
+                            actions: [
+                              TextButton(
+                                onPressed: () =>
+                                    Navigator.of(context).pop(false),
+                                child: const Text('Cancel'),
+                              ),
+                              TextButton(
+                                onPressed: () =>
+                                    Navigator.of(context).pop(true),
+                                child: const Text('Confirm'),
+                              ),
+                            ],
                           ),
-                        ),
-                        subtitle: Text(
-                          'Level: ${character['level'] ?? 'Unknown'}\n'
-                          'Race: ${character['race'] ?? 'Unknown'}\n'
-                          'Class: ${character['class'] ?? 'Unknown'}',
-                        ),
-                        trailing: Center(
-                          child: SvgPicture.asset(
+                        );
+                        return confirm ?? false;
+                      },
+                      onDismissed: (direction) {
+                        _deleteCharacter(characterID, index);
+                      },
+                      child: Card(
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 5),
+                        child: ListTile(
+                          title: Text(
+                            character['name'] ?? 'Unknown',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          subtitle: Text(
+                            'Level: ${character['level'] ?? 'Unknown'}\n'
+                            'Race: ${character['race'] ?? 'Unknown'}\n'
+                            'Class: ${character['class'] ?? 'Unknown'}',
+                          ),
+                          trailing: SvgPicture.asset(
                             assetName,
                             height: 40,
                             width: 40,
                             alignment: Alignment.center,
-                            errorBuilder: (context, error, stackTrace) {
-                              return const Icon(Icons.image_not_supported);
-                            },
+                            color: Theme.of(context).iconTheme.color,
+                            placeholderBuilder: (context) =>
+                                const CircularProgressIndicator(),
                           ),
+                          isThreeLine: true,
+                          onTap: () {
+                            // Navigate to CharacterSheet and pass the characterID
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    CharacterSheet(characterID: characterID),
+                              ),
+                            );
+                          },
                         ),
-                        isThreeLine: true,
-                        onTap: () {
-                          // Navigate to CharacterSheet and pass the characterID
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  CharacterSheet(characterID: characterID),
-                            ),
-                          );
-                        },
                       ),
                     );
                   },
