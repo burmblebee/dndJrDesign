@@ -3,17 +3,18 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:warlocks_of_the_beach/login_screen.dart';
 import 'package:warlocks_of_the_beach/screens/campaign_screen.dart';
+import 'package:warlocks_of_the_beach/screens/character_sheet/character_list.dart';
 import 'package:warlocks_of_the_beach/screens/dnd_forms/character_name.dart';
 import 'firebase_options.dart';
-import 'splash_screen.dart'; // Import the SplashScreen
+import 'splash_screen.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized(); // Ensure this is the first line
+  WidgetsFlutterBinding.ensureInitialized(); 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  runApp(const MyApp()); // Run app AFTER Firebase initializes
+  runApp(const MyApp()); 
 }
 
 class MyApp extends StatelessWidget {
@@ -78,6 +79,7 @@ class MyApp extends StatelessWidget {
           '/character_creator': (context) => const CharacterName(),
           '/campaign_screen': (context) => const CampaignScreen(),
           '/login_screen': (context) => const LoginScreen(),
+          '/character_sheets' :(context) => CharacterList(),
         },
       ),
     );

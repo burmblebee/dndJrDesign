@@ -59,6 +59,7 @@ class SummarizationScreen extends ConsumerWidget {
       'weapons': character.weapons,
       'cantrips': character.cantrips,
       'spells': character.spells,
+      'level' : 1, //hard coding level 1 until we add leveling up functionality to the character creator
     };
 
     try {

@@ -41,6 +41,15 @@ class MainDrawer extends StatelessWidget{
             },
           ),
           const Divider(),
+          ListTile(
+            tileColor: Color(0xFF25291C),
+            leading: const Icon(Icons.group),
+            title: const Text('Character Sheets', style: TextStyle(color: Colors.white),),
+            onTap: () {
+              Navigator.of(context).pushReplacementNamed('/character_sheets');
+            },
+          ),
+          const Divider(),
           const Spacer(),
           const Divider(),
           ListTile(
