@@ -1,4 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:warlocks_of_the_beach/npc/npc.dart';
+
+import '../combat/character.dart';
 
 class FirestoreService {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -30,12 +33,82 @@ class FirestoreService {
   }
 
   // Update HP
-  Future<void> updateCombatantStat(String campaignId, String combatantId, int health) async {
-    await firestore
+  Future<void> updateCharacterHealth(String campaignId, String characterName, int health) async {
+    QuerySnapshot querySnapshot = await firestore
         .collection('user_campaigns')
         .doc(campaignId)
-        .collection('combatants')
-        .doc(combatantId)
-        .update({'hp': health});
+        .collection('characters')
+        .where('characterName', isEqualTo: characterName)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      String docId = querySnapshot.docs.first.id; // Get the document ID of the matching character
+      await firestore
+          .collection('user_campaigns')
+          .doc(campaignId)
+          .collection('characters')
+          .doc(docId)
+          .update({'hp': health});
+    } else {
+      print("Character $characterName not found in Firestore!");
+    }
+  }
+
+  Future<void> initializeCombat(String campaignId, List<Character> characters) async {
+    WriteBatch batch = firestore.batch();
+    CollectionReference characterCollection = firestore
+        .collection('user_campaigns')
+        .doc(campaignId)
+        .collection('characters');
+
+    for (var character in characters) {
+      DocumentReference charDoc = characterCollection.doc(character.name); // Using name as ID
+      batch.set(charDoc, {
+        'characterName': character.name,
+        'hp': character.health,
+        'maxHealth': character.maxHealth,
+        'armorClass': character.armorClass,
+      });
+    }
+
+    await batch.commit();
+  }
+
+
+
+  Future<void> setTurnOrder(String campaignId, List<String> turnOrder) async {
+    await firestore.collection('user_campaigns').doc(campaignId).update({
+      'turnOrder': turnOrder,
+    });
+  }
+
+  Future<void> addCharacterToCampaign(
+      String campaignId, String name, int hp, int maxHealth, int ac, List<AttackOption> attacks) async {
+    try {
+      final campaignRef = FirebaseFirestore.instance.collection('campaigns').doc(campaignId);
+      await campaignRef.update({
+        'characters': FieldValue.arrayUnion([{
+          'name': name,
+          'hp': hp,
+          'maxHealth': maxHealth,
+          'ac': ac,
+          'attacks': attacks,
+        }]),
+      });
+    } catch (e) {
+      print("Error adding character: $e");
+    }
+  }
+
+  // Remove character from the campaign
+  Future<void> removeCharacterFromCampaign(String campaignId, String characterName) async {
+    try {
+      final campaignRef = FirebaseFirestore.instance.collection('campaigns').doc(campaignId);
+      await campaignRef.update({
+        'characters': FieldValue.arrayRemove([{'name': characterName}]),
+      });
+    } catch (e) {
+      print("Error removing character: $e");
+    }
   }
 }

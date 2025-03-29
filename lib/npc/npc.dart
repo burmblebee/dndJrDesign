@@ -3,6 +3,20 @@ class AttackOption {
   List<int> diceConfig;
 
   AttackOption({required this.name, required this.diceConfig});
+
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'diceConfig': diceConfig,
+    };
+  }
+
+  factory AttackOption.fromMap(Map<String, dynamic> data) {
+    return AttackOption(
+      name: data['name'] as String,
+      diceConfig: List<int>.from(data['diceConfig']),
+    );
+  }
 }
 
 class NPC {

@@ -30,4 +30,29 @@ class Character {
       attacks: attacks ?? this.attacks,
     );
   }
+
+  // Convert Character to a Firestore-friendly map
+  Map<String, dynamic> toFirestore() {
+    return {
+      'name': name,
+      'health': health,
+      'maxHealth': maxHealth,
+      'armorClass': armorClass,
+      'attacks': attacks.map((attack) => attack.toMap()).toList(),
+    };
+  }
+
+  // Create a Character from Firestore data
+  factory Character.fromMap(Map<String, dynamic> data) {
+    return Character(
+      name: data['name'] as String,
+      health: data['health'] as int,
+      maxHealth: data['maxHealth'] as int,
+      armorClass: data['armorClass'] as int,
+      attacks: (data['attacks'] as List<dynamic>?)
+          ?.map((attackData) => AttackOption.fromMap(attackData))
+          .toList() ??
+          [],
+    );
+  }
 }
