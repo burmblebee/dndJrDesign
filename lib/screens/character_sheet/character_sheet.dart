@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class CharacterSheet extends StatefulWidget {
   final String characterID;
-
   const CharacterSheet({Key? key, required this.characterID}) : super(key: key);
 
   @override
@@ -12,34 +10,7 @@ class CharacterSheet extends StatefulWidget {
 }
 
 class _CharacterSheetState extends State<CharacterSheet> {
-  // Variables to hold character data
-  String name = '';
-  String race = '';
-  String characterClass = '';
-  String background = '';
-  String alignment = '';
-  String faith = '';
-  String lifestyle = '';
-  String hair = '';
-  String eyes = '';
-  String skin = '';
-  String height = '';
-  String weight = '';
-  String age = '';
-  String gender = '';
-  String personalityTraits = '';
-  String ideals = '';
-  String bonds = '';
-  String flaws = '';
-  String organizations = '';
-  String allies = '';
-  String enemies = '';
-  String backstory = '';
-  String other = '';
-  Map<String, dynamic> abilityScores = {};
-  List<dynamic> weapons = [];
-  List<dynamic> cantrips = [];
-  List<dynamic> spells = [];
+  Map<String, dynamic>? characterData;
   bool isLoading = true;
 
   @override
@@ -50,109 +21,171 @@ class _CharacterSheetState extends State<CharacterSheet> {
 
   Future<void> _fetchCharacterData() async {
     try {
-      if (FirebaseAuth.instance.currentUser == null) {
-        return;
-      } else {
-        final User user = FirebaseAuth.instance.currentUser!;
-        final uuid = user.uid;
+      DocumentSnapshot characterSnapshot = await FirebaseFirestore.instance
+          .collection('characters')
+          .doc(widget.characterID)
+          .get();
 
-        // Fetch the character data from Firestore
-        DocumentSnapshot characterSnapshot = await FirebaseFirestore.instance
-            .collection('app_user_profiles')
-            .doc(uuid) // Use the actual user ID
-            .collection('characters')
-            .doc(widget.characterID)
-            .get();
-
-        if (characterSnapshot.exists) {
-          final data = characterSnapshot.data() as Map<String, dynamic>;
-
-          setState(() {
-            // Assign data to variables
-            name = data['name'] ?? '';
-            race = data['race'] ?? '';
-            characterClass = data['class'] ?? '';
-            background = data['background'] ?? '';
-            alignment = data['alignment'] ?? '';
-            faith = data['faith'] ?? '';
-            lifestyle = data['lifestyle'] ?? '';
-            hair = data['hair'] ?? '';
-            eyes = data['eyes'] ?? '';
-            skin = data['skin'] ?? '';
-            height = data['height'] ?? '';
-            weight = data['weight'] ?? '';
-            age = data['age'] ?? '';
-            gender = data['gender'] ?? '';
-            personalityTraits = data['personalityTraits'] ?? '';
-            ideals = data['ideals'] ?? '';
-            bonds = data['bonds'] ?? '';
-            flaws = data['flaws'] ?? '';
-            organizations = data['organizations'] ?? '';
-            allies = data['allies'] ?? '';
-            enemies = data['enemies'] ?? '';
-            backstory = data['backstory'] ?? '';
-            other = data['other'] ?? '';
-            abilityScores = data['abilityScores'] ?? {};
-            weapons = data['weapons'] ?? [];
-            cantrips = data['cantrips'] ?? [];
-            spells = data['spells'] ?? [];
-            isLoading = false;
-          });
-        } else {
-          setState(() {
-            isLoading = false;
-          });
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Character not found.'),
-              duration: Duration(seconds: 2),
-            ),
-          );
-        }
-      }
+      setState(() {
+        characterData = characterSnapshot.data() as Map<String, dynamic>?;
+        isLoading = false;
+      });
     } catch (e) {
       print('Error fetching character data: $e');
       setState(() {
         isLoading = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to fetch character data: $e'),
-          duration: const Duration(seconds: 2),
-        ),
-      );
     }
+  }
+
+  void _addSpell() async {
+    TextEditingController spellNameController = TextEditingController();
+    TextEditingController spellLevelController = TextEditingController();
+    TextEditingController spellDescriptionController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Add New Spell"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: spellNameController,
+                decoration: const InputDecoration(labelText: "Spell Name"),
+              ),
+              TextField(
+                controller: spellLevelController,
+                decoration: const InputDecoration(labelText: "Spell Level"),
+                keyboardType: TextInputType.number,
+              ),
+              TextField(
+                controller: spellDescriptionController,
+                decoration: const InputDecoration(labelText: "Description"),
+                maxLines: 3,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (spellNameController.text.isNotEmpty &&
+                    spellLevelController.text.isNotEmpty) {
+                  Map<String, dynamic> newSpell = {
+                    "name": spellNameController.text,
+                    "level": int.tryParse(spellLevelController.text) ?? 0,
+                    "description": spellDescriptionController.text,
+                  };
+
+                  List<dynamic> updatedSpells =
+                      List.from(characterData?["spells"] ?? []);
+                  updatedSpells.add(newSpell);
+
+                  await FirebaseFirestore.instance
+                      .collection('characters')
+                      .doc(widget.characterID)
+                      .update({"spells": updatedSpells});
+
+                  setState(() {
+                    characterData?["spells"] = updatedSpells;
+                  });
+
+                  Navigator.pop(context);
+                }
+              },
+              child: const Text("Add"),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Character Sheet'),
-      ),
+      appBar: AppBar(title: Text(characterData?['name'] ?? 'Character Sheet')),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
+          : DefaultTabController(
+              length: 5,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Name: $name',
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                  const TabBar(
+                    tabs: [
+                      Tab(text: 'Stats'),
+                      Tab(text: 'Skills'),
+                      Tab(text: 'Spells'),
+                      Tab(child: Text('Combat'),),
+                      Tab(text: 'Traits'),
+                    ],
+                  ),
+                  Expanded(
+                    child: TabBarView(
+                      children: [
+                        _buildStatsTab(),
+                        _buildSkillsTab(),
+                        _buildSpellsTab(),
+                        _buildCombatTab(),
+                        _buildTraitsTab(),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  Text('Race: $race', style: const TextStyle(fontSize: 16)),
-                  const SizedBox(height: 10),
-                  Text('Class: $characterClass',
-                      style: const TextStyle(fontSize: 16)),
-                  
                 ],
               ),
             ),
     );
+  }
+
+  Widget _buildSpellsTab() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          ElevatedButton(
+            onPressed: _addSpell,
+            child: const Text("Add Spell"),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: (characterData?["spells"] as List<dynamic>?)?.length ?? 0,
+              itemBuilder: (context, index) {
+                var spell = characterData?["spells"][index];
+                return Card(
+                  margin: const EdgeInsets.symmetric(vertical: 5),
+                  child: ListTile(
+                    title: Text(spell["name"] ?? "Unknown Spell"),
+                    subtitle: Text("Level: ${spell["level"]}\n${spell["description"]}"),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatsTab() {
+    return Center(child: Text("Stats Placeholder"));
+  }
+
+  Widget _buildSkillsTab() {
+    return Center(child: Text("Skills & Saves Placeholder"));
+  }
+
+  Widget _buildTraitsTab() {
+    // Placeholder for traits tab, if needed in the future
+    return Center(child: Text("Traits Placeholder"));
+  }
+
+  Widget _buildCombatTab() {
+    // Placeholder for combat tab, if needed in the future
+    return Center(child: Text("Combat Placeholder"));
   }
 }
