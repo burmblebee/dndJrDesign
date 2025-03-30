@@ -32,7 +32,6 @@ class _CharacterListState extends State<CharacterList> {
         final User user = FirebaseAuth.instance.currentUser!;
         final uuid = user.uid;
 
-        // Fetch all characters from Firestore
         QuerySnapshot characterSnapshot = await FirebaseFirestore.instance
             .collection('app_user_profiles')
             .doc(uuid)
@@ -97,29 +96,6 @@ class _CharacterListState extends State<CharacterList> {
     }
   }
 
-  void _showDeleteConfirmationDialog(String characterID, int index) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Character'),
-        content: const Text('Are you sure you want to delete this character?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _deleteCharacter(characterID, index);
-            },
-            child: const Text('Confirm'),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -144,6 +120,8 @@ class _CharacterListState extends State<CharacterList> {
                     final characterID = characterIDs[index];
                     final assetName =
                         'assets/${character['class'] ?? 'default'}.svg';
+                    final levelClass =
+                        'Level ${character['level'] ?? 'Unknown'} ${character['class'] ?? 'Unknown'}';
 
                     return Dismissible(
                       key: ValueKey(characterID),
@@ -158,7 +136,6 @@ class _CharacterListState extends State<CharacterList> {
                         ),
                       ),
                       confirmDismiss: (direction) async {
-                        // Show confirmation dialog
                         bool? confirm = await showDialog(
                           context: context,
                           builder: (context) => AlertDialog(
@@ -188,6 +165,15 @@ class _CharacterListState extends State<CharacterList> {
                         margin: const EdgeInsets.symmetric(
                             horizontal: 10, vertical: 5),
                         child: ListTile(
+                          leading: SvgPicture.asset(
+                            assetName,
+                            height: 56,
+                            width: 56,
+                            alignment: Alignment.center,
+                            color: Theme.of(context).iconTheme.color,
+                            placeholderBuilder: (context) =>
+                                const CircularProgressIndicator(),
+                          ),
                           title: Text(
                             character['name'] ?? 'Unknown',
                             style: const TextStyle(
@@ -195,22 +181,10 @@ class _CharacterListState extends State<CharacterList> {
                             ),
                           ),
                           subtitle: Text(
-                            'Level: ${character['level'] ?? 'Unknown'}\n'
-                            'Race: ${character['race'] ?? 'Unknown'}\n'
-                            'Class: ${character['class'] ?? 'Unknown'}',
-                          ),
-                          trailing: SvgPicture.asset(
-                            assetName,
-                            height: 40,
-                            width: 40,
-                            alignment: Alignment.center,
-                            color: Theme.of(context).iconTheme.color,
-                            placeholderBuilder: (context) =>
-                                const CircularProgressIndicator(),
+                            '$levelClass\nRace: ${character['race'] ?? 'Unknown'}',
                           ),
                           isThreeLine: true,
                           onTap: () {
-                            // Navigate to CharacterSheet and pass the characterID
                             Navigator.push(
                               context,
                               MaterialPageRoute(
