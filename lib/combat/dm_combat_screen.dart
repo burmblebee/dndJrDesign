@@ -404,7 +404,8 @@ class DMCombatScreen extends ConsumerWidget {
 
                           // Armor Class input
                           const SizedBox(width: 10),
-                          Expanded(
+                          SizedBox(
+                            height: 60,  // Specify a fixed height here
                             child: TextField(
                               decoration: const InputDecoration(
                                 labelText: 'Armor Class',
@@ -573,6 +574,7 @@ class DMCombatScreen extends ConsumerWidget {
       },
     );
   }
+
 
 //TODO: Implement this function
   void startNewCombatBottomSheet() {}

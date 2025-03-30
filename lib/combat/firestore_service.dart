@@ -85,25 +85,41 @@ class FirestoreService {
   Future<void> addCharacterToCampaign(
       String campaignId, String name, int hp, int maxHealth, int ac, List<AttackOption> attacks) async {
     try {
-      final campaignRef = FirebaseFirestore.instance.collection('campaigns').doc(campaignId);
+      final campaignRef = FirebaseFirestore.instance.collection('user_campaigns').doc(campaignId);
+
+      // Check if the document exists
+      final docSnapshot = await campaignRef.get();
+      if (!docSnapshot.exists) {
+        // If the campaign doesn't exist, create it with basic fields
+        await campaignRef.set({
+          'characters': [], // Initialize characters array if the campaign doesn't exist
+          'currentTurn': 0, // or some default value
+          'turnOrder': [],
+        });
+      }
+
+      // Now proceed to add the character
+      final attacksMap = attacks.map((attack) => attack.toMap()).toList();
       await campaignRef.update({
         'characters': FieldValue.arrayUnion([{
           'name': name,
           'hp': hp,
           'maxHealth': maxHealth,
           'ac': ac,
-          'attacks': attacks,
+          'attacks': attacksMap,
         }]),
       });
+
     } catch (e) {
       print("Error adding character: $e");
     }
   }
 
+
   // Remove character from the campaign
   Future<void> removeCharacterFromCampaign(String campaignId, String characterName) async {
     try {
-      final campaignRef = FirebaseFirestore.instance.collection('campaigns').doc(campaignId);
+      final campaignRef = FirebaseFirestore.instance.collection('user_campaigns').doc(campaignId);
       await campaignRef.update({
         'characters': FieldValue.arrayRemove([{'name': characterName}]),
       });

@@ -41,7 +41,7 @@ class CombatStateNotifier extends StateNotifier<CombatState> {
 
   // Load combat data from Firestore and listen for real-time updates
   void _loadCombatData() {
-    _firestore.collection('campaigns').doc(campaignId).snapshots().listen((snapshot) {
+    _firestore.collection('user_campaigns').doc(campaignId).snapshots().listen((snapshot) {
       if (snapshot.exists) {
         final data = snapshot.data()!;
         List<Character> fetchedCharacters = (data['characters'] as List)
@@ -62,7 +62,7 @@ class CombatStateNotifier extends StateNotifier<CombatState> {
       final newIndex = (state.currentTurnIndex + 1) % state.characters.length;
       state = state.copyWith(currentTurnIndex: newIndex);
 
-      _firestore.collection('campaigns').doc(campaignId).update({
+      _firestore.collection('user_campaigns').doc(campaignId).update({
         'currentTurnIndex': newIndex,
       });
     }
@@ -76,7 +76,7 @@ class CombatStateNotifier extends StateNotifier<CombatState> {
 
     state = state.copyWith(characters: updatedCharacters);
 
-    _firestore.collection('campaigns').doc(campaignId).update({
+    _firestore.collection('user_campaigns').doc(campaignId).update({
       'characters': updatedCharacters.map((c) => c.toFirestore()).toList(),
     });
   }
@@ -86,7 +86,7 @@ class CombatStateNotifier extends StateNotifier<CombatState> {
     List<Character> updatedCharacters = [...state.characters, newCharacter];
     state = state.copyWith(characters: updatedCharacters);
 
-    _firestore.collection('campaigns').doc(campaignId).update({
+    _firestore.collection('user_campaigns').doc(campaignId).update({
       'characters': updatedCharacters.map((c) => c.toFirestore()).toList(),
     });
   }
@@ -99,7 +99,7 @@ class CombatStateNotifier extends StateNotifier<CombatState> {
 
     state = state.copyWith(characters: updatedCharacters);
 
-    _firestore.collection('campaigns').doc(campaignId).update({
+    _firestore.collection('user_campaigns').doc(campaignId).update({
       'characters': updatedCharacters.map((c) => c.toFirestore()).toList(),
     });
   }
@@ -115,7 +115,7 @@ class CombatStateNotifier extends StateNotifier<CombatState> {
 
     state = state.copyWith(characters: updatedCharacters);
 
-    _firestore.collection('campaigns').doc(campaignId).update({
+    _firestore.collection('user_campaigns').doc(campaignId).update({
       'characters': updatedCharacters.map((c) => c.toFirestore()).toList(),
     });
   }
