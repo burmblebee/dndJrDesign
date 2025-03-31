@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:uuid/uuid.dart';
+import 'package:warlocks_of_the_beach/screens/character_sheet/popup_dice_roller.dart';
 import 'package:warlocks_of_the_beach/screens/dnd_forms/character_trait_selection.dart';
 import 'package:warlocks_of_the_beach/widgets/navigation/bottom_navbar.dart';
 import 'package:warlocks_of_the_beach/widgets/navigation/main_drawer.dart';
@@ -141,14 +142,13 @@ class _CharacterSheetState extends State<CharacterSheet> {
               child: Column(
                 children: [
                   const TabBar(
+                    isScrollable: false,
                     tabs: [
-                      Tab(text: 'Stats'),
-                      Tab(text: 'Skills'),
-                      Tab(text: 'Spells'),
-                      Tab(
-                        child: Text('Combat'),
-                      ),
-                      Tab(text: 'Traits'),
+                      Tab(child: Text('Stats')),
+                      Tab(child: Text('Skills')),
+                      Tab(child: Text('Spells')),
+                      Tab(child: Text('Combat')),
+                      Tab(child: Text('Traits')),
                     ],
                   ),
                   Expanded(
@@ -165,47 +165,71 @@ class _CharacterSheetState extends State<CharacterSheet> {
                 ],
               ),
             ),
+            //The floating action button - currently just rolls 2d6
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          // Roll 2d6 using the popup dice roller
+          int? result = await showDiceRollPopup(context, "2d20");
+          if (result != null) {
+            // Show the result in a dialog
+            showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: const Text("Dice Roll Result"),
+                content: Text("You rolled: $result"),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text("OK"),
+                  ),
+                ],
+              ),
+            );
+          }
+        },
+        backgroundColor: Colors.blue,
+        child: const Icon(Icons.casino), // Dice icon
+      ),
     );
   }
 
   Widget _buildSpellsTab() {
-  return Center(
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (selectedCantrips.isNotEmpty) ...[
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8.0),
-            child: Text(
-              '    Cantrips:',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+    return Center(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (selectedCantrips.isNotEmpty) ...[
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 8.0),
+              child: Text(
+                '    Cantrips:',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
             ),
-          ),
-          for (var cantrip in selectedCantrips) buildSpellTile(cantrip, true),
+            for (var cantrip in selectedCantrips) buildSpellTile(cantrip, true),
+          ],
+          if (selectedSpells.isNotEmpty) ...[
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 8.0),
+              child: Text(
+                '    Level 1 Spells:',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ),
+            for (var spell in selectedSpells) buildSpellTile(spell, false),
+          ],
+          if (selectedCantrips.isEmpty && selectedSpells.isEmpty)
+            const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Text(
+                'No spells selected.',
+                style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
+              ),
+            ),
         ],
-        if (selectedSpells.isNotEmpty) ...[
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8.0),
-            child: Text(
-              '    Level 1 Spells:',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-          ),
-          for (var spell in selectedSpells) buildSpellTile(spell, false),
-        ],
-        if (selectedCantrips.isEmpty && selectedSpells.isEmpty)
-          const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Text(
-              'No spells selected.',
-              style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
-            ),
-          ),
-      ],
-    ),
-  );
-}
-
+      ),
+    );
+  }
 
   Widget _buildStatsTab() {
     return Center(child: Text("Stats Placeholder"));
@@ -222,7 +246,7 @@ class _CharacterSheetState extends State<CharacterSheet> {
 
   Widget _buildCombatTab() {
     // Placeholder for combat tab, if needed in the future
-    return Center(child: Text("Combat Placeholder"));
+    return Center(child: Text("Equipment Placeholder"));
   }
 
   ////////////////// Funcation Timeeeeeeee /////////////////
@@ -516,5 +540,3 @@ class _CharacterSheetState extends State<CharacterSheet> {
     }
   }
 }
-
-
