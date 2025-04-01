@@ -3,14 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:uuid/uuid.dart';
+import 'package:warlocks_of_the_beach/rpg_awesome_icons.dart';
 import 'package:warlocks_of_the_beach/screens/character_sheet/popup_dice_roller.dart';
-import 'package:warlocks_of_the_beach/screens/dnd_forms/character_trait_selection.dart';
-import 'package:warlocks_of_the_beach/widgets/navigation/bottom_navbar.dart';
-import 'package:warlocks_of_the_beach/widgets/navigation/main_drawer.dart';
 import '../../services/spell_service.dart';
 import '../../services/class_service.dart';
-import '../../providers/character_provider.dart';
 
 class CharacterSheet extends StatefulWidget {
   final String characterID;
@@ -27,6 +23,144 @@ class _CharacterSheetState extends State<CharacterSheet> {
   String errorMessage = '';
   Set<String> selectedSpells = {};
   Set<String> selectedCantrips = {};
+  Set<String> selectedWeapons = {};
+  String strengthScore = '10';
+  String dexterityScore = '10';
+  String constitutionScore = '10';
+  String intelligenceScore = '10';
+  String wisdomScore = '10';
+  String charismaScore = '10';
+  String strengthModifier = '0';
+  String dexterityModifier = '0';
+  String constitutionModifier = '0';
+  String intelligenceModifier = '0';
+  String wisdomModifier = '0';
+  String charismaModifier = '0';
+  final List<String> simpleWeapons = [
+    'Club',
+    'Dagger',
+    'Greatclub',
+    'Handaxe',
+    'Javelin',
+    'Light Hammer',
+    'Mace',
+    'Quarterstaff',
+    'Sickle',
+    'Spear',
+    'Light Crossbow',
+    'Dart',
+    'Shortbow',
+    'Sling',
+    'Blowgun',
+  ];
+
+  final List<String> martialWeapons = [
+    'Battleaxe',
+    'Flail',
+    'Glaive',
+    'Greataxe',
+    'Greatsword',
+    'Halberd',
+    'Lance',
+    'Longsword',
+    'Maul',
+    'Morningstar',
+    'Pike',
+    'Rapier',
+    'Scimitar',
+    'Shortsword',
+    'Trident',
+    'War Pick',
+    'Warhammer',
+    'Whip',
+    'Hand Crossbow',
+    'Heavy Crossbow',
+    'Longbow',
+    'Net',
+  ];
+
+  final Map<String, String> simpleWeaponDamage = {
+    'Club': '1d4',
+    'Dagger': '1d4',
+    'Greatclub': '2d4',
+    'Handaxe': '1d6',
+    'Javelin': '1d6',
+    'Light Hammer': '1d4',
+    'Mace': '1d6',
+    'Quarterstaff': '1d6',
+    'Sickle': '1d4',
+    'Spear': '1d6',
+    'Light Crossbow': '1d8',
+    'Dart': '1d4',
+    'Shortbow': '1d6',
+    'Sling': '1d4',
+    'Blowgun': '1',
+  };
+
+  final Map<String, String> martialWeaponDamage = {
+    'Battleaxe': '1d8',
+    'Flail': '1d8',
+    'Glaive': '1d10',
+    'Greataxe': '1d12',
+    'Greatsword': '2d6',
+    'Halberd': '1d10',
+    'Lance': '1d12',
+    'Longsword': '1d8',
+    'Maul': '2d6',
+    'Morningstar': '1d8',
+    'Pike': '1d10',
+    'Rapier': '1d8',
+    'Scimitar': '1d6',
+    'Shortsword': '1d6',
+    'Trident': '1d6',
+    'War Pick': '1d8',
+    'Warhammer': '1d8',
+    'Whip': '1d4',
+    'Hand Crossbow': '1d6',
+    'Heavy Crossbow': '1d10',
+    'Longbow': '1d8',
+    'Net': '0',
+  };
+
+  final Map<String, String> weaponModifiers = {
+    'Club': 'Strength',
+    'Dagger': 'Dexterity or Strength',
+    'Greatclub': 'Strength',
+    'Handaxe': 'Dexterity or Strength',
+    'Javelin': 'Dexterity or Strength',
+    'Light Hammer': 'Dexterity or Strength',
+    'Mace': 'Strength',
+    'Quarterstaff': 'Strength',
+    'Sickle': 'Strength',
+    'Spear': 'Dexterity or Strength',
+    'Light Crossbow': 'Dexterity',
+    'Dart': 'Dexterity',
+    'Shortbow': 'Dexterity',
+    'Sling': 'Dexterity',
+    'Blowgun': 'Dexterity',
+    'Battleaxe': 'Strength',
+    'Flail': 'Strength',
+    'Glaive': 'Strength',
+    'Greataxe': 'Strength',
+    'Greatsword': 'Strength',
+    'Halberd': 'Strength',
+    'Lance': 'Strength',
+    'Longsword': 'Strength',
+    'Maul': 'Strength',
+    'Morningstar': 'Strength',
+    'Pike': 'Strength',
+    'Rapier': 'Dexterity',
+    'Scimitar': 'Dexterity',
+    'Shortsword': 'Dexterity',
+    'Trident': 'Dexterity or Strength',
+    'War Pick': 'Strength',
+    'Warhammer': 'Strength',
+    'Whip': 'Dexterity',
+    'Hand Crossbow': 'Dexterity',
+    'Heavy Crossbow': 'Dexterity',
+    'Longbow': 'Dexterity',
+    'Net': 'Dexterity',
+  };
 
   @override
   void initState() {
@@ -48,11 +182,39 @@ class _CharacterSheetState extends State<CharacterSheet> {
       setState(() {
         characterData = characterSnapshot.data() as Map<String, dynamic>?;
         isLoading = false;
+
+        //set the scores for easy access
+        strengthScore =
+            characterData?["abilityScores"]["Strength"]?.toString() ?? '10';
+        dexterityScore =
+            characterData?["abilityScores"]["Dexterity"]?.toString() ?? '10';
+        constitutionScore =
+            characterData?["abilityScores"]["Constitution"]?.toString() ?? '10';
+        intelligenceScore =
+            characterData?["abilityScores"]["Intelligence"]?.toString() ?? '10';
+        wisdomScore =
+            characterData?["abilityScores"]["Wisdom"]?.toString() ?? '10';
+        charismaScore =
+            characterData?["abilityScores"]["Charisma"]?.toString() ?? '10';
+
+        //set the ability modifiers based on the scores
+        strengthModifier = ((int.parse(strengthScore) - 10) ~/ 2).toString();
+        dexterityModifier = ((int.parse(dexterityScore) - 10) ~/ 2).toString();
+        charismaModifier = ((int.parse(charismaScore) - 10) ~/ 2).toString();
+        constitutionModifier =
+            ((int.parse(constitutionScore) - 10) ~/ 2).toString();
+        intelligenceModifier =
+            ((int.parse(intelligenceScore) - 10) ~/ 2).toString();
+        wisdomModifier = ((int.parse(wisdomScore) - 10) ~/ 2).toString();
+
         for (var spell in characterData?["spells"] ?? []) {
           selectedSpells.add(spell);
         }
         for (var cantrip in characterData?["cantrips"] ?? []) {
           selectedCantrips.add(cantrip);
+        }
+        for (var weapon in characterData?["weapons"] ?? []) {
+          selectedWeapons.add(weapon);
         }
       });
     } catch (e) {
@@ -61,74 +223,6 @@ class _CharacterSheetState extends State<CharacterSheet> {
         isLoading = false;
       });
     }
-  }
-
-  void _addSpell() async {
-    TextEditingController spellNameController = TextEditingController();
-    TextEditingController spellLevelController = TextEditingController();
-    TextEditingController spellDescriptionController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text("Add New Spell"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: spellNameController,
-                decoration: const InputDecoration(labelText: "Spell Name"),
-              ),
-              TextField(
-                controller: spellLevelController,
-                decoration: const InputDecoration(labelText: "Spell Level"),
-                keyboardType: TextInputType.number,
-              ),
-              TextField(
-                controller: spellDescriptionController,
-                decoration: const InputDecoration(labelText: "Description"),
-                maxLines: 3,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Cancel"),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                if (spellNameController.text.isNotEmpty &&
-                    spellLevelController.text.isNotEmpty) {
-                  Map<String, dynamic> newSpell = {
-                    "name": spellNameController.text,
-                    "level": int.tryParse(spellLevelController.text) ?? 0,
-                    "description": spellDescriptionController.text,
-                  };
-
-                  List<dynamic> updatedSpells =
-                      List.from(characterData?["spells"] ?? []);
-                  updatedSpells.add(newSpell);
-
-                  await FirebaseFirestore.instance
-                      .collection('characters')
-                      .doc(widget.characterID)
-                      .update({"spells": updatedSpells});
-
-                  setState(() {
-                    characterData?["spells"] = updatedSpells;
-                  });
-
-                  Navigator.pop(context);
-                }
-              },
-              child: const Text("Add"),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   @override
@@ -165,11 +259,10 @@ class _CharacterSheetState extends State<CharacterSheet> {
                 ],
               ),
             ),
-            //The floating action button - currently just rolls 2d6
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           // Roll 2d6 using the popup dice roller
-          int? result = await showDiceRollPopup(context, "2d20");
+          int? result = await showDiceRollPopup(context, "2d6");
           if (result != null) {
             // Show the result in a dialog
             showDialog(
@@ -191,6 +284,14 @@ class _CharacterSheetState extends State<CharacterSheet> {
         child: const Icon(Icons.casino), // Dice icon
       ),
     );
+  }
+
+  Widget _buildStatsTab() {
+    return Center(child: Text("Stats Placeholder"));
+  }
+
+  Widget _buildSkillsTab() {
+    return Center(child: Text("Skills Placeholder"));
   }
 
   Widget _buildSpellsTab() {
@@ -231,78 +332,72 @@ class _CharacterSheetState extends State<CharacterSheet> {
     );
   }
 
-  Widget _buildStatsTab() {
-    return Center(child: Text("Stats Placeholder"));
-  }
-
-  Widget _buildSkillsTab() {
-    return Center(child: Text("Skills & Saves Placeholder"));
+  Widget _buildCombatTab() {
+    return SingleChildScrollView(
+      child: Center(
+        child: Column(
+          children: [
+            if (selectedWeapons.isNotEmpty) ...[
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 8.0),
+                child: Text(
+                  '    Weapons:',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ),
+              for (var weapon in selectedWeapons)
+                _buildWeaponTile(weapon), // Use the weapon tile builder
+            ],
+          ],
+        ),
+      ),
+    );
+    // return Center(
+    //     child: Column(
+    //   children: [
+    //     if (selectedWeapons.isNotEmpty) ...[
+    //       const Padding(
+    //         padding: EdgeInsets.symmetric(vertical: 8.0),
+    //         child: Text(
+    //           '    Weapons:',
+    //           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+    //         ),
+    //       ),
+    //       for (var weapon in selectedWeapons) Text(weapon),
+    //     ],
+    //   ],
+    // ));
   }
 
   Widget _buildTraitsTab() {
-    // Placeholder for traits tab, if needed in the future
     return Center(child: Text("Traits Placeholder"));
   }
 
-  Widget _buildCombatTab() {
-    // Placeholder for combat tab, if needed in the future
-    return Center(child: Text("Equipment Placeholder"));
-  }
+  Widget buildSpellTile(String spellName, bool isCantrip) {
+    bool isSelected = isCantrip
+        ? selectedCantrips.contains(spellName)
+        : selectedSpells.contains(spellName);
 
-  ////////////////// Funcation Timeeeeeeee /////////////////
-
-  Future<void> loadData() async {
-    try {
-      final characterClass = characterData?["class"];
-      if (characterClass == null) {
-        setState(() {
-          errorMessage = 'No class selected.';
-          isLoading = false;
-        });
-        return;
-      }
-
-      final classData = await ClassService.getClassData(characterClass);
-      if (classData == null) {
-        setState(() {
-          errorMessage = 'No class data found for $characterClass.';
-          isLoading = false;
-        });
-        return;
-      }
-
-      final features = classData["Class Features"];
-      if (features == null) {
-        setState(() {
-          errorMessage = 'No "Class Features" found for $characterClass.';
-          isLoading = false;
-        });
-        return;
-      }
-      final classTableKey = "The $characterClass";
-      final classTable = features[classTableKey];
-      if (classTable == null || classTable["table"] == null) {
-        setState(() {
-          errorMessage = 'No table data found for $classTableKey.';
-          isLoading = false;
-        });
-        return;
-      }
-
-      setState(() {
-        isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        errorMessage = 'Error loading data: $e';
-        isLoading = false;
-      });
+    if (_spellDescriptionCache.containsKey(spellName)) {
+      String description = _spellDescriptionCache[spellName]!;
+      String summary = _buildSummary(description);
+      return _buildTile(spellName, summary, isSelected, isCantrip);
+    } else {
+      return FutureBuilder<String>(
+        future: _getSpellDescription(spellName),
+        builder: (context, snapshot) {
+          String summary = 'Loading description...';
+          if (snapshot.hasData) {
+            String description = snapshot.data!;
+            summary = _buildSummary(description);
+          }
+          return _buildTile(spellName, summary, isSelected, isCantrip);
+        },
+      );
     }
   }
 
-  ///////////// SPELL DESCRIPTION & DIALOG SECTION /////////////
   Future<String> _getSpellDescription(String spellName) async {
-    // Check if description is already cached.
     if (_spellDescriptionCache.containsKey(spellName)) {
       return _spellDescriptionCache[spellName]!;
     }
@@ -310,6 +405,38 @@ class _CharacterSheetState extends State<CharacterSheet> {
     String finalDesc = desc ?? 'No description available.';
     _spellDescriptionCache[spellName] = finalDesc;
     return finalDesc;
+  }
+
+  Widget _buildTile(
+      String spellName, String summary, bool isSelected, bool isCantrip) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+      color: Colors.grey[850],
+      child: ListTile(
+        leading: FaIcon(FontAwesomeIcons.wandMagic,
+            color: Theme.of(context).iconTheme.color),
+        title: Text(
+          spellName,
+          style:
+              const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        ),
+        subtitle: Text(
+          summary,
+          style: const TextStyle(fontSize: 12, color: Colors.white),
+        ),
+        trailing: IconButton(
+          icon: Icon(Icons.info_outline,
+              color: Theme.of(context).iconTheme.color),
+          onPressed: () {
+            _showSpellInfoDialog(context, spellName);
+          },
+        ),
+      ),
+    );
   }
 
   Future<void> _showSpellInfoDialog(
@@ -396,7 +523,6 @@ class _CharacterSheetState extends State<CharacterSheet> {
     );
   }
 
-  // Helper to extract a summary from a spell description.
   String _buildSummary(String description) {
     List<String> lines = description
         .split('\n')
@@ -425,118 +551,152 @@ class _CharacterSheetState extends State<CharacterSheet> {
     return summary;
   }
 
-  Widget _buildTile(
-      String spellName, String summary, bool isSelected, bool isCantrip) {
+  Widget _buildWeaponTile(String weaponName) {
+    final String damage = simpleWeaponDamage[weaponName] ??
+        martialWeaponDamage[weaponName] ??
+        'Unknown';
+    final String attackModifier = _getWeaponAttackModifier(weaponName);
+    final String modifierType = weaponModifiers[weaponName] ?? 'Strength';
+
     return Card(
-      elevation: 2,
+      elevation: 4,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
-      margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-      color: Colors.grey[850],
-      child: StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return ListTile(
-            leading: FaIcon(FontAwesomeIcons.wandMagic,
-                color: Theme.of(context).iconTheme.color),
-            title: Text(
-              spellName,
-              style: const TextStyle(
-                  fontWeight: FontWeight.bold, color: Colors.white),
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+      color: Theme.of(context).listTileTheme.tileColor,
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Weapon Icon
+            FaIcon(
+              _getWeaponIcon(weaponName),
+              size: 40,
+              color: Theme.of(context).iconTheme.color,
             ),
-            subtitle: Text(
-              summary,
-              style: const TextStyle(fontSize: 12, color: Colors.white),
+            const SizedBox(width: 12),
+
+            // Weapon Details
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Weapon Name
+                  Text(
+                    weaponName,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+
+                  // Damage and Attack Modifier
+                  Text(
+                    'Damage: $damage + $attackModifier',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.white70,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+
+                  // Modifier Type
+                  Text(
+                    'Modifier: $modifierType',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.white70,
+                    ),
+                  ),
+                ],
+              ),
             ),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.info_outline,
-                      color: Theme.of(context).iconTheme.color),
-                  onPressed: () {
-                    _showSpellInfoDialog(context, spellName);
-                  },
-                ),
-                // isSelected
-                //     ? const Icon(Icons.check_circle, color: Colors.green)
-                //     : Icon(Icons.add_circle_outline,
-                //         color: Theme.of(context).iconTheme.color),
-              ],
+
+            // Attack Modifier Display
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Theme.of(context).iconTheme.color,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                children: [
+                  const Text(
+                    'To Hit',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                  Text(
+                    '+$attackModifier',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
+              ),
             ),
-            onTap: () {
-              // setState(() {
-              //   if (isCantrip) {
-              //     if (isSelected) {
-              //       selectedCantrips.remove(spellName);
-              //       isSelected = false;
-              //     } else {
-              //       if (selectedCantrips.length < allowedCantrips) {
-              //         selectedCantrips.add(spellName);
-              //         isSelected = true;
-              //       } else {
-              //         ScaffoldMessenger.of(context).showSnackBar(
-              //           SnackBar(
-              //             content: Text(
-              //                 'You can only select $allowedCantrips cantrips.',
-              //                 style: const TextStyle(color: Colors.white)),
-              //           ),
-              //         );
-              //       }
-              //     }
-              //   } else {
-              //     if (isSelected) {
-              //       selectedSpells.remove(spellName);
-              //       isSelected = false;
-              //     } else {
-              //       if (selectedSpells.length < allowedSpells) {
-              //         selectedSpells.add(spellName);
-              //         isSelected = true;
-              //       } else {
-              //         ScaffoldMessenger.of(context).showSnackBar(
-              //           SnackBar(
-              //             content: Text(
-              //               'You can only select $allowedSpells spells.',
-              //               style: const TextStyle(color: Colors.black),
-              //             ),
-              //             backgroundColor: Colors.white,
-              //           ),
-              //         );
-              //       }
-              //     }
-              //   }
-              // });
-            },
-          );
-        },
+          ],
+        ),
       ),
     );
   }
 
-// Updated buildSpellTile that uses the cache to avoid reloading on each setState.
-  Widget buildSpellTile(String spellName, bool isCantrip) {
-    bool isSelected = isCantrip
-        ? selectedCantrips.contains(spellName)
-        : selectedSpells.contains(spellName);
+  IconData _getWeaponIcon(String weapon) {
+    final lower = weapon.toLowerCase();
+    if (lower.contains('sword') ||
+        lower.contains('rapier') ||
+        lower.contains('scimitar') ||
+        lower.contains('shortsword') ||
+        lower.contains('longsword') ||
+        lower.contains('greatsword')) {
+      return RpgAwesomeIcons.crossedSwords;
+    } else if (lower.contains('axe')) {
+      return RpgAwesomeIcons.batteredAxe;
+    } else if (lower.contains('bow') || lower.contains('crossbow')) {
+      return RpgAwesomeIcons.arrowCluster;
+    } else if (lower.contains('dagger')) {
+      return RpgAwesomeIcons.knife;
+    } else if (lower.contains('club') ||
+        lower.contains('mace') ||
+        lower.contains('hammer') ||
+        lower.contains('flail')) {
+      return FontAwesomeIcons.hammer;
+    } else if (lower.contains('spear') || lower.contains('javelin')) {
+      return FontAwesomeIcons.solidCircle; // placeholder
+    }
+    return FontAwesomeIcons.crosshairs; // fallback
+  }
 
-    // If the description is already cached, build the tile directly.
-    if (_spellDescriptionCache.containsKey(spellName)) {
-      String description = _spellDescriptionCache[spellName]!;
-      String summary = _buildSummary(description);
-      return _buildTile(spellName, summary, isSelected, isCantrip);
-    } else {
-      // Otherwise, use FutureBuilder to load and cache the description.
-      return FutureBuilder<String>(
-        future: _getSpellDescription(spellName),
-        builder: (context, snapshot) {
-          String summary = 'Loading description...';
-          if (snapshot.hasData) {
-            String description = snapshot.data!;
-            summary = _buildSummary(description);
-          }
-          return _buildTile(spellName, summary, isSelected, isCantrip);
-        },
-      );
+  String _getWeaponAttackModifier(String weaponName) {
+    int returnModifier = 0;
+    String modifierType = weaponModifiers[weaponName] ?? 'Strength';
+    switch (modifierType) {
+      case 'Strength':
+        returnModifier = int.parse(strengthModifier) + 2;
+        return returnModifier
+            .toString(); // +2 is the proficiency bonus for simplicity
+      case 'Dexterity':
+        returnModifier = int.parse(dexterityModifier) + 2;
+        return returnModifier.toString();
+      case 'Dexterity or Strength':
+        if (int.parse(dexterityScore) >= int.parse(strengthScore)) {
+          returnModifier = int.parse(dexterityModifier) + 2;
+          return returnModifier.toString(); //use Dexterity if it's higher
+        } else {
+          returnModifier = int.parse(strengthModifier) + 2;
+          return returnModifier.toString(); //otherwise use Strength
+        }
+      default:
+        return '0'; // trust ol default we all know and love :)
     }
   }
 }

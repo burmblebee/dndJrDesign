@@ -2,10 +2,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 Future<int?> showDiceRollPopup(BuildContext context, String diceInput) async {
-  // Parse the input (e.g., "2d6" -> 2 dice with 6 sides each)
+  // this parses the funny input ("2d6" -> 2 dice with 6 sides)
   final match = RegExp(r'(\d+)d(\d+)').firstMatch(diceInput);
   if (match == null) {
-    // Show an error dialog for invalid input
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
