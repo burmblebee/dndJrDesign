@@ -12,7 +12,7 @@ class PreLaunchCampaignScreen extends StatelessWidget {
   final isDM;
   final campaignID;
 
-  Stream<List<players>> _getPlayers() async* {
+  Stream<List<String>> _getPlayers() async* {
     final user = FirebaseAuth.instance.currentUser;
 
     if(user == null) {
@@ -68,8 +68,49 @@ class PreLaunchCampaignScreen extends StatelessWidget {
               },
               child: const Text('Launch Campaign'),
             ),
+
+            // DM Combat Screen button, should only be visible to the DM
+            if (isDM) ... [
+             ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => AddCombat(campaignID: campaignID)),
+                  );
+                },
+                child: const Text('DM Combat Screen'),
+              ),
+            ],
             
-            // Should now be a for loop displaying all the players and characters in the campaign
+            // A list of players in the campaign, should be pulled from the database
+            const SizedBox(height: 20),
+            StreamBuilder<List<String>>(
+              stream: _getPlayers(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const CircularProgressIndicator(); // Show a loading indicator
+                } else if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}'); // Show an error message
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Text('No players found'); // Handle empty data
+                } else {
+                  final players = snapshot.data!;
+                  return Column(
+                    children: players.map((player) {
+                      return Column(
+                        children: [
+                          ListTile(
+                            leading: const Icon(Icons.account_circle),
+                            title: Text(player),
+                          ),
+                          const SizedBox(height: 10),
+                        ],
+                      );
+                    }).toList(),
+                  );
+                }
+              },
+            ),
 
             const SizedBox(height: 10),
             ElevatedButton(
@@ -89,12 +130,6 @@ class PreLaunchCampaignScreen extends StatelessWidget {
             const SizedBox(height: 10),
             const ListTile(
               leading: Icon(Icons.account_circle),
-              title: Text('TomatoSoupe'),
-            ),
-            const ListTile(
-              leading: Icon(Icons.account_circle),
-              title: Text('Sonrac'),
-            ),
           ],
         ),
       ),
