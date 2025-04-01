@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hexagon/hexagon.dart';
-import 'package:warlocks_of_the_beach/die.dart';
+import '../dice/die.dart';
 import '../npc/npc.dart';
 
 class PremadeAttack extends StatefulWidget {
