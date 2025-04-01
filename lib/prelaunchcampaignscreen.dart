@@ -5,6 +5,8 @@ import '../widgets/main_appbar.dart';
 import '../widgets/navigation/main_drawer.dart';
 import '../widgets/navigation/bottom_navbar.dart';
 import '../screens/campaign_screen.dart';
+import '../combat/DMcombatScreen.dart';
+import '';
 
 class PreLaunchCampaignScreen extends StatelessWidget {
   const PreLaunchCampaignScreen({super.key, required this.campaignID, required this.isDM});
@@ -63,7 +65,7 @@ class PreLaunchCampaignScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   // Should be a function that checks if the user is a DM or a player, and sorting them to the correctr screen depending on that.
-                  MaterialPageRoute(builder: (context) => ((isDM) ? DMCombatScreen(campaignID: campaignID) : playerCombatScreen(campaignID: campaignID))),
+                  MaterialPageRoute(builder: (context) => ((isDM) ? DMCombatScreen(campaignId: campaignID) : playerCombatScreen(campaignID: campaignID))),
                 );
               },
               child: const Text('Launch Campaign'),
