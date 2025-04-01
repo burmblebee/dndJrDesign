@@ -6,7 +6,7 @@ import '../dice/diceRoller.dart';
 import '../npc/npc.dart';
 import '../npc/npc_provider.dart';
 import 'attack_roll.dart';
-import 'character.dart';
+import 'combat_character.dart';
 import 'combat_provider.dart';
 import 'firestore_service.dart';
 
@@ -14,7 +14,7 @@ class DMCombatScreen extends ConsumerWidget {
   const DMCombatScreen({super.key, required this.campaignId});
   final String campaignId;
 
-  void attackBottomSheet(BuildContext context, List<Character> characters,
+  void attackBottomSheet(BuildContext context, List<CombatCharacter> characters,
       WidgetRef ref, int currentTurnIndex, String campaignId) {
     String? selectedCharacter;
     String? selectedCharacterId;
@@ -37,9 +37,7 @@ class DMCombatScreen extends ConsumerWidget {
               builder: (BuildContext context, StateSetter setState) {
                 List<Map<String, String>> characterList = characters
                     .where((character) => character.health > 0)
-                    .map((character) => {
-                  'name': character.name
-                })
+                    .map((character) => {'name': character.name})
                     .toList();
 
                 return Padding(
@@ -48,7 +46,8 @@ class DMCombatScreen extends ConsumerWidget {
                   child: Container(
                     decoration: const BoxDecoration(
                       color: Color.fromARGB(255, 159, 158, 154),
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(16)),
                     ),
                     child: Wrap(
                       children: [
@@ -74,7 +73,8 @@ class DMCombatScreen extends ConsumerWidget {
                                     value: char['name'],
                                     child: Text(char['name']!),
                                     onTap: () {
-                                      selectedCharacterId = char['id']; // Save the character's Firestore ID
+                                      selectedCharacterId = char[
+                                          'id']; // Save the character's Firestore ID
                                     },
                                   );
                                 }).toList(),
@@ -86,7 +86,8 @@ class DMCombatScreen extends ConsumerWidget {
                               ),
                               const SizedBox(height: 20),
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
                                 children: [
                                   ElevatedButton(
                                     onPressed: () {
@@ -95,7 +96,9 @@ class DMCombatScreen extends ConsumerWidget {
                                         MaterialPageRoute(
                                           builder: (context) => PremadeAttack(
                                             campaignId: campaignId,
-                                            attackOptions: characters[currentTurnIndex].attacks,
+                                            attackOptions:
+                                                characters[currentTurnIndex]
+                                                    .attacks,
                                             onRollComplete: handleRollComplete,
                                           ),
                                         ),
@@ -117,7 +120,8 @@ class DMCombatScreen extends ConsumerWidget {
                                             keyboardType: TextInputType.number,
                                             onChanged: (value) {
                                               setState(() {
-                                                damage = int.tryParse(value) ?? 0;
+                                                damage =
+                                                    int.tryParse(value) ?? 0;
                                               });
                                             },
                                           ),
@@ -130,7 +134,10 @@ class DMCombatScreen extends ConsumerWidget {
                                             ),
                                             TextButton(
                                               onPressed: () {
-                                                ref.read(diceRollProvider.notifier).state = damage;
+                                                ref
+                                                    .read(diceRollProvider
+                                                        .notifier)
+                                                    .state = damage;
                                                 Navigator.pop(context);
                                               },
                                               child: const Text('Save'),
@@ -169,11 +176,14 @@ class DMCombatScreen extends ConsumerWidget {
                               ),
                               const SizedBox(height: 20),
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
                                 children: [
                                   ElevatedButton(
                                     onPressed: () {
-                                      ref.read(diceRollProvider.notifier).state = 0;
+                                      ref
+                                          .read(diceRollProvider.notifier)
+                                          .state = 0;
                                       Navigator.pop(context);
                                     },
                                     child: const Text('Cancel'),
@@ -182,17 +192,27 @@ class DMCombatScreen extends ConsumerWidget {
                                     onPressed: () async {
                                       if (selectedCharacter != null) {
                                         int newHealth = characters
-                                            .firstWhere((char) => char.name == selectedCharacter)
-                                            .health - damage;
+                                                .firstWhere((char) =>
+                                                    char.name ==
+                                                    selectedCharacter)
+                                                .health -
+                                            damage;
 
-                                        await firestoreService.updateCharacterHealth(campaignId, selectedCharacter!, newHealth);
-
+                                        await firestoreService
+                                            .updateCharacterHealth(campaignId,
+                                                selectedCharacter!, newHealth);
+                                        ref
+                                            .read(combatProvider(campaignId)
+                                                .notifier)
+                                            .updateHealth(
+                                                selectedCharacter!, newHealth);
                                         Navigator.pop(context);
                                       } else {
                                         showDialog(
                                           context: context,
                                           builder: (context) => AlertDialog(
-                                            title: const Text('No Character Selected'),
+                                            title: const Text(
+                                                'No Character Selected'),
                                             actions: [
                                               TextButton(
                                                 onPressed: () {
@@ -224,9 +244,9 @@ class DMCombatScreen extends ConsumerWidget {
     );
   }
 
-  void healBottomSheet(
-      BuildContext context, List<Character> characters, WidgetRef ref, String campaignId) {
-    Character? selectedCharacter;
+  void healBottomSheet(BuildContext context, List<CombatCharacter> characters,
+      WidgetRef ref, String campaignId) {
+    CombatCharacter? selectedCharacter;
     int healedAmount = 0;
 
     showModalBottomSheet(
@@ -236,119 +256,132 @@ class DMCombatScreen extends ConsumerWidget {
       builder: (context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            return Padding(
-              padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).viewInsets.bottom + 20),
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: Color.fromARGB(255, 159, 158, 154),
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                ),
-                child: Wrap(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Text(
-                            'Heal Options',
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
+            return SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).viewInsets.bottom),
+                child: Container(
+                  decoration: const BoxDecoration(
+                    color: Color.fromARGB(255, 159, 158, 154),
+                    borderRadius:
+                        BorderRadius.vertical(top: Radius.circular(16)),
+                  ),
+                  child: Wrap(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text(
+                              'Heal Options',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 20),
-                          DropdownButton<Character>( // Using Character directly
-                            hint: const Text("Select a Character"),
-                            value: selectedCharacter,
-                            items: characters.map((character) {
-                              return DropdownMenuItem<Character>(
-                                value: character,
-                                child: Text(character.name),
-                              );
-                            }).toList(),
-                            onChanged: (value) {
-                              setState(() {
-                                selectedCharacter = value;
-                              });
-                            },
-                          ),
-                          const SizedBox(height: 20),
-                          TextField(
-                            decoration: const InputDecoration(
-                              labelText: 'Healing Amount',
-                              border: OutlineInputBorder(),
+                            const SizedBox(height: 20),
+                            DropdownButton<CombatCharacter>(
+                              // Using Character directly
+                              hint: const Text("Select a Character"),
+                              value: selectedCharacter,
+                              items: characters.map((character) {
+                                return DropdownMenuItem<CombatCharacter>(
+                                  value: character,
+                                  child: Text(character.name),
+                                );
+                              }).toList(),
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedCharacter = value;
+                                });
+                              },
                             ),
-                            keyboardType: TextInputType.number,
-                            onChanged: (value) {
-                              setState(() {
-                                healedAmount = int.tryParse(value) ?? 0;
-                              });
-                            },
-                          ),
-                          const SizedBox(height: 20),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              ElevatedButton(
-                                onPressed: () async {
-                                  if (selectedCharacter != null && healedAmount > 0) {
-                                    int newHealth = selectedCharacter!.health + healedAmount;
-
-                                    // Cap healing at max health
-                                    newHealth = newHealth > selectedCharacter!.maxHealth
-                                        ? selectedCharacter!.maxHealth
-                                        : newHealth;
-
-                                    // Update character health in Firestore
-                                    await FirestoreService().updateCharacterHealth(
-                                        campaignId, selectedCharacter!.name, newHealth);
-
-                                    // Update the health locally (using ref.read() for StateNotifier)
-                                    ref.read(combatProvider(campaignId).notifier).updateHealth(
-                                        selectedCharacter!.name, newHealth);
-
+                            const SizedBox(height: 20),
+                            TextField(
+                              decoration: const InputDecoration(
+                                labelText: 'Healing Amount',
+                                border: OutlineInputBorder(),
+                              ),
+                              keyboardType: TextInputType.number,
+                              onChanged: (value) {
+                                setState(() {
+                                  healedAmount = int.tryParse(value) ?? 0;
+                                });
+                              },
+                            ),
+                            const SizedBox(height: 20),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                ElevatedButton(
+                                  onPressed: () {
                                     Navigator.pop(context);
-                                  } else {
-                                    // Show alert if no character selected or invalid healing
-                                    showDialog(
-                                      context: context,
-                                      builder: (context) => AlertDialog(
-                                        title: const Text('Invalid Input'),
-                                        content: Text(
-                                          selectedCharacter == null
-                                              ? 'No character selected!'
-                                              : 'Healing amount must be greater than 0!',
-                                        ),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.of(context).pop();
-                                            },
-                                            child: const Text('OK'),
+                                  },
+                                  child: const Text('Cancel'),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () async {
+                                    if (selectedCharacter != null &&
+                                        healedAmount > 0) {
+                                      int newHealth =
+                                          selectedCharacter!.health +
+                                              healedAmount;
+
+                                      // Cap healing at max health
+                                      newHealth = newHealth >
+                                              selectedCharacter!.maxHealth
+                                          ? selectedCharacter!.maxHealth
+                                          : newHealth;
+
+                                      // Update character health in Firestore
+                                      await FirestoreService()
+                                          .updateCharacterHealth(
+                                              campaignId,
+                                              selectedCharacter!.name,
+                                              newHealth);
+
+                                      ref
+                                          .read(combatProvider(campaignId)
+                                              .notifier)
+                                          .updateHealth(selectedCharacter!.name,
+                                              newHealth);
+
+                                      Navigator.pop(context);
+                                    } else {
+                                      // Show alert if no character selected or invalid healing
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) => AlertDialog(
+                                          title: const Text('Invalid Input'),
+                                          content: Text(
+                                            selectedCharacter == null
+                                                ? 'No character selected!'
+                                                : 'Healing amount must be greater than 0!',
                                           ),
-                                        ],
-                                      ),
-                                    );
-                                  }
-                                },
-                                child: const Text('Heal'),
-                              ),
-                              ElevatedButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                                child: const Text('Cancel'),
-                              ),
-                            ],
-                          ),
-                        ],
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.of(context).pop();
+                                              },
+                                              child: const Text('OK'),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    }
+                                  },
+                                  child: const Text('Heal'),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             );
@@ -358,15 +391,13 @@ class DMCombatScreen extends ConsumerWidget {
     );
   }
 
-
-
-  void addRemoveCharacterBottomSheet(
-      BuildContext context, List<Character> characters, WidgetRef ref, String campaignId) {
+  void addRemoveCharacterBottomSheet(BuildContext context,
+      List<CombatCharacter> characters, WidgetRef ref, String campaignId) {
     String? selectedName;
     int? hp, maxHealth, ac;
     String? npc;
+    String? selectedCharacter;
 
-    // Assuming npcState is already provided and available
     final npcState = ref.watch(npcProvider); // Watch the NPC state
 
     showModalBottomSheet(
@@ -378,7 +409,7 @@ class DMCombatScreen extends ConsumerWidget {
           builder: (BuildContext context, StateSetter setState) {
             return Padding(
               padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).viewInsets.bottom + 20),
+                  bottom: MediaQuery.of(context).viewInsets.bottom),
               child: Container(
                 decoration: const BoxDecoration(
                   color: Color.fromARGB(255, 159, 158, 154),
@@ -390,10 +421,9 @@ class DMCombatScreen extends ConsumerWidget {
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
                         children: [
                           const Text(
-                            'Manage Characters',
+                            'Create Quick Character to Add',
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
@@ -401,27 +431,70 @@ class DMCombatScreen extends ConsumerWidget {
                             ),
                           ),
                           const SizedBox(height: 20),
-
-                          // Armor Class input
-                          const SizedBox(width: 10),
-                          SizedBox(
-                            height: 60,  // Specify a fixed height here
-                            child: TextField(
-                              decoration: const InputDecoration(
-                                labelText: 'Armor Class',
-                                border: OutlineInputBorder(),
-                              ),
-                              keyboardType: TextInputType.number,
-                              onChanged: (value) {
-                                setState(() {
-                                  ac = int.tryParse(value) ?? 0;
-                                });
-                              },
+                          TextField(
+                            decoration: const InputDecoration(
+                              labelText: 'Character Name',
+                              border: OutlineInputBorder(),
                             ),
+                            keyboardType: TextInputType.text,
+                            onChanged: (value) {
+                              setState(() {
+                                selectedName = value;
+                              });
+                            },
+                          ),
+                          const SizedBox(height: 20),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  decoration: const InputDecoration(
+                                    labelText: 'Current Health',
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  keyboardType: TextInputType.number,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      hp = int.tryParse(value) ?? 0;
+                                    });
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: TextField(
+                                  decoration: const InputDecoration(
+                                    labelText: 'Max Health',
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  keyboardType: TextInputType.number,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      maxHealth = int.tryParse(value) ?? 0;
+                                    });
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: TextField(
+                                  decoration: const InputDecoration(
+                                    labelText: 'Armor Class',
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  keyboardType: TextInputType.number,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      ac = int.tryParse(value) ?? 0;
+                                    });
+                                  },
+                                ),
+                              ),
+                            ],
                           ),
                           const SizedBox(height: 20),
 
-                          // Select NPC or custom character
                           const Text(
                             'OR Select a Character to Add.',
                             style: TextStyle(
@@ -432,19 +505,22 @@ class DMCombatScreen extends ConsumerWidget {
                           ),
                           DropdownButton<String>(
                             hint: const Text("Select a Character"),
-                            value: npc,
-                            items: npcState.npcs.map((npc) {
-                              return DropdownMenuItem<String>(
-                                value: npc.name,
-                                child: Text(npc.name),
-                              );
-                            }).toList(),
+                            value: (npcState.npcs.any((n) => n.name == npc)
+                                ? npc
+                                : null), // Ensure valid selection
+                            items: npcState.npcs
+                                .map((npc) => DropdownMenuItem<String>(
+                                      value: npc.name,
+                                      child: Text(npc.name),
+                                    ))
+                                .toList(),
                             onChanged: (value) {
                               setState(() {
                                 npc = value;
                               });
                             },
                           ),
+
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
@@ -459,27 +535,57 @@ class DMCombatScreen extends ConsumerWidget {
                                       ac != null &&
                                       ac! > 0) {
                                     // Add character to Firestore and update state
-                                    await FirestoreService().addCharacterToCampaign(
-                                        campaignId, selectedName!, hp!, maxHealth!, ac!, []);
-                                    ref.read(combatProvider(campaignId).notifier).addCharacter( Character(name: selectedName!, health: hp, maxHealth: maxHealth, armorClass: ac!, attacks: []));
+                                    await FirestoreService()
+                                        .addCharacterToCampaign(
+                                            campaignId,
+                                            selectedName!,
+                                            hp!,
+                                            maxHealth!,
+                                            ac!, []);
+                                    ref
+                                        .read(
+                                            combatProvider(campaignId).notifier)
+                                        .addCharacter(CombatCharacter(
+                                            name: selectedName!,
+                                            health: hp!,
+                                            maxHealth: maxHealth!,
+                                            armorClass: ac!,
+                                            attacks: [],
+                                            isNPC: true));
                                     Navigator.pop(context);
                                   } else if (npc != null && npc!.isNotEmpty) {
                                     NPC selectedNpc = npcState.npcs
                                         .firstWhere((n) => n.name == npc);
 
                                     // Add NPC to Firestore and update state
-                                    await FirestoreService().addCharacterToCampaign(
-                                        campaignId, selectedNpc.name, selectedNpc.maxHealth, selectedNpc.maxHealth, selectedNpc.ac, selectedNpc.attacks);
+                                    await FirestoreService()
+                                        .addCharacterToCampaign(
+                                            campaignId,
+                                            selectedNpc.name,
+                                            selectedNpc.maxHealth,
+                                            selectedNpc.maxHealth,
+                                            selectedNpc.ac,
+                                            selectedNpc.attacks);
 
-                                    ref.read(combatProvider(campaignId).notifier).addCharacter( Character(name: selectedNpc.name, health: selectedNpc.maxHealth, maxHealth: selectedNpc.maxHealth, armorClass: selectedNpc.ac, attacks: selectedNpc.attacks)
-                                    );
+                                    ref
+                                        .read(
+                                            combatProvider(campaignId).notifier)
+                                        .addCharacter(CombatCharacter(
+                                            name: selectedNpc.name,
+                                            health: selectedNpc.maxHealth,
+                                            maxHealth: selectedNpc.maxHealth,
+                                            armorClass: selectedNpc.ac,
+                                            attacks: selectedNpc.attacks,
+                                            isNPC: true
+                                    ));
                                     Navigator.pop(context);
                                   } else {
                                     // Show error if nothing is selected
                                     showDialog(
                                       context: context,
                                       builder: (context) => AlertDialog(
-                                        title: const Text('You left something empty!'),
+                                        title: const Text(
+                                            'You left something empty!'),
                                         actions: [
                                           TextButton(
                                             onPressed: () {
@@ -509,7 +615,8 @@ class DMCombatScreen extends ConsumerWidget {
                           ),
                           DropdownButton<String>(
                             hint: const Text("Select a Character to Remove"),
-                            value: selectedName,
+                            value:
+                                selectedCharacter, // Use this instead of selectedName
                             items: characters.map((character) {
                               return DropdownMenuItem<String>(
                                 value: character.name,
@@ -518,7 +625,7 @@ class DMCombatScreen extends ConsumerWidget {
                             }).toList(),
                             onChanged: (value) {
                               setState(() {
-                                selectedName = value;
+                                selectedCharacter = value;
                               });
                             },
                           ),
@@ -528,18 +635,24 @@ class DMCombatScreen extends ConsumerWidget {
                             children: [
                               ElevatedButton(
                                 onPressed: () async {
-                                  if (selectedName != null && selectedName!.isNotEmpty) {
+                                  if (selectedName != null &&
+                                      selectedName!.isNotEmpty) {
                                     // Remove character from Firestore and update state
-                                    await FirestoreService().removeCharacterFromCampaign(
-                                        campaignId, selectedName!);
-                                    ref.read(combatProvider(campaignId).notifier).removeCharacter(selectedName!);
+                                    await FirestoreService()
+                                        .removeCharacterFromCampaign(
+                                            campaignId, selectedName!);
+                                    ref
+                                        .read(
+                                            combatProvider(campaignId).notifier)
+                                        .removeCharacter(selectedName!);
                                     Navigator.pop(context);
                                   } else {
                                     // Show error if nothing is selected
                                     showDialog(
                                       context: context,
                                       builder: (context) => AlertDialog(
-                                        title: const Text('You left something empty!'),
+                                        title: const Text(
+                                            'You left something empty!'),
                                         actions: [
                                           TextButton(
                                             onPressed: () {
@@ -575,15 +688,15 @@ class DMCombatScreen extends ConsumerWidget {
     );
   }
 
-
 //TODO: Implement this function
   void startNewCombatBottomSheet() {}
 
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    List<Character> characters = ref.watch(combatProvider(campaignId)).characters;
-    int currentTurnIndex = ref.watch(combatProvider(campaignId)).currentTurnIndex;
+    List<CombatCharacter> characters =
+        ref.watch(combatProvider(campaignId)).characters;
+    int currentTurnIndex =
+        ref.watch(combatProvider(campaignId)).currentTurnIndex;
     final oddItemColor = Theme.of(context).canvasColor;
     final evenItemColor = Colors.white.withOpacity(0.2);
 
@@ -610,15 +723,14 @@ class DMCombatScreen extends ConsumerWidget {
               children: [
                 ElevatedButton(
                   onPressed: () {
-                    addRemoveCharacterBottomSheet(context, characters, ref, campaignId);
+                    addRemoveCharacterBottomSheet(
+                        context, characters, ref, campaignId);
                   },
                   child: const Text('Add/Remove Character'),
                 ),
                 const SizedBox(width: 20),
                 ElevatedButton(
-                  onPressed: () async {
-
-                  },
+                  onPressed: () async {},
                   child: const Text('Start New Combat'),
                 ),
               ],
@@ -626,7 +738,8 @@ class DMCombatScreen extends ConsumerWidget {
             const SizedBox(height: 20),
 
             // Combat turn order list
-            currentTurnOrder(context, characters, oddItemColor, evenItemColor, ref, campaignId),
+            currentTurnOrder(context, characters, oddItemColor, evenItemColor,
+                ref, campaignId),
             const SizedBox(height: 40),
 
             // Display current turn character
@@ -639,10 +752,9 @@ class DMCombatScreen extends ConsumerWidget {
     );
   }
 
-
   Widget currentTurnOrder(
       BuildContext context,
-      List<Character> characters,
+      List<CombatCharacter> characters,
       Color oddItemColor,
       Color evenItemColor,
       WidgetRef ref,
@@ -656,7 +768,9 @@ class DMCombatScreen extends ConsumerWidget {
             Container(
               key: ValueKey(characters[index].name), // Use name for unique key
               decoration: BoxDecoration(
-                color: index.isEven ? evenItemColor : oddItemColor,
+                color: (characters[index].health > 0)
+                    ? (index.isEven ? evenItemColor : oddItemColor)
+                    : Colors.red.withOpacity(0.5),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: ListTile(
@@ -699,16 +813,16 @@ class DMCombatScreen extends ConsumerWidget {
             ),
         ],
         onReorder: (int oldIndex, int newIndex) {
-          ref.read(combatProvider(campaignId).notifier).reorderCharacters(oldIndex, newIndex);
+          ref
+              .read(combatProvider(campaignId).notifier)
+              .reorderCharacters(oldIndex, newIndex);
         },
       ),
     );
   }
 
-
-
-  Widget currentTurn(
-      BuildContext context, List<Character> characters, int currentTurnIndex, WidgetRef ref, String campaignId) {
+  Widget currentTurn(BuildContext context, List<CombatCharacter> characters,
+      int currentTurnIndex, WidgetRef ref, String campaignId) {
     if (characters.isEmpty) {
       return const Center(
         child: Text(
@@ -722,7 +836,9 @@ class DMCombatScreen extends ConsumerWidget {
       padding: const EdgeInsets.all(8.0),
       height: 200,
       decoration: BoxDecoration(
-        color: Colors.grey[800],
+        color: (characters[currentTurnIndex].health > 0)
+            ? Colors.grey[800]
+            : Colors.red.withOpacity(0.5),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -741,7 +857,8 @@ class DMCombatScreen extends ConsumerWidget {
             children: [
               ElevatedButton(
                   onPressed: () {
-                    attackBottomSheet(context, characters, ref, currentTurnIndex, campaignId);
+                    attackBottomSheet(
+                        context, characters, ref, currentTurnIndex, campaignId);
                   },
                   child: const Text('Attack')),
               const SizedBox(width: 20),

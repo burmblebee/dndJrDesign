@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:warlocks_of_the_beach/npc/npc.dart';
 
-import '../combat/character.dart';
+import '../combat/combat_character.dart';
 
 class FirestoreService {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -38,7 +38,7 @@ class FirestoreService {
         .collection('user_campaigns')
         .doc(campaignId)
         .collection('characters')
-        .where('characterName', isEqualTo: characterName)
+        .where('name', isEqualTo: characterName)
         .get();
 
     if (querySnapshot.docs.isNotEmpty) {
@@ -54,7 +54,7 @@ class FirestoreService {
     }
   }
 
-  Future<void> initializeCombat(String campaignId, List<Character> characters) async {
+  Future<void> initializeCombat(String campaignId, List<CombatCharacter> characters) async {
     WriteBatch batch = firestore.batch();
     CollectionReference characterCollection = firestore
         .collection('user_campaigns')
@@ -76,11 +76,7 @@ class FirestoreService {
 
 
 
-  Future<void> setTurnOrder(String campaignId, List<String> turnOrder) async {
-    await firestore.collection('user_campaigns').doc(campaignId).update({
-      'turnOrder': turnOrder,
-    });
-  }
+
 
   Future<void> addCharacterToCampaign(
       String campaignId, String name, int hp, int maxHealth, int ac, List<AttackOption> attacks) async {

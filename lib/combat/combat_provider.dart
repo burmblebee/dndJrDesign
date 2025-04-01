@@ -1,18 +1,18 @@
 import 'package:riverpod/riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../combat/character.dart';
+import '../combat/combat_character.dart';
 import '../npc/npc.dart';
 import 'firestore_service.dart';
 
 final diceRollProvider = StateProvider<int>((ref) => 0);
 
 class CombatState {
-  final List<Character> characters;
+  final List<CombatCharacter> characters;
   final int currentTurnIndex;
 
   CombatState({required this.characters, this.currentTurnIndex = 0});
 
-  CombatState copyWith({List<Character>? characters, int? currentTurnIndex}) {
+  CombatState copyWith({List<CombatCharacter>? characters, int? currentTurnIndex}) {
     return CombatState(
       characters: characters ?? this.characters,
       currentTurnIndex: currentTurnIndex ?? this.currentTurnIndex,
@@ -44,8 +44,8 @@ class CombatStateNotifier extends StateNotifier<CombatState> {
     _firestore.collection('user_campaigns').doc(campaignId).snapshots().listen((snapshot) {
       if (snapshot.exists) {
         final data = snapshot.data()!;
-        List<Character> fetchedCharacters = (data['characters'] as List)
-            .map((char) => Character.fromMap(char))
+        List<CombatCharacter> fetchedCharacters = (data['characters'] as List)
+            .map((char) => CombatCharacter.fromMap(char))
             .toList();
 
         state = state.copyWith(
@@ -70,7 +70,7 @@ class CombatStateNotifier extends StateNotifier<CombatState> {
 
   // Update character health and sync with Firestore
   void updateHealth(String characterName, int newHealth) {
-    List<Character> updatedCharacters = state.characters.map((char) {
+    List<CombatCharacter> updatedCharacters = state.characters.map((char) {
       return char.name == characterName ? char.copyWith(health: newHealth) : char;
     }).toList();
 
@@ -82,8 +82,8 @@ class CombatStateNotifier extends StateNotifier<CombatState> {
   }
 
   // Add new character and sync with Firestore
-  void addCharacter(Character newCharacter) {
-    List<Character> updatedCharacters = [...state.characters, newCharacter];
+  void addCharacter(CombatCharacter newCharacter) {
+    List<CombatCharacter> updatedCharacters = [...state.characters, newCharacter];
     state = state.copyWith(characters: updatedCharacters);
 
     _firestore.collection('user_campaigns').doc(campaignId).update({
@@ -93,7 +93,7 @@ class CombatStateNotifier extends StateNotifier<CombatState> {
 
   // Remove character and sync with Firestore
   void removeCharacter(String characterName) {
-    List<Character> updatedCharacters = state.characters
+    List<CombatCharacter> updatedCharacters = state.characters
         .where((char) => char.name != characterName)
         .toList();
 
@@ -109,7 +109,7 @@ class CombatStateNotifier extends StateNotifier<CombatState> {
     if (oldIndex < newIndex) newIndex -= 1;
     final character = state.characters[oldIndex];
 
-    List<Character> updatedCharacters = List.from(state.characters)
+    List<CombatCharacter> updatedCharacters = List.from(state.characters)
       ..removeAt(oldIndex)
       ..insert(newIndex, character);
 

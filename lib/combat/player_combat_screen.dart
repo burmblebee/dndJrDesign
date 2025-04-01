@@ -6,16 +6,16 @@ import '../dice/diceRoller.dart';
 import '../npc/npc.dart';
 import '../npc/npc_provider.dart';
 import 'attack_roll.dart';
-import 'character.dart';
+import 'combat_character.dart';
 import 'combat_provider.dart';
 import 'firestore_service.dart';
 
 class PlayerCombatScreen extends ConsumerWidget {
   PlayerCombatScreen({super.key, required this.campaignId});
   final String campaignId;
-  late Character playerCharacter;
+  late CombatCharacter playerCharacter;
 
-  void attackBottomSheet(BuildContext context, List<Character> characters,
+  void attackBottomSheet(BuildContext context, List<CombatCharacter> characters,
       WidgetRef ref, int currentTurnIndex, String campaignId) {
     String? selectedCharacter;
     String? selectedCharacterId;
@@ -226,8 +226,8 @@ class PlayerCombatScreen extends ConsumerWidget {
   }
 
   void healBottomSheet(
-      BuildContext context, List<Character> characters, WidgetRef ref, String campaignId) {
-    Character? selectedCharacter;
+      BuildContext context, List<CombatCharacter> characters, WidgetRef ref, String campaignId) {
+    CombatCharacter? selectedCharacter;
     int healedAmount = 0;
 
     showModalBottomSheet(
@@ -262,11 +262,11 @@ class PlayerCombatScreen extends ConsumerWidget {
                             ),
                           ),
                           const SizedBox(height: 20),
-                          DropdownButton<Character>( // Using Character directly
+                          DropdownButton<CombatCharacter>( // Using Character directly
                             hint: const Text("Select a Character"),
                             value: selectedCharacter,
                             items: characters.map((character) {
-                              return DropdownMenuItem<Character>(
+                              return DropdownMenuItem<CombatCharacter>(
                                 value: character,
                                 child: Text(character.name),
                               );
@@ -363,12 +363,13 @@ class PlayerCombatScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     //TODO: Get character for that player
-    playerCharacter = Character(
+    playerCharacter = CombatCharacter(
       name: 'Suffering',
       health: 100,
       maxHealth: 100,
       armorClass: 15,
       attacks: [],
+      isNPC: false
     );
     final combatState = ref.watch(combatProvider(campaignId));
 
@@ -420,7 +421,9 @@ class PlayerCombatScreen extends ConsumerWidget {
             Container(
               key: ValueKey(characters[index]),
               decoration: BoxDecoration(
-                color: index.isEven ? evenItemColor : oddItemColor,
+                color: (characters[index].health > 0)
+                    ? (index.isEven ? evenItemColor : oddItemColor)
+                    : Colors.red.withOpacity(0.5),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: ListTile(
@@ -448,7 +451,7 @@ class PlayerCombatScreen extends ConsumerWidget {
   }
 
 
-  Widget currentTurn(context, List<Character> characters, int currentTurnIndex,
+  Widget currentTurn(context, List<CombatCharacter> characters, int currentTurnIndex,
       WidgetRef ref) {
     return Container(
       padding: const EdgeInsets.all(8.0),
@@ -456,7 +459,9 @@ class PlayerCombatScreen extends ConsumerWidget {
       //full screen width
       width: MediaQuery.of(context).size.width,
       decoration: BoxDecoration(
-        color: Colors.grey[800],
+        color: (characters[currentTurnIndex].health > 0)
+            ? Colors.grey[800]
+            : Colors.red.withOpacity(0.5),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -491,17 +496,16 @@ class PlayerCombatScreen extends ConsumerWidget {
                         child: const Text('Heal')),
                   ],
                 ),
+                const Spacer(),
+                ElevatedButton(
+                  onPressed: () {
+                    ref.read(combatProvider(campaignId).notifier).nextTurn();
+                  },
+                  child: const Text('Advance Turn'),
+                ),
               ],
             ),
-          const Spacer(),
-          ElevatedButton(
-            onPressed: () {
-              // ref
-              //     .read(combatProvider.notifier)
-              //     .nextTurn(); // Advance turn order
-            },
-            child: const Text('Advance Turn'),
-          ),
+
           const SizedBox(width: 20),
         ],
       ),
