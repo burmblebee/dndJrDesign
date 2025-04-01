@@ -6,8 +6,6 @@ import 'package:warlocks_of_the_beach/screens/campaign_screen.dart';
 import 'package:warlocks_of_the_beach/screens/dnd_forms/character_name.dart';
 import 'firebase_options.dart'; 
 
-
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Ensure this is the first line
   await Firebase.initializeApp(
