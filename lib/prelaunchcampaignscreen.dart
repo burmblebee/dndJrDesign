@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import '../widgets/main_appbar.dart';
 import '../widgets/navigation/main_drawer.dart';
 import '../widgets/navigation/bottom_navbar.dart';
-import '../screens/campaign_screen.dart';
 import '../combat/DMcombatScreen.dart';
-import '';
+import '../combat/player_combat_screen.dart';
+import '../combat/create_combat.dart';
 
 class PreLaunchCampaignScreen extends StatelessWidget {
   const PreLaunchCampaignScreen({super.key, required this.campaignID, required this.isDM});
@@ -65,13 +65,15 @@ class PreLaunchCampaignScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   // Should be a function that checks if the user is a DM or a player, and sorting them to the correctr screen depending on that.
-                  MaterialPageRoute(builder: (context) => ((isDM) ? DMCombatScreen(campaignId: campaignID) : playerCombatScreen(campaignID: campaignID))),
+                  MaterialPageRoute(builder: (context) => ((isDM) ? DMCombatScreen(campaignId: campaignID) : PlayerCombatScreen(campaignId: campaignID))),
                 );
               },
               child: const Text('Launch Campaign'),
             ),
 
             // DM Combat Screen button, should only be visible to the DM
+            // Commented out due to AddCOmbat not being usable.
+            /**
             if (isDM) ... [
              ElevatedButton(
                 onPressed: () {
@@ -83,6 +85,7 @@ class PreLaunchCampaignScreen extends StatelessWidget {
                 child: const Text('DM Combat Screen'),
               ),
             ],
+            */
             
             // A list of players in the campaign, should be pulled from the database
             const SizedBox(height: 20),
