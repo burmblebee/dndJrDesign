@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import '../widgets/main_appbar.dart';
 import '../widgets/navigation/main_drawer.dart';
 import '../widgets/navigation/bottom_navbar.dart';
-import '../combat/DMcombatScreen.dart';
+import '../combat/dm_combat_screen.dart';
 import '../combat/player_combat_screen.dart';
 import '../combat/create_combat.dart';
 
@@ -135,6 +135,7 @@ class PreLaunchCampaignScreen extends StatelessWidget {
             const SizedBox(height: 10),
             const ListTile(
               leading: Icon(Icons.account_circle),
+            ),
           ],
         ),
       ),
