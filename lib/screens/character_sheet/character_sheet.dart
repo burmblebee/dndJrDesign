@@ -637,43 +637,16 @@ class _CharacterSheetState extends State<CharacterSheet> {
                 // Roll to hit, then prompt to see if user wants to roll damage
                 showDiceRollPopup(
                   context,
-                  "1d20", // Attack roll dice
+                  "1d20", // Attack roll dice (always a d20 for weapon attacks)
                   modifier: int.parse(attackModifier), // Attack roll modifier
                   attackRollDamage: damage, // Damage roll dice
                 ).then((result) {
+                  //just some logging
                   if (result != null) {
-                    // Show the result in a dialog
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text("Attack Roll Result"),
-                        content: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Attack Roll:\nBase Roll: ${result['attackRollBase']}\n"
-                              "Modifier: ${result['attackRollModifier']}\n"
-                              "Total: ${result['attackRoll']}",
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                            const SizedBox(height: 16),
-                            if (result['damageRoll'] != 0)
-                              Text(
-                                "Damage Roll:\nTotal Damage: ${result['damageRoll']}",
-                                style: const TextStyle(fontSize: 16),
-                              ),
-                          ],
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            child: const Text("OK"),
-                          ),
-                        ],
-                      ),
-                    );
+                    print("Final Result: $result");
+                    
                   }
+                  
                 });
               },
               icon: const Icon(Icons.casino),

@@ -71,6 +71,14 @@ class _DiceRollPopupState extends State<DiceRollPopup>
   List<double> diceRotations = [];
   bool isRolling = true;
 
+  // State variables for preserving the attack roll result.
+  int? attackTotal;
+  String? attackBreakdown;
+
+  // State variables to handle damage roll results.
+  bool damageRolled = false;
+  int? damageTotal;
+
   @override
   void initState() {
     super.initState();
@@ -79,14 +87,14 @@ class _DiceRollPopupState extends State<DiceRollPopup>
       duration: const Duration(seconds: 1),
     )..repeat(reverse: true);
 
-    // Initialize dice values and positions
+    // Initialize dice values and positions for attack roll.
     for (int i = 0; i < widget.numDice; i++) {
       diceValues.add(1); // Placeholder value before rolling
-      dicePositions.add(Offset(50.0 + i * 50, 150.0)); // Random start positions
+      dicePositions.add(Offset(50.0 + i * 50, 150.0)); // Starting positions
       diceRotations.add(0); // Start rotations at 0
     }
 
-    // Start rolling the dice
+    // Start rolling the attack dice.
     rollDice();
   }
 
@@ -96,12 +104,11 @@ class _DiceRollPopupState extends State<DiceRollPopup>
     super.dispose();
   }
 
+  // Rolls the attack dice and then saves the result.
   void rollDice() async {
     int rollCount = 10;
-
     for (int i = 0; i < rollCount; i++) {
-      if (!mounted) return; // Exit if widget is no longer in the tree
-
+      if (!mounted) return;
       setState(() {
         for (int j = 0; j < widget.numDice; j++) {
           diceValues[j] = _random.nextInt(widget.diceSides) + 1;
@@ -112,27 +119,32 @@ class _DiceRollPopupState extends State<DiceRollPopup>
           diceRotations[j] = _random.nextDouble() * 2 * pi;
         }
       });
-
       await Future.delayed(const Duration(milliseconds: 100));
     }
-
     if (!mounted) return;
     _animationController.stop();
     setState(() {
       isRolling = false;
+      // Save the attack roll result before any damage roll.
+      int baseRoll = diceValues.reduce((a, b) => a + b);
+      attackTotal = baseRoll + widget.modifier;
+      attackBreakdown = diceValues.length > 1
+          ? diceValues.join(' + ') + ' = $baseRoll'
+          : baseRoll.toString();
     });
   }
 
+  // Rolls damage dice. Notice that we do not update the saved attack result.
   Future<int> rollDamageDice(String damageDice) async {
     final match =
         RegExp(r'(\d+)d(\d+)').firstMatch(damageDice.replaceAll(' ', ''));
     if (match == null) return 0;
-
     final int numDice = int.parse(match.group(1)!);
     final int diceSides = int.parse(match.group(2)!);
 
+    // Set up new dice values for damage roll.
     diceValues = List.generate(numDice, (_) => 1);
-    dicePositions = List.generate(numDice, (_) => Offset(50.0, 150.0));
+    dicePositions = List.generate(numDice, (_) => const Offset(50.0, 150.0));
     diceRotations = List.generate(numDice, (_) => 0.0);
 
     setState(() {
@@ -140,8 +152,7 @@ class _DiceRollPopupState extends State<DiceRollPopup>
     });
 
     for (int i = 0; i < 10; i++) {
-      if (!mounted) return 0; // Exit if widget is disposed
-
+      if (!mounted) return 0;
       setState(() {
         for (int j = 0; j < numDice; j++) {
           diceValues[j] = _random.nextInt(diceSides) + 1;
@@ -152,158 +163,152 @@ class _DiceRollPopupState extends State<DiceRollPopup>
           diceRotations[j] = _random.nextDouble() * 2 * pi;
         }
       });
-
       await Future.delayed(const Duration(milliseconds: 100));
     }
-
     if (!mounted) return 0;
     _animationController.stop();
     setState(() {
       isRolling = false;
     });
-
     return diceValues.reduce((a, b) => a + b);
   }
 
   @override
   Widget build(BuildContext context) {
-    final int baseRoll = diceValues.reduce((a, b) => a + b);
-    final int totalRoll = baseRoll + widget.modifier;
-    final String diceBreakdown = diceValues.length > 1
-        ? diceValues.join(' + ') + ' = $baseRoll'
-        : baseRoll.toString(); // Show breakdown only if more than one die
+    // If attackTotal is already saved, use it; otherwise compute from current dice values.
+    final int displayedAttackTotal = attackTotal ??
+        (diceValues.reduce((a, b) => a + b) + widget.modifier);
+    final String displayedAttackBreakdown = attackBreakdown ??
+        (diceValues.length > 1
+            ? diceValues.join(' + ') + ' = ${diceValues.reduce((a, b) => a + b)}'
+            : diceValues[0].toString());
 
-    return AlertDialog(
-      title: isRolling ? const Text("Rolling...") : const Text("Attack Roll"),
-      content: isRolling
-          ? SizedBox(
-              height: 300,
-              width: 300,
-              child: Stack(
-                children: List.generate(diceValues.length, (index) {
-                  return AnimatedPositioned(
-                    duration: const Duration(milliseconds: 100),
-                    curve: Curves.easeOut,
-                    left: dicePositions[index].dx,
-                    top: dicePositions[index].dy,
-                    child: AnimatedBuilder(
-                      animation: _animationController,
-                      builder: (context, child) {
-                        return Transform.rotate(
-                          angle: diceRotations[index] +
-                              _animationController.value * 2 * pi,
-                          child: Container(
-                            width: 50,
-                            height: 50,
-                            decoration: BoxDecoration(
-                              color: Colors.blue,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            alignment: Alignment.center,
-                            child: Text(
-                              '${diceValues[index]}',
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        );
-                      },
+    // Build content based on whether damage has been rolled.
+    Widget content;
+    if (isRolling) {
+      content = SizedBox(
+        height: 300,
+        width: 300,
+        child: Stack(
+          children: List.generate(diceValues.length, (index) {
+            return AnimatedPositioned(
+              duration: const Duration(milliseconds: 100),
+              curve: Curves.easeOut,
+              left: dicePositions[index].dx,
+              top: dicePositions[index].dy,
+              child: AnimatedBuilder(
+                animation: _animationController,
+                builder: (context, child) {
+                  return Transform.rotate(
+                    angle: diceRotations[index] +
+                        _animationController.value * 2 * pi,
+                    child: Container(
+                      width: 50,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: Colors.blue,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        '${diceValues[index]}',
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   );
-                }),
+                },
               ),
-            )
-          : Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  "Attack Roll:\nDice: $diceBreakdown\nModifier: ${widget.modifier}\nTotal: $totalRoll",
-                  style: const TextStyle(fontSize: 16),
-                ),
-              ],
-            ),
+            );
+          }),
+        ),
+      );
+    } else if (damageRolled && damageTotal != null) {
+      // Show combined attack and damage roll results.
+      // Use the saved attack roll result.
+      final String damageBreakdown = diceValues.length > 1
+          ? diceValues.join(' + ') +
+              ' = ${diceValues.reduce((a, b) => a + b)}'
+          : diceValues[0].toString();
+      content = Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            "Attack Roll:\nDice: $displayedAttackBreakdown\nModifier: ${widget.modifier}\nTotal: $displayedAttackTotal",
+            style: const TextStyle(fontSize: 16),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            "Damage Roll:\nDice: $damageBreakdown\nModifier: ${widget.modifier}\nTotal: $damageTotal",
+            style: const TextStyle(fontSize: 16),
+          ),
+        ],
+      );
+    } else {
+      // Show only the attack roll result.
+      content = Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            "Attack Roll:\nDice: $displayedAttackBreakdown\nModifier: ${widget.modifier}\nTotal: $displayedAttackTotal",
+            style: const TextStyle(fontSize: 16),
+          ),
+        ],
+      );
+    }
+
+    return AlertDialog(
+      title: isRolling
+          ? const Text("Rolling...")
+          : Text(damageRolled ? "Roll Results" : "Attack Roll"),
+      content: content,
       actions: [
         if (!isRolling)
-          TextButton(
-            onPressed: () async {
-              // Ask if the user wants to roll for damage
-              final bool rollDamage = await showDialog<bool>(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Text("Roll for Damage?"),
-                      content: const Text("Do you want to roll for damage?"),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(false),
-                          child: const Text("No"),
-                        ),
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(true),
-                          child: const Text("Yes"),
-                        ),
-                      ],
-                    ),
-                  ) ??
-                  false;
-
-              if (rollDamage) {
-                // Reroll for damage with animation
-                final int damageBaseRoll =
-                    await rollDamageDice(widget.attackRollDamage);
-                final int damageTotal = damageBaseRoll + widget.modifier;
-                final String damageBreakdown = diceValues.length > 1
-                    ? diceValues.join(' + ') + ' = $damageBaseRoll'
-                    : damageBaseRoll
-                        .toString(); // Show breakdown only if more than one die
-
-                // Show the results screen with both attack and damage rolls
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text("Roll Results"),
-                    content: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Attack Roll: $totalRoll",
-                          style: const TextStyle(fontSize: 16),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          "Damage Roll:\nDice: $damageBreakdown\nModifier: ${widget.modifier}\nTotal: $damageTotal",
-                          style: const TextStyle(fontSize: 16),
-                        ),
-                      ],
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () {
-                          // Dismiss the damage roll popup
-                          if (mounted) {
-                            Navigator.of(context).pop();
-                          }
-                        },
-                        child: const Text("OK"),
-                      ),
-                    ],
-                  ),
-                );
-              } else {
-                // Show only the attack roll results
-                if (mounted) {
-                  Navigator.of(context).pop({
-                    "attackRoll": totalRoll,
-                    "damageRoll": 0,
-                  });
-                }
-              }
-            },
-            child: const Text("OK"),
-          ),
+          // If damage hasn't been rolled yet, offer two options.
+          if (!damageRolled)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TextButton(
+                  onPressed: () async {
+                    // User chooses to roll for damage.
+                    final int damageBaseRoll =
+                        await rollDamageDice(widget.attackRollDamage);
+                    final int rolledDamage = damageBaseRoll + widget.modifier;
+                    setState(() {
+                      damageTotal = rolledDamage;
+                      damageRolled = true;
+                      // No need to restart the animation controller here.
+                    });
+                  },
+                  child: const Text("Roll for Damage"),
+                ),
+                TextButton(
+                  onPressed: () {
+                    // User chooses not to roll for damage.
+                    Navigator.of(context).pop({
+                      "attackRoll": displayedAttackTotal,
+                      "damageRoll": 0,
+                    });
+                  },
+                  child: const Text("OK"),
+                ),
+              ],
+            )
+          else
+            // Once damage is rolled, one OK button dismisses the dialog.
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop({
+                  "attackRoll": displayedAttackTotal,
+                  "damageRoll": damageTotal!,
+                });
+              },
+              child: const Text("OK"),
+            ),
       ],
     );
   }
