@@ -17,6 +17,7 @@ class CharacterSheet extends StatefulWidget {
 }
 
 class _CharacterSheetState extends State<CharacterSheet> {
+  bool canPop = false;
   Map<String, dynamic>? characterData;
   bool isLoading = true;
   final Map<String, String> _spellDescriptionCache = {};
@@ -227,61 +228,76 @@ class _CharacterSheetState extends State<CharacterSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(characterData?['name'] ?? 'Character Sheet')),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : DefaultTabController(
-              length: 5,
-              child: Column(
-                children: [
-                  const TabBar(
-                    isScrollable: false,
-                    tabs: [
-                      Tab(child: Text('Stats')),
-                      Tab(child: Text('Skills')),
-                      Tab(child: Text('Spells')),
-                      Tab(child: Text('Combat')),
-                      Tab(child: Text('Traits')),
-                    ],
-                  ),
-                  Expanded(
-                    child: TabBarView(
-                      children: [
-                        _buildStatsTab(),
-                        _buildSkillsTab(),
-                        _buildSpellsTab(),
-                        _buildCombatTab(),
-                        _buildTraitsTab(),
+    return PopScope(
+      canPop: canPop,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(characterData?['name'] ?? 'Character Sheet'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              // Set the flag to true and pop the screen
+              setState(() {
+                canPop = true;
+              });
+              Navigator.of(context).pop();
+            },
+          ),
+        ),
+        body: isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : DefaultTabController(
+                length: 5,
+                child: Column(
+                  children: [
+                    const TabBar(
+                      isScrollable: false,
+                      tabs: [
+                        Tab(child: Text('Stats')),
+                        Tab(child: Text('Skills')),
+                        Tab(child: Text('Spells')),
+                        Tab(child: Text('Combat')),
+                        Tab(child: Text('Traits')),
                       ],
                     ),
-                  ),
-                ],
+                    Expanded(
+                      child: TabBarView(
+                        children: [
+                          _buildStatsTab(),
+                          _buildSkillsTab(),
+                          _buildSpellsTab(),
+                          _buildCombatTab(),
+                          _buildTraitsTab(),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          // Roll 2d6 using the popup dice roller
-          int? result = 0;
-          if (result != null) {
-            // Show the result in a dialog
-            showDialog(
-              context: context,
-              builder: (context) => AlertDialog(
-                title: const Text("Dice Roll Result"),
-                content: Text("You rolled: $result"),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text("OK"),
-                  ),
-                ],
-              ),
-            );
-          }
-        },
-        backgroundColor: Colors.blue,
-        child: const Icon(Icons.casino), // Dice icon
+        floatingActionButton: FloatingActionButton(
+          onPressed: () async {
+            // Roll 2d6 using the popup dice roller
+            int? result = 0;
+            if (result != null) {
+              // Show the result in a dialog
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text("Dice Roll Result"),
+                  content: Text("You rolled: $result"),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text("OK"),
+                    ),
+                  ],
+                ),
+              );
+            }
+          },
+          backgroundColor: Colors.blue,
+          child: const Icon(Icons.casino), // Dice icon
+        ),
       ),
     );
   }

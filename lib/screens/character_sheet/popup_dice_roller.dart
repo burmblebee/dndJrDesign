@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:warlocks_of_the_beach/screens/character_sheet/character_sheet.dart';
 
 Future<Map<String, int>?> showDiceRollPopup(
   BuildContext context,
@@ -99,6 +100,8 @@ class _DiceRollPopupState extends State<DiceRollPopup>
     int rollCount = 10;
 
     for (int i = 0; i < rollCount; i++) {
+      if (!mounted) return; // Exit if widget is no longer in the tree
+
       setState(() {
         for (int j = 0; j < widget.numDice; j++) {
           diceValues[j] = _random.nextInt(widget.diceSides) + 1;
@@ -113,7 +116,8 @@ class _DiceRollPopupState extends State<DiceRollPopup>
       await Future.delayed(const Duration(milliseconds: 100));
     }
 
-    _animationController.stop(); // Stop animation
+    if (!mounted) return;
+    _animationController.stop();
     setState(() {
       isRolling = false;
     });
@@ -127,26 +131,56 @@ class _DiceRollPopupState extends State<DiceRollPopup>
     final int numDice = int.parse(match.group(1)!);
     final int diceSides = int.parse(match.group(2)!);
 
-    int totalDamage = 0;
-    for (int i = 0; i < numDice; i++) {
-      totalDamage += _random.nextInt(diceSides) + 1;
+    diceValues = List.generate(numDice, (_) => 1);
+    dicePositions = List.generate(numDice, (_) => Offset(50.0, 150.0));
+    diceRotations = List.generate(numDice, (_) => 0.0);
+
+    setState(() {
+      isRolling = true;
+    });
+
+    for (int i = 0; i < 10; i++) {
+      if (!mounted) return 0; // Exit if widget is disposed
+
+      setState(() {
+        for (int j = 0; j < numDice; j++) {
+          diceValues[j] = _random.nextInt(diceSides) + 1;
+          dicePositions[j] = Offset(
+            _random.nextInt(200).toDouble(),
+            _random.nextInt(200).toDouble(),
+          );
+          diceRotations[j] = _random.nextDouble() * 2 * pi;
+        }
+      });
+
+      await Future.delayed(const Duration(milliseconds: 100));
     }
-    return totalDamage;
+
+    if (!mounted) return 0;
+    _animationController.stop();
+    setState(() {
+      isRolling = false;
+    });
+
+    return diceValues.reduce((a, b) => a + b);
   }
 
   @override
   Widget build(BuildContext context) {
     final int baseRoll = diceValues.reduce((a, b) => a + b);
     final int totalRoll = baseRoll + widget.modifier;
+    final String diceBreakdown = diceValues.length > 1
+        ? diceValues.join(' + ') + ' = $baseRoll'
+        : baseRoll.toString(); // Show breakdown only if more than one die
 
     return AlertDialog(
-      title: const Text("Attack Roll"),
+      title: isRolling ? const Text("Rolling...") : const Text("Attack Roll"),
       content: isRolling
           ? SizedBox(
               height: 300,
               width: 300,
               child: Stack(
-                children: List.generate(widget.numDice, (index) {
+                children: List.generate(diceValues.length, (index) {
                   return AnimatedPositioned(
                     duration: const Duration(milliseconds: 100),
                     curve: Curves.easeOut,
@@ -186,7 +220,7 @@ class _DiceRollPopupState extends State<DiceRollPopup>
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  "Attack Roll:\nBase Roll: $baseRoll\nModifier: ${widget.modifier}\nTotal: $totalRoll",
+                  "Attack Roll:\nDice: $diceBreakdown\nModifier: ${widget.modifier}\nTotal: $totalRoll",
                   style: const TextStyle(fontSize: 16),
                 ),
               ],
@@ -216,10 +250,14 @@ class _DiceRollPopupState extends State<DiceRollPopup>
                   false;
 
               if (rollDamage) {
-                // Reroll for damage
+                // Reroll for damage with animation
                 final int damageBaseRoll =
                     await rollDamageDice(widget.attackRollDamage);
                 final int damageTotal = damageBaseRoll + widget.modifier;
+                final String damageBreakdown = diceValues.length > 1
+                    ? diceValues.join(' + ') + ' = $damageBaseRoll'
+                    : damageBaseRoll
+                        .toString(); // Show breakdown only if more than one die
 
                 // Show the results screen with both attack and damage rolls
                 showDialog(
@@ -231,19 +269,24 @@ class _DiceRollPopupState extends State<DiceRollPopup>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Attack Roll:\nBase Roll: $baseRoll\nModifier: ${widget.modifier}\nTotal: $totalRoll",
+                          "Attack Roll: $totalRoll",
                           style: const TextStyle(fontSize: 16),
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          "Damage Roll:\nBase Roll: $damageBaseRoll\nModifier: ${widget.modifier}\nTotal: $damageTotal",
+                          "Damage Roll:\nDice: $damageBreakdown\nModifier: ${widget.modifier}\nTotal: $damageTotal",
                           style: const TextStyle(fontSize: 16),
                         ),
                       ],
                     ),
                     actions: [
                       TextButton(
-                        onPressed: () => Navigator.of(context).pop(),
+                        onPressed: () {
+                          // Dismiss the damage roll popup
+                          if (mounted) {
+                            Navigator.of(context).pop();
+                          }
+                        },
                         child: const Text("OK"),
                       ),
                     ],
@@ -251,10 +294,12 @@ class _DiceRollPopupState extends State<DiceRollPopup>
                 );
               } else {
                 // Show only the attack roll results
-                Navigator.of(context).pop({
-                  "attackRoll": totalRoll,
-                  "damageRoll": 0,
-                });
+                if (mounted) {
+                  Navigator.of(context).pop({
+                    "attackRoll": totalRoll,
+                    "damageRoll": 0,
+                  });
+                }
               }
             },
             child: const Text("OK"),
