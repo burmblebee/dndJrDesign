@@ -6,11 +6,17 @@ class Character {
   final String picture;
   final Map<String, dynamic> abilityScores;
   final List<String> weapons;
-  final List<String> cantrips; // New field for cantrips
-  final List<String> spells; // New field for spells
+  final List<String> cantrips;
+  final List<String> spells;
   final List<String> proficiencies;
   final List<String> languages;
   final Map<String, String> traits;
+
+  // Updated field for starting equipment
+  final List<String> selectedKit; // Changed from String? to List<String>
+  final String? selectedArmor;
+  final List<String> selectedEquipment;
+  final String? selectedInstrument;
 
   Character({
     required this.name,
@@ -25,22 +31,47 @@ class Character {
     required this.proficiencies,
     required this.languages,
     required this.traits,
+    this.selectedKit = const [], // Default to an empty list
+    this.selectedArmor,
+    this.selectedEquipment = const [],
+    this.selectedInstrument,
   });
 
-  factory Character.fromMap(Map<String, dynamic> data) {
+  Character copyWith({
+    String? name,
+    String? race,
+    String? characterClass,
+    String? background,
+    String? picture,
+    Map<String, dynamic>? abilityScores,
+    List<String>? weapons,
+    List<String>? cantrips,
+    List<String>? spells,
+    List<String>? proficiencies,
+    List<String>? languages,
+    Map<String, String>? traits,
+    List<String>? selectedKit, // Updated to List<String>
+    String? selectedArmor,
+    List<String>? selectedEquipment,
+    String? selectedInstrument,
+  }) {
     return Character(
-      name: data['name'] ?? '',
-      race: data['race'] ?? '',
-      characterClass: data['characterClass'] ?? '',
-      background: data['background'] ?? '',
-      picture: data['picture'] ?? '',
-      abilityScores: data['abilityScores'] ?? {},
-      weapons: List<String>.from(data['weapons'] ?? []),
-      cantrips: List<String>.from(data['cantrips'] ?? []), // Updated
-      spells: List<String>.from(data['spells'] ?? []), // Updated
-      proficiencies: List<String>.from(data['proficiencies'] ?? []),
-      languages: List<String>.from(data['languages'] ?? []),
-      traits: Map<String, String>.from(data['traits'] ?? {}),
+      name: name ?? this.name,
+      race: race ?? this.race,
+      characterClass: characterClass ?? this.characterClass,
+      background: background ?? this.background,
+      picture: picture ?? this.picture,
+      abilityScores: abilityScores ?? this.abilityScores,
+      weapons: weapons ?? this.weapons,
+      cantrips: cantrips ?? this.cantrips,
+      spells: spells ?? this.spells,
+      proficiencies: proficiencies ?? this.proficiencies,
+      languages: languages ?? this.languages,
+      traits: traits ?? this.traits,
+      selectedKit: selectedKit ?? this.selectedKit, // Updated
+      selectedArmor: selectedArmor ?? this.selectedArmor,
+      selectedEquipment: selectedEquipment ?? this.selectedEquipment,
+      selectedInstrument: selectedInstrument ?? this.selectedInstrument,
     );
   }
 
@@ -53,41 +84,36 @@ class Character {
       'picture': picture,
       'abilityScores': abilityScores,
       'weapons': weapons,
-      'cantrips': cantrips, // Updated
-      'spells': spells, // Updated
+      'cantrips': cantrips,
+      'spells': spells,
       'proficiencies': proficiencies,
       'languages': languages,
       'traits': traits,
+      'selectedKit': selectedKit, // Updated
+      'selectedArmor': selectedArmor,
+      'selectedEquipment': selectedEquipment,
+      'selectedInstrument': selectedInstrument,
     };
   }
 
-  Character copyWith({
-    String? name,
-    String? race,
-    String? characterClass,
-    String? background,
-    String? picture,
-    Map<String, dynamic>? abilityScores,
-    List<String>? weapons,
-    List<String>? cantrips, // Updated
-    List<String>? spells, // Updated
-    List<String>? proficiencies,
-    List<String>? languages,
-    Map<String, String>? traits,
-  }) {
+  factory Character.fromMap(Map<String, dynamic> map) {
     return Character(
-      name: name ?? this.name,
-      race: race ?? this.race,
-      characterClass: characterClass ?? this.characterClass,
-      background: background ?? this.background,
-      picture: picture ?? this.picture,
-      abilityScores: abilityScores ?? this.abilityScores,
-      weapons: weapons ?? this.weapons,
-      cantrips: cantrips ?? this.cantrips, // Updated
-      spells: spells ?? this.spells, // Updated
-      proficiencies: proficiencies ?? this.proficiencies,
-      languages: languages ?? this.languages,
-      traits: traits ?? this.traits,
+      name: map['name'] ?? '',
+      race: map['race'] ?? '',
+      characterClass: map['characterClass'] ?? '',
+      background: map['background'] ?? '',
+      picture: map['picture'] ?? '',
+      abilityScores: Map<String, dynamic>.from(map['abilityScores'] ?? {}),
+      weapons: List<String>.from(map['weapons'] ?? []),
+      cantrips: List<String>.from(map['cantrips'] ?? []),
+      spells: List<String>.from(map['spells'] ?? []),
+      proficiencies: List<String>.from(map['proficiencies'] ?? []),
+      languages: List<String>.from(map['languages'] ?? []),
+      traits: Map<String, String>.from(map['traits'] ?? {}),
+      selectedKit: List<String>.from(map['selectedKit'] ?? []), // Updated
+      selectedArmor: map['selectedArmor'],
+      selectedEquipment: List<String>.from(map['selectedEquipment'] ?? []),
+      selectedInstrument: map['selectedInstrument'],
     );
   }
 }

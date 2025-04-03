@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:warlocks_of_the_beach/providers/character_provider.dart';
+import 'package:warlocks_of_the_beach/screens/dnd_forms/starting_equipment_selection.dart';
 import 'package:warlocks_of_the_beach/widgets/navigation/bottom_navbar.dart';
 import 'package:warlocks_of_the_beach/widgets/navigation/main_appbar.dart';
 import '../../screens/dnd_forms/equipment_selection.dart';
@@ -926,7 +927,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => EquipmentSelection(),
+                        builder: (context) => StartingEquipmentSelection(),
                       ),
                     );
                   },

@@ -12,15 +12,35 @@ class CharacterNotifier extends StateNotifier<Character> {
           picture: '',
           abilityScores: {},
           weapons: [],
-          cantrips: [], // Updated
-          spells: [], // Updated
+          cantrips: [],
+          spells: [],
           proficiencies: [],
           languages: [],
           traits: {},
+          selectedKit: [],
+          selectedArmor: null,
+          selectedEquipment: [],
+          selectedInstrument: null,
         ));
+
+  void updateSelectedKit(List<String> kit) {
+    state = state.copyWith(selectedKit: kit); 
+  }
+
+  void updateSelectedArmor(String armor) {
+    state = state.copyWith(selectedArmor: armor);
+  }
+
+  void updateSelectedEquipment(List<String> items) {
+    state = state.copyWith(selectedEquipment: items);
+  }
 
   void updateCharacterName(String name) {
     state = state.copyWith(name: name);
+  }
+
+  void updateSelectedInstrument(String instrument) {
+    state = state.copyWith(selectedInstrument: instrument);
   }
 
   void updateSelectedRace(String race) {
@@ -43,11 +63,11 @@ class CharacterNotifier extends StateNotifier<Character> {
     state = state.copyWith(weapons: weapons);
   }
 
-  void updateCantrips(List<String> cantrips) { // New method
+  void updateCantrips(List<String> cantrips) {
     state = state.copyWith(cantrips: cantrips);
   }
 
-  void updateSpells(List<String> spells) { // Updated method
+  void updateSpells(List<String> spells) {
     state = state.copyWith(spells: spells);
   }
 
@@ -85,6 +105,7 @@ class CharacterNotifier extends StateNotifier<Character> {
   }
 }
 
-final characterProvider = StateNotifierProvider<CharacterNotifier, Character>((ref) {
+final characterProvider =
+    StateNotifierProvider<CharacterNotifier, Character>((ref) {
   return CharacterNotifier();
 });
