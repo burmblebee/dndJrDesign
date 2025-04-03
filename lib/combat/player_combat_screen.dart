@@ -381,7 +381,7 @@ class PlayerCombatScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Combat Screen')),
-      bottomNavigationBar: CombatBottomNavBar(),
+      bottomNavigationBar: CombatBottomNavBar(campaignId: campaignId, isDM: false),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(

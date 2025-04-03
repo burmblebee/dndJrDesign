@@ -1,5 +1,6 @@
 // screen with 2 buttons, one leading to npc list and one leading to item list
 import 'package:flutter/material.dart';
+import 'package:warlocks_of_the_beach/combat/create_combat.dart';
 import 'package:warlocks_of_the_beach/combat/dm_combat_screen.dart';
 import 'package:warlocks_of_the_beach/combat/player_combat_screen.dart';
 
@@ -33,6 +34,14 @@ class SyncTest extends StatelessWidget {
                 ));
               },
               child: const Text('Player'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(
+                  builder: (context) =>  AddCombat(campaignId: '20'),
+                ));
+              },
+              child: const Text('Add Combat'),
             ),
           ],
         ),

@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:warlocks_of_the_beach/combat/premade_attacks.dart';
@@ -576,8 +578,7 @@ class DMCombatScreen extends ConsumerWidget {
                                             maxHealth: selectedNpc.maxHealth,
                                             armorClass: selectedNpc.ac,
                                             attacks: selectedNpc.attacks,
-                                            isNPC: true
-                                    ));
+                                            isNPC: true));
                                     Navigator.pop(context);
                                   } else {
                                     // Show error if nothing is selected
@@ -688,8 +689,111 @@ class DMCombatScreen extends ConsumerWidget {
     );
   }
 
+  Future<List<String>> fetchCombatNames(String campaignId) async {
+    final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+    try {
+      QuerySnapshot combatDocs = await _firestore
+          .collection('user_campaigns')
+          .doc(campaignId)
+          .collection('combats')
+          .get();
+
+      // Extract combat names
+      List<String> combatNames =
+          combatDocs.docs.map((doc) => doc['name'] as String).toList();
+
+      return combatNames;
+    } catch (e) {
+      print("Error fetching combats: $e");
+      return [];
+    }
+  }
+
 //TODO: Implement this function
-  void startNewCombatBottomSheet() {}
+  Future<void> startNewCombatBottomSheet(BuildContext context) async {
+    List<String> combats = await fetchCombatNames(campaignId);
+    String? selectedCombat;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).viewInsets.bottom),
+                child: Container(
+                  decoration: const BoxDecoration(
+                    color: Color.fromARGB(255, 159, 158, 154),
+                    borderRadius:
+                        BorderRadius.vertical(top: Radius.circular(16)),
+                  ),
+                  child: Wrap(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Center(
+                          child: Column(
+                            children: [
+                              const Text(
+                                'Select a Combat to Start',
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              DropdownButton(
+                                  items: combats
+                                      .map((combat) => DropdownMenuItem<String>(
+                                            value: combat,
+                                            child: Text(combat),
+                                          ))
+                                      .toList(),
+                                  value: selectedCombat,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      selectedCombat = value;
+                                    });
+                                  }),
+                              const SizedBox(height: 20),
+                              ElevatedButton(
+                                //TODO: Start a new combat with only player characters
+                                  onPressed: (){},
+                                  child: Text('Reset Combat with No NPCs')
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  ElevatedButton(onPressed: (){
+                                    Navigator.pop(context);
+                                  }, child: Text('Cancel')),
+                                  ElevatedButton(
+                                    //TODO: Start new combat with selected combat
+                                      onPressed: (){},
+                                      child: Text('Start New Combat')),
+
+                                ],
+                              ),
+                              SizedBox(height: 50)
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -702,7 +806,7 @@ class DMCombatScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Combat Screen')),
-      bottomNavigationBar: CombatBottomNavBar(),
+      bottomNavigationBar: CombatBottomNavBar(campaignId: campaignId, isDM: true,),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
@@ -730,7 +834,9 @@ class DMCombatScreen extends ConsumerWidget {
                 ),
                 const SizedBox(width: 20),
                 ElevatedButton(
-                  onPressed: () async {},
+                  onPressed: () async {
+                    await startNewCombatBottomSheet(context);
+                  },
                   child: const Text('Start New Combat'),
                 ),
               ],

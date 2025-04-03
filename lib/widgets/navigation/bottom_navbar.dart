@@ -63,7 +63,8 @@ class _MainBottomNavBarState extends State<MainBottomNavBar> {
       unselectedItemColor: theme.unselectedItemColor, // Theme-unselected color
       currentIndex: _selectedIndex,
       onTap: _onItemTapped,
-      type: BottomNavigationBarType.fixed, // Ensures background stays consistent
+      type:
+          BottomNavigationBarType.fixed, // Ensures background stays consistent
       items: const [
         BottomNavigationBarItem(
           icon: Icon(Icons.search),

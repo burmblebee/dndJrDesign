@@ -38,4 +38,26 @@ class NPC {
 
     );
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'attacks': attacks.map((attack) => attack.toMap()).toList(),
+      'maxHealth': maxHealth,
+      'ac': ac,
+    };
+  }
+
+  factory NPC.fromMap(Map<String, dynamic> data) {
+    return NPC(
+      id: data['id'] as String,
+      name: data['name'] as String,
+      attacks: (data['attacks'] as List<dynamic>).map((attack) {
+        return AttackOption.fromMap(attack);
+      }).toList(),
+      maxHealth: data['maxHealth'] as int,
+      ac: data['ac'] as int,
+    );
+  }
 }

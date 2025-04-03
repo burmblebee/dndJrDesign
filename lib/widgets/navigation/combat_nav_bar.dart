@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:warlocks_of_the_beach/combat/dm_combat_screen.dart';
+import 'package:warlocks_of_the_beach/item/bag_of_holding.dart';
 import 'package:warlocks_of_the_beach/screens/campaign_screen.dart';
 
+import '../../combat/player_combat_screen.dart';
+
 class CombatBottomNavBar extends StatefulWidget {
-  const CombatBottomNavBar({super.key});
+  CombatBottomNavBar({super.key, required this.campaignId, required this.isDM});
+  String campaignId;
+  bool isDM;
 
   @override
   State<CombatBottomNavBar> createState() => _CombatBottomNavBarState();
@@ -13,32 +19,29 @@ class _CombatBottomNavBarState extends State<CombatBottomNavBar> {
   int _selectedIndex = 0;
 
   void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+    Widget screen;
+    _selectedIndex = index;
 
-    switch (index) {
-      case 0:
-        // Navigate to Combat
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(builder: (context) => BrowseContentScreen()),
-        // );
-        break;
-      case 1:
-        // Navigate to Other
-
-        break;
-      // case 2:
-      //   // Navigate to Dice Roller
-      //   Navigator.push(
-      //     context,
-      //     MaterialPageRoute(builder: (context) => DiceRollScreen()),
-      //   );
-        // );
-        // break;
+    if (index == 0) {
+      screen = widget.isDM
+          ? DMCombatScreen(campaignId: widget.campaignId)
+          : PlayerCombatScreen(campaignId: widget.campaignId);
+    } else if (index == 1) {
+      screen = BagOfHolding(campaignId: widget.campaignId, isDM: widget.isDM);
+    } else {
+      return;
     }
+    debugPrint('Selected index: $_selectedIndex');
+    debugPrint('index: $index');
+
+    // Replace the current screen instead of stacking new ones
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => screen),
+    );
   }
+
+
 
   @override
   Widget build(BuildContext context) {
