@@ -449,8 +449,17 @@ class _StartingEquipmentSelectionState extends ConsumerState<StartingEquipmentSe
                       }
                     }
                     // Update provider fields.
-                    characterNotifier.updateSelectedArmor(armor);
-                    characterNotifier.updateSelectedKit(kitInstrument);
+                    // characterNotifier.updateSelectedArmor(armor);
+                    
+                    // characterNotifier.updateSelectedKit(kitInstrument);                
+                    // ref.read(characterProvider.notifier).updateSpells(selectedSpells.toList());
+                    if (armor.isNotEmpty) {
+                      ref.read(characterProvider.notifier).updateSelectedArmor(armor);
+                    } else {
+                      ref.read(characterProvider.notifier).updateSelectedArmor("Robes");
+                    }
+                    ref.read(characterProvider.notifier).updateSelectedKit(kitInstrument);
+   
                     // Pass the manually determined weapons as initial values for the EquipmentSelection screen.
                     Navigator.push(
                       context,

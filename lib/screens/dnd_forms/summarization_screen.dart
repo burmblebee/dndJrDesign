@@ -46,6 +46,8 @@ class SummarizationScreen extends ConsumerWidget {
         'enemies': character.traits['enemies'] ?? '',
         'backstory': character.traits['backstory'] ?? '',
         'other': character.traits['other'] ?? '',
+        'proficiencies': character.proficiencies,
+        'languages': character.languages,
         'abilityScores': {
           'Strength': character.abilityScores['Strength'],
           'Dexterity': character.abilityScores['Dexterity'],
