@@ -62,6 +62,21 @@ class _CharacterSheetState extends State<CharacterSheet> {
   String enemies = '';
   String backstory = '';
   String other = '';
+  String userPack = '';
+
+  final Map<String, String> packDescriptions = {
+    "Scholar’s Pack":
+        "backpack, book of lore, ink and quill, and a small knife",
+    "Dungeoneer’s Pack":
+        "backpack, crowbar, hammer, 10 pitons, 10 torches, 5 days of rations, 50 feet of hempen rope",
+    "Explorer’s Pack":
+        "backpack, bedroll, mess kit, tinderbox, 10 torches, 10 days of rations, 50 feet of hempen rope",
+    "Priest’s Pack":
+        "backpack, prayer book, incense (5 sticks), vestments for religious ceremonies",
+    "Entertainer’s Pack": "backpack, costume, disguise kit",
+    "Burglar’s Pack":
+        "backpack, crowbar, hammer, 10 pitons, 10 torches, and 5 days of rations"
+  };
 
   final Map<String, List<String>> classSavingThrowProficiencies = {
     "Barbarian": ["Strength", "Constitution"],
@@ -294,8 +309,6 @@ class _CharacterSheetState extends State<CharacterSheet> {
           selectedWeapons.add(weapon);
         }
 
-       
-
         // Calculate Armor Class.
         // Grab startingArmor from Firebase (if missing, assume "Robe").
         String startingArmor =
@@ -303,6 +316,9 @@ class _CharacterSheetState extends State<CharacterSheet> {
         if (startingArmor.isEmpty) {
           startingArmor = "Robe";
         }
+
+        userPack = characterData?["startingKit"]?.toString().replaceAll(RegExp(r'[\[\]]'), '') ?? "Scholar’s Pack";
+
 
         // Map of starting armors with their base AC and rules.
         final Map<String, Map<String, dynamic>> armorStats = {
@@ -382,14 +398,12 @@ class _CharacterSheetState extends State<CharacterSheet> {
         body: isLoading
             ? const Center(child: CircularProgressIndicator())
             : DefaultTabController(
-                
                 length: 5,
                 child: Column(
                   children: [
                     Container(
                       color: Theme.of(context).scaffoldBackgroundColor,
                       child: const TabBar(
-                        
                         isScrollable: false,
                         tabs: [
                           Tab(child: Text('Stats')),
@@ -777,7 +791,42 @@ class _CharacterSheetState extends State<CharacterSheet> {
   }
 
   Widget _buildInventoryTab() {
-    return Center(child: Text("Skills Placeholder"));
+    // In a real app, you'd likely store the user's pack type in a variable.
+    // For demonstration, we're just using "Scholar’s Pack".
+    
+
+    // Retrieve the string for the user's pack; provide a fallback if necessary.
+    final String packItemsString = packDescriptions[userPack] ?? "";
+
+    // Split the string by commas and trim whitespace from each item.
+    final List<String> packItems =
+        packItemsString.split(',').map((item) => item.trim()).toList();
+
+    return ListView(
+      padding: const EdgeInsets.all(8.0),
+      children: [
+        // Header for the pack name.
+        ListTile(
+          title: Text(
+            userPack,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+            ),
+          ),
+        ),
+        const Divider(),
+        // Create a list tile for each item in the pack.
+        ...packItems.map((item) => Card(
+              elevation: 2,
+              margin: const EdgeInsets.symmetric(vertical: 4.0),
+              child: ListTile(
+                leading: const Icon(Icons.check_box_outlined),
+                title: Text(item),
+              ),
+            )),
+      ],
+    );
   }
 
   Widget _buildSpellsTab() {
@@ -857,7 +906,7 @@ class _CharacterSheetState extends State<CharacterSheet> {
 
   Widget _buildTraitsTab() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(8.0), 
+      padding: const EdgeInsets.all(8.0),
       child: Column(
         children: [
           _buildSummaryTile(context, 'Background', background),
