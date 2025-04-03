@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:warlocks_of_the_beach/home_screen.dart';
 import 'package:warlocks_of_the_beach/login_screen.dart';
 import 'package:warlocks_of_the_beach/profile.dart';
+import 'package:warlocks_of_the_beach/screens/Compendium/spell_compendium.dart';
 
 class MainDrawer extends StatelessWidget{
   const MainDrawer({super.key});
@@ -50,6 +51,14 @@ class MainDrawer extends StatelessWidget{
             },
           ),
           const Divider(),
+          ListTile(
+            tileColor: Color(0xFF25291C),
+            leading: const Icon(Icons.speaker_phone_outlined),
+            title: const Text('Spell Conpendium', style: TextStyle(color: Colors.white),),
+            onTap: () {
+              Navigator.of(context).push(MaterialPageRoute(builder: (context) => SpellCompendium(),));
+            },
+          ),
           const Spacer(),
           const Divider(),
           ListTile(
