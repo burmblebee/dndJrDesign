@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
 import 'package:warlocks_of_the_beach/providers/character_provider.dart';
 import 'package:warlocks_of_the_beach/widgets/main_appbar.dart';
 import 'package:warlocks_of_the_beach/widgets/navigation/bottom_navbar.dart';
@@ -19,6 +20,7 @@ class SummarizationScreen extends ConsumerWidget {
     } else {
       final User user = FirebaseAuth.instance.currentUser!;
       final uuid = user.uid;
+      final String characterId = const Uuid().v4();
 
       final characterData = {
         'name': character.name,
@@ -67,7 +69,7 @@ class SummarizationScreen extends ConsumerWidget {
             .collection('app_user_profiles')
             .doc(uuid)
             .collection('characters')
-            .doc(character.name)
+            .doc(characterId)
             .set(characterData);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Character data sent to Firestore successfully!')),

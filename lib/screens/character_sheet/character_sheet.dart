@@ -37,6 +37,8 @@ class _CharacterSheetState extends State<CharacterSheet> {
   String intelligenceModifier = '0';
   String wisdomModifier = '0';
   String charismaModifier = '0';
+  int armorClass = 0; // New variable to store the final AC
+
   final List<String> simpleWeapons = [
     'Club',
     'Dagger',
@@ -184,7 +186,7 @@ class _CharacterSheetState extends State<CharacterSheet> {
         characterData = characterSnapshot.data() as Map<String, dynamic>?;
         isLoading = false;
 
-        //set the scores for easy access
+        // Set the scores for easy access.
         strengthScore =
             characterData?["abilityScores"]["Strength"]?.toString() ?? '10';
         dexterityScore =
@@ -198,16 +200,17 @@ class _CharacterSheetState extends State<CharacterSheet> {
         charismaScore =
             characterData?["abilityScores"]["Charisma"]?.toString() ?? '10';
 
-        //set the ability modifiers based on the scores
+        // Set the ability modifiers based on the scores.
         strengthModifier = ((int.parse(strengthScore) - 10) ~/ 2).toString();
         dexterityModifier = ((int.parse(dexterityScore) - 10) ~/ 2).toString();
-        charismaModifier = ((int.parse(charismaScore) - 10) ~/ 2).toString();
         constitutionModifier =
             ((int.parse(constitutionScore) - 10) ~/ 2).toString();
         intelligenceModifier =
             ((int.parse(intelligenceScore) - 10) ~/ 2).toString();
         wisdomModifier = ((int.parse(wisdomScore) - 10) ~/ 2).toString();
+        charismaModifier = ((int.parse(charismaScore) - 10) ~/ 2).toString();
 
+        // Set the selected spells, cantrips, and weapons.
         for (var spell in characterData?["spells"] ?? []) {
           selectedSpells.add(spell);
         }
@@ -216,6 +219,63 @@ class _CharacterSheetState extends State<CharacterSheet> {
         }
         for (var weapon in characterData?["weapons"] ?? []) {
           selectedWeapons.add(weapon);
+        }
+
+        // Calculate Armor Class.
+        // Grab startingArmor from Firebase (if missing, assume "Robe").
+        String startingArmor =
+            characterData?["startingArmor"]?.toString() ?? "";
+        if (startingArmor.isEmpty) {
+          startingArmor = "Robe";
+        }
+
+        // Map of starting armors with their base AC and rules.
+        final Map<String, Map<String, dynamic>> armorStats = {
+          "Robe": {
+            "base": 10,
+            "plusDex": true,
+            "maxDex": null, // No cap.
+          },
+          "Chain Mail": {
+            "base": 16,
+            "plusDex": false,
+          },
+          "Studded Leather Armor": {
+            "base": 12,
+            "plusDex": true,
+            "maxDex": null,
+          },
+          "Scale Mail": {
+            "base": 14,
+            "plusDex": true,
+            "maxDex": 2, // Maximum Dex modifier of +2.
+          },
+          "Leather Armor": {
+            "base": 11,
+            "plusDex": true,
+            "maxDex": null,
+          },
+        };
+
+        // Calculate the final armor class.
+        if (armorStats.containsKey(startingArmor)) {
+          int baseAC = armorStats[startingArmor]!["base"];
+          bool plusDex = armorStats[startingArmor]!["plusDex"];
+          int additionalDex = 0;
+          if (plusDex) {
+            int dexMod = int.parse(dexterityModifier);
+            // If a maximum Dex modifier is defined, use the lesser of the Dex mod and the cap.
+            if (armorStats[startingArmor]!["maxDex"] != null) {
+              int maxDex = armorStats[startingArmor]!["maxDex"];
+              additionalDex = dexMod > maxDex ? maxDex : dexMod;
+            } else {
+              additionalDex = dexMod;
+            }
+          }
+          armorClass = baseAC + additionalDex;
+        } else {
+          // If the starting armor is not in the map, assume unarmored (10 + Dex mod).
+          armorClass = 10 + int.parse(dexterityModifier);
         }
       });
     } catch (e) {
@@ -254,9 +314,9 @@ class _CharacterSheetState extends State<CharacterSheet> {
                       isScrollable: false,
                       tabs: [
                         Tab(child: Text('Stats')),
-                        Tab(child: Text('Skills')),
                         Tab(child: Text('Spells')),
                         Tab(child: Text('Combat')),
+                        Tab(child: Text('Pouch')),
                         Tab(child: Text('Traits')),
                       ],
                     ),
@@ -264,9 +324,9 @@ class _CharacterSheetState extends State<CharacterSheet> {
                       child: TabBarView(
                         children: [
                           _buildStatsTab(),
-                          _buildSkillsTab(),
                           _buildSpellsTab(),
                           _buildCombatTab(),
+                          _buildInventoryTab(),
                           _buildTraitsTab(),
                         ],
                       ),
@@ -303,10 +363,283 @@ class _CharacterSheetState extends State<CharacterSheet> {
   }
 
   Widget _buildStatsTab() {
-    return Center(child: Text("Stats Placeholder"));
+  // Replace these placeholder values with your actual data or variables.
+  final int initiative = 2;
+  final int hp = 11; // Replace with actual HP value.
+  final int speed = 25;
+  final String hitDice = "1d8";
+  final int proficiency = 2;
+
+  // Example: The "save" values can be computed from your character data.
+  // For demonstration, we’ll use these placeholders.
+  final int strengthSave = int.parse(strengthModifier) + 2; 
+  final int dexSave = int.parse(dexterityModifier) + 4; 
+  final int conSave = int.parse(constitutionModifier) + 1; 
+  final int intSave = int.parse(intelligenceModifier) + 0; 
+  final int wisSave = int.parse(wisdomModifier) + 3; 
+  final int chaSave = int.parse(charismaModifier) + 2; 
+
+  // Define a map of skills with their associated ability key.
+  final Map<String, String> skillAbilities = {
+    "Acrobatics": "dexterity",
+    "Animal Handling": "wisdom",
+    "Arcana": "intelligence",
+    "Athletics": "strength",
+    "Deception": "charisma",
+    "History": "intelligence",
+    "Insight": "wisdom",
+    "Intimidation": "charisma",
+    "Investigation": "intelligence",
+    "Medicine": "wisdom",
+    "Nature": "intelligence",
+    "Perception": "wisdom",
+    "Performance": "charisma",
+    "Persuasion": "charisma",
+    "Religion": "intelligence",
+    "Sleight of Hand": "dexterity",
+    "Stealth": "dexterity",
+    "Survival": "wisdom",
+  };
+
+  // Helper function to format modifiers (e.g. +3 or -1).
+  String formatModifier(String modStr) {
+    final int mod = int.parse(modStr);
+    return mod >= 0 ? "+$mod" : "$mod";
   }
 
-  Widget _buildSkillsTab() {
+  // Build a list of skill cards.
+  List<Widget> buildSkillCards() {
+    List<Widget> cards = [];
+    skillAbilities.forEach((skill, ability) {
+      String mod;
+      switch (ability) {
+        case "strength":
+          mod = strengthModifier;
+          break;
+        case "dexterity":
+          mod = dexterityModifier;
+          break;
+        case "constitution":
+          mod = constitutionModifier;
+          break;
+        case "intelligence":
+          mod = intelligenceModifier;
+          break;
+        case "wisdom":
+          mod = wisdomModifier;
+          break;
+        case "charisma":
+          mod = charismaModifier;
+          break;
+        default:
+          mod = "0";
+      }
+      cards.add(_buildSkillCard(skill, formatModifier(mod)));
+    });
+    return cards;
+  }
+
+  return SingleChildScrollView(
+    padding: const EdgeInsets.all(8.0),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // -- Top Section: Combat Stats --
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            _buildTopStatCard("Initiative", "$initiative"),
+            _buildTopStatCard("HP", "$hp"),
+            _buildTopStatCard("Speed", "$speed"),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            _buildTopStatCard("Hit Dice", hitDice),
+            _buildTopStatCard("AC", "$armorClass"),
+            _buildTopStatCard("Prof.", "+$proficiency"),
+          ],
+        ),
+        const SizedBox(height: 16),
+        // -- Ability Scores Section --
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildAbilityScoreCard(
+                    "Strength",
+                    strengthScore,
+                    strengthModifier,
+                    "$strengthSave",
+                  ),
+                  _buildAbilityScoreCard(
+                    "Dexterity",
+                    dexterityScore,
+                    dexterityModifier,
+                    "$dexSave",
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildAbilityScoreCard(
+                    "Constitution",
+                    constitutionScore,
+                    constitutionModifier,
+                    "$conSave",
+                  ),
+                  _buildAbilityScoreCard(
+                    "Intelligence",
+                    intelligenceScore,
+                    intelligenceModifier,
+                    "$intSave",
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildAbilityScoreCard(
+                    "Wisdom",
+                    wisdomScore,
+                    wisdomModifier,
+                    "$wisSave",
+                  ),
+                  _buildAbilityScoreCard(
+                    "Charisma",
+                    charismaScore,
+                    charismaModifier,
+                    "$chaSave",
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        // -- Skills Section --
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: Text(
+            "Skills",
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
+        ),
+        const SizedBox(height: 8),
+        // Use a GridView to show skills in multiple columns.
+        GridView.count(
+          crossAxisCount: 2,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          childAspectRatio: 3.5,
+          children: buildSkillCards(),
+        ),
+      ],
+    ),
+  );
+}
+
+Widget _buildTopStatCard(String label, String value) {
+  return Card(
+    elevation: 3,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(8.0),
+    ),
+    child: Container(
+      width: 100,
+      padding: const EdgeInsets.all(12.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+Widget _buildAbilityScoreCard(
+    String ability, String score, String mod, String save) {
+  return Card(
+    elevation: 3,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(8.0),
+    ),
+    child: Container(
+      width: 140,
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          Text(
+            ability,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const Divider(),
+          const SizedBox(height: 4),
+          Text(
+            "$score",
+            style: const TextStyle(fontSize: 18),
+          ),
+          Text(
+            "Mod: ${mod.startsWith('-') ? mod : '+' + mod}",
+            style: const TextStyle(fontSize: 14),
+          ),
+          Text(
+            "Save: $save",
+            style: const TextStyle(fontSize: 14),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+Widget _buildSkillCard(String skill, String mod) {
+  return Card(
+    elevation: 2,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(6.0),
+    ),
+    margin: const EdgeInsets.all(4.0),
+    child: Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 6.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Flexible(
+            child: Text(
+              skill,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+          ),
+          Text(
+            mod,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+
+  Widget _buildInventoryTab() {
     return Center(child: Text("Skills Placeholder"));
   }
 
@@ -639,14 +972,13 @@ class _CharacterSheetState extends State<CharacterSheet> {
                   context,
                   "1d20", // Attack roll dice (always a d20 for weapon attacks)
                   modifier: int.parse(attackModifier), // Attack roll modifier
-                  attackRollDamage: damage, // Damage roll dice
+                  attackRollDamage: damage,
+                  isAttack: true // Damage roll dice
                 ).then((result) {
                   //just some logging
                   if (result != null) {
                     print("Final Result: $result");
-                    
                   }
-                  
                 });
               },
               icon: const Icon(Icons.casino),

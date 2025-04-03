@@ -8,6 +8,7 @@ Future<Map<String, int>?> showDiceRollPopup(
   String attackRollDice, {
   required int modifier,
   required String attackRollDamage,
+  required bool isAttack, // New parameter
 }) async {
   final match =
       RegExp(r'(\d+)d(\d+)').firstMatch(attackRollDice.replaceAll(' ', ''));
@@ -40,6 +41,7 @@ Future<Map<String, int>?> showDiceRollPopup(
         diceSides: diceSides,
         modifier: modifier,
         attackRollDamage: attackRollDamage,
+        isAttack: isAttack, // Pass the new parameter
       );
     },
   );
@@ -50,6 +52,7 @@ class DiceRollPopup extends StatefulWidget {
   final int diceSides;
   final int modifier;
   final String attackRollDamage;
+  final bool isAttack; // New parameter
 
   const DiceRollPopup({
     Key? key,
@@ -57,6 +60,7 @@ class DiceRollPopup extends StatefulWidget {
     required this.diceSides,
     required this.modifier,
     required this.attackRollDamage,
+    required this.isAttack, // Initialize the new parameter
   }) : super(key: key);
 
   @override
@@ -277,14 +281,18 @@ class _DiceRollPopupState extends State<DiceRollPopup>
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            "Attack Roll Total: $displayedAttackTotal",
+            "Attack Roll: $displayedAttackTotal",
             style: const TextStyle(fontSize: 16),
           ),
           const SizedBox(height: 16),
           Text(
-            "Damage Roll:\nDice: $damageBreakdown\nModifier: ${widget.modifier}\nTotal: $damageTotal",
+            "Damage Roll: $damageTotal ($damageBreakdown + ${widget.modifier})",
             style: const TextStyle(fontSize: 16),
           ),
+          // Text(
+          //   "Damage Roll:\nDice: $damageBreakdown\nModifier: ${widget.modifier}\nTotal: $damageTotal",
+          //   style: const TextStyle(fontSize: 16),
+          // ),
         ],
       );
     } else {
@@ -292,21 +300,26 @@ class _DiceRollPopupState extends State<DiceRollPopup>
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            "Attack Roll:\nDice: $displayedAttackBreakdown\nModifier: ${widget.modifier}\nTotal: $displayedAttackTotal",
+            widget.isAttack
+                ? "Attack Roll: $displayedAttackTotal ($displayedAttackBreakdown + ${widget.modifier})"
+                : "Roll: $displayedAttackTotal ($displayedAttackBreakdown + ${widget.modifier})",
+                // ? "Attack Roll:\nDice: $displayedAttackBreakdown\nModifier: ${widget.modifier}\nTotal: $displayedAttackTotal"
+                // : "Roll:\nDice: $displayedAttackBreakdown\nModifier: ${widget.modifier}\nTotal: $displayedAttackTotal",
             style: const TextStyle(fontSize: 16),
           ),
         ],
       );
     }
 
+
     return AlertDialog(
       title: isRolling
           ? const Text("Rolling...")
-          : Text(damageRolled ? "Roll Results" : "Attack Roll"),
+          : Text(widget.isAttack ? "Attack Roll" : "Roll Results"),
       content: content,
       actions: [
         if (!isRolling)
-          if (!damageRolled)
+          if (widget.isAttack && !damageRolled)
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -338,7 +351,7 @@ class _DiceRollPopupState extends State<DiceRollPopup>
               onPressed: () {
                 Navigator.of(context).pop({
                   "attackRoll": displayedAttackTotal,
-                  "damageRoll": damageTotal!,
+                  "damageRoll": widget.isAttack ? damageTotal ?? 0 : 0,
                 });
               },
               child: const Text("OK"),
