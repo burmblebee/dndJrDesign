@@ -5,6 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:warlocks_of_the_beach/widgets/navigation/combat_nav_bar.dart';
 
 import 'fixed_item.dart';
+import 'item sub-widgets/armor_details.dart';
+import 'item sub-widgets/misc_details.dart';
+import 'item sub-widgets/weapon_details.dart';
+import 'item sub-widgets/wondrous_details.dart';
 
 class BagOfHolding extends ConsumerStatefulWidget {
   BagOfHolding({super.key, required this.campaignId, required this.isDM});
@@ -107,15 +111,40 @@ class _BagOfHoldingState extends ConsumerState<BagOfHolding> {
 
   // Load the Firestore items
   void _loadItems() async {
-    final snapshot = await _firestore
+    final snapshot1 = await _firestore
         .collection('user_campaigns')
         .doc(widget.campaignId)
         .collection('bag_of_holding_basic')
         .orderBy('timestamp')
         .get();
+    final snapshot2 = await _firestore
+        .collection('user_campaigns')
+        .doc(widget.campaignId)
+        .collection('bag_of_holding_premade')
+        .get();
     setState(() {
       _items.clear();
-      _items.addAll(snapshot.docs.map((doc) => doc['item'] as String));
+      _items.addAll(snapshot1.docs.map((doc) => doc['item'] as String));
+      for (var doc in snapshot2.docs) {
+        final data = doc.data();
+        final id = doc.id;
+        final type = data['itemType'];
+
+        switch (type) {
+          case 'Weapon':
+            _selectedPremadeItems.add(CombatItem.fromMap(id, data));
+            break;
+          case 'Armor':
+            _selectedPremadeItems.add(ArmorItem.fromMap(id, data));
+            break;
+          case 'Wondrous':
+            _selectedPremadeItems.add(WondrousItem.fromMap(id, data));
+            break;
+          default:
+            _selectedPremadeItems.add(Item.fromMap(id, data));
+        }
+      }
+
     });
   }
 
@@ -239,35 +268,37 @@ class _BagOfHoldingState extends ConsumerState<BagOfHolding> {
                               Flexible(
                                 child: _editingIndex == index
                                     ? TextField(
-                                  autofocus: true,
-                                  controller: TextEditingController(text: item),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 17,
-                                  ),
-                                  onSubmitted: (newValue) =>
-                                      _saveEditedItem(index, newValue),
-                                  decoration: const InputDecoration(
-                                    border: InputBorder.none,
-                                    hintText: 'Edit item',
-                                    hintStyle: TextStyle(color: Colors.white54),
-                                  ),
-                                )
+                                        autofocus: true,
+                                        controller:
+                                            TextEditingController(text: item),
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 17,
+                                        ),
+                                        onSubmitted: (newValue) =>
+                                            _saveEditedItem(index, newValue),
+                                        decoration: const InputDecoration(
+                                          border: InputBorder.none,
+                                          hintText: 'Edit item',
+                                          hintStyle:
+                                              TextStyle(color: Colors.white54),
+                                        ),
+                                      )
                                     : GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      _editingIndex = index;
-                                    });
-                                  },
-                                  child: Text(
-                                    item,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 17,
-                                    ),
-                                    softWrap: true,
-                                  ),
-                                ),
+                                        onTap: () {
+                                          setState(() {
+                                            _editingIndex = index;
+                                          });
+                                        },
+                                        child: Text(
+                                          item,
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 20,
+                                          ),
+                                          softWrap: true,
+                                        ),
+                                      ),
                               ),
                             ],
                           ),
@@ -280,18 +311,70 @@ class _BagOfHoldingState extends ConsumerState<BagOfHolding> {
                       ..._selectedPremadeItems.map((item) {
                         return Padding(
                           padding: const EdgeInsets.symmetric(vertical: 6.0),
-                          child: ListTile(
-                            tileColor: const Color(0xFFD4C097).withOpacity(0.5),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.remove,
+                                      color: Color.fromARGB(255, 241, 187, 87)),
+                                  onPressed: () => _removePremadeItem(item),
+                                ),
+                                Text(item.name,
+                                    style: const TextStyle(
+                                        fontSize: 20, color: Colors.white)),
+                                const Spacer(),
+                                IconButton(
+                                  icon: const Icon(Icons.remove_red_eye,
+                                      color: Color.fromARGB(255, 241, 187, 87)),
+                                  onPressed: () {
+                                    if (item.itemType == ItemType.Weapon) {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => WeaponDetailsScreen(
+                                            weapon: item as CombatItem,
+                                          ),
+                                        ),
+                                      );
+                                    } else if (item.itemType == ItemType.Armor) {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => ArmorDetailsScreen(
+                                            armor: item as ArmorItem,
+                                          ),
+                                        ),
+                                      );
+                                    } else if (item.itemType == ItemType.Wondrous) {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => WondrousDetailsScreen(
+                                            item: item as WondrousItem,
+                                          ),
+                                        ),
+                                      );
+                                    } else if (item.itemType ==
+                                        ItemType.Miscellaneous) {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              MiscDetailsScreen(item: item),
+                                        ),
+                                      );
+                                    } else {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                            content: Text(
+                                                'Selected item is not available')),
+                                      );
+                                    }
+                                  },
+                                ),
+                              ],
                             ),
-                            visualDensity: const VisualDensity(vertical: 4),
-                            title: Text(item.name,
-                                style: const TextStyle(fontSize: 20, color: Colors.black)),
-                            onTap: () {
-                              // Optional: handle premade item tap
-                            },
-                          ),
+
                         );
                       }).toList(),
                     ],
@@ -343,5 +426,18 @@ class _BagOfHoldingState extends ConsumerState<BagOfHolding> {
         ),
         bottomNavigationBar: CombatBottomNavBar(
             campaignId: widget.campaignId, isDM: widget.isDM));
+  }
+
+  void _removePremadeItem(Item item) {
+    setState(() {
+      _selectedPremadeItems.remove(item);
+    });
+    //remove from firestore
+    _firestore
+        .collection('user_campaigns')
+        .doc(widget.campaignId)
+        .collection('bag_of_holding_premade')
+        .doc(item.id)
+        .delete();
   }
 }
