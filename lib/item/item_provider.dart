@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -62,20 +63,19 @@ class ItemProvider extends StateNotifier<ItemState> {
   ItemProvider() : super(ItemState(items: [], selectedItem: null));
 
   Future<void> saveItem(Item item) async {
-
-    // if (item is ArmorItem) {
-    //   debugPrint("Saving ArmorItem with armorClass: ${item.armorClass}");
-    // }
-    // debugPrint("Item to save: ${item.toMap()}");
-
-    // debugPrint("saveItem() was called");
-    debugPrint("Saving item: ${item.toMap()}");
     try {
-    //  debugPrint("Saving item: ${item.toMap()}");
-      bool isNewItem = item.id.isEmpty; // Check if it's a new item
+      debugPrint("Saving item: ${item.toMap()}");
+
+      final uuid = FirebaseAuth.instance.currentUser?.uid;
+      if (uuid == null) {
+        debugPrint("Error: User is not authenticated.");
+        return;
+      }
+
+      bool isNewItem = item.id.isEmpty;
       final docRef = isNewItem
-          ? _firestore.collection('items').doc() // Generate new ID
-          : _firestore.collection('items').doc(item.id);
+          ? _firestore.collection('app_user_profiles').doc(uuid).collection('items').doc()
+          : _firestore.collection('app_user_profiles').doc(uuid).collection('items').doc(item.id);
 
       if (isNewItem) {
         item = item.copyWith(id: docRef.id);
@@ -85,10 +85,13 @@ class ItemProvider extends StateNotifier<ItemState> {
 
       state = state.copyWith(
         items: isNewItem
-            ? [...state.items, item]
+            ? [...state.items, item] // Append new item
             : state.items.map((i) => i.id == item.id ? item : i).toList(),
         selectedItem: null,
       );
+
+      debugPrint("Item saved successfully: ${item.toMap()}");
+
     } catch (e) {
       debugPrint("Error saving item: $e");
     }
@@ -96,9 +99,11 @@ class ItemProvider extends StateNotifier<ItemState> {
 
 
 
+
   Future<void> fetchItems() async {
     try {
-      final querySnapshot = await _firestore.collection('items').get();
+      final uuid = FirebaseAuth.instance.currentUser?.uid;
+      final querySnapshot = await _firestore.collection('app_user_profiles').doc(uuid).collection('items').get();
       final items = querySnapshot.docs.map((doc) {
         final data = doc.data();
         final type = data['itemType'];
@@ -156,7 +161,8 @@ class ItemProvider extends StateNotifier<ItemState> {
 
   Future<void> deleteItem(String id) async {
     try {
-      await _firestore.collection('items').doc(id).delete();
+      final uuid = FirebaseAuth.instance.currentUser?.uid;
+      await _firestore.collection('app_user_profiles').doc(uuid).collection('items').doc(id).delete();
       state = state.copyWith(
         items: state.items.where((item) => item.id != id).toList(),
         selectedItem: null,
@@ -172,7 +178,8 @@ class ItemProvider extends StateNotifier<ItemState> {
       return;
     }
     try {
-      await _firestore.collection('items').doc(item.id).update(item.toMap());
+      final uuid = FirebaseAuth.instance.currentUser?.uid;
+      await _firestore.collection('app_user_profiles').doc(uuid).collection('items').doc(item.id).update(item.toMap());
       state = state.copyWith(
         items: state.items.map((i) => i.id == item.id ? item : i).toList(),
         selectedItem: item,

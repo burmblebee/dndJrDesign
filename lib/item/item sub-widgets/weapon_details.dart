@@ -1,28 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../fixed_item.dart';
-import '../item_provider.dart';
 
-class WeaponDetailsScreen extends ConsumerWidget {
-  const WeaponDetailsScreen({super.key});
+class WeaponDetailsScreen extends StatelessWidget {
+  final CombatItem weapon; // Accept the Weapon as a parameter
+
+  const WeaponDetailsScreen({Key? key, required this.weapon}) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final itemState = ref.watch(itemProvider);
-    final weapon = itemState.selectedItem as CombatItem?;
-
-    if (weapon == null) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Weapon Details')),
-        body: const Center(
-          child: Text(
-            'Weapon not found!',
-            style: TextStyle(fontSize: 20),
-          ),
-        ),
-      );
-    }
-
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(weapon.name),
@@ -30,7 +15,7 @@ class WeaponDetailsScreen extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.delete),
             onPressed: () {
-              ref.read(itemProvider.notifier).deleteItem(weapon.id);
+              // Handle delete logic here
               Navigator.pop(context);
             },
           ),
@@ -39,7 +24,7 @@ class WeaponDetailsScreen extends ConsumerWidget {
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.save),
         onPressed: () {
-          ref.read(itemProvider.notifier).updateItem(weapon);
+          // Handle saving logic here
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Item details saved!')),
           );
@@ -111,7 +96,7 @@ class WeaponDetailsScreen extends ConsumerWidget {
                     const Text(
                       'Requires Attunement',
                       style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                     if (weapon.attunementDescription?.isNotEmpty ?? false)
                       Text(
@@ -143,30 +128,30 @@ class WeaponDetailsScreen extends ConsumerWidget {
                 spacing: 8.0,
                 children: (weapon.weaponTypes.isNotEmpty)
                     ? weapon.weaponTypes.map((type) {
-                        if (type != null) {
-                          return Chip(
-                            label: Text(
-                              type.name,
-                              style: const TextStyle(fontSize: 20),
-                            ),
-                          );
-                        } else {
-                          return const Chip(
-                            label: Text(
-                              'Unknown',
-                              style: TextStyle(fontSize: 20),
-                            ),
-                          );
-                        }
-                      }).toList()
+                  if (type != null) {
+                    return Chip(
+                      label: Text(
+                        type.name,
+                        style: const TextStyle(fontSize: 20),
+                      ),
+                    );
+                  } else {
+                    return const Chip(
+                      label: Text(
+                        'Unknown',
+                        style: TextStyle(fontSize: 20),
+                      ),
+                    );
+                  }
+                }).toList()
                     : [
-                        const Chip(
-                          label: Text(
-                            'None',
-                            style: TextStyle(fontSize: 20),
-                          ),
-                        )
-                      ],
+                  const Chip(
+                    label: Text(
+                      'None',
+                      style: TextStyle(fontSize: 20),
+                    ),
+                  )
+                ],
               ),
             ],
           ),

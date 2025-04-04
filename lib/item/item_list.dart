@@ -44,7 +44,7 @@ class itemListScreen extends ConsumerWidget {
         child: const Icon(Icons.add),
       ),
       body: itemState.items.isEmpty
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: Text('No items available'))
           : ListView.builder(
               itemCount: itemState.items.length,
               itemBuilder: (context, index) {
@@ -68,14 +68,14 @@ class itemListScreen extends ConsumerWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const WeaponDetailsScreen(),
+                              builder: (context) => WeaponDetailsScreen(weapon: item as CombatItem,),
                             ),
                           );
                         } else if (item.itemType == ItemType.Armor) {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const ArmorDetailsScreen(),
+                              builder: (context) => ArmorDetailsScreen(armor: item as ArmorItem,),
                             ),
                           );
                         } else if (item.itemType == ItemType.Wondrous) {
@@ -83,7 +83,7 @@ class itemListScreen extends ConsumerWidget {
                             context,
                             MaterialPageRoute(
                               builder: (context) =>
-                                  const WondrousDetailsScreen(),
+                                WondrousDetailsScreen(item: item as WondrousItem,),
                             ),
                           );
                         } else if (item.itemType == ItemType.Miscellaneous) {
@@ -91,7 +91,7 @@ class itemListScreen extends ConsumerWidget {
                             context,
                             MaterialPageRoute(
                               builder: (context) =>
-                              const MiscDetailsScreen(),
+                              MiscDetailsScreen(item: item),
                             ),
                           );
                         } else {

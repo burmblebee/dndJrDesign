@@ -1,24 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../fixed_item.dart';
-import '../item_provider.dart';
 
-class MiscDetailsScreen extends ConsumerWidget {
-  const MiscDetailsScreen({super.key});
+class MiscDetailsScreen extends StatelessWidget {
+  final Item item;
+
+  const MiscDetailsScreen({Key? key, required this.item}) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final itemState = ref.watch(itemProvider);
-    final item = itemState.selectedItem;
-
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(item!.name),
+        title: Text(item.name),
         actions: [
           IconButton(
             icon: const Icon(Icons.delete),
             onPressed: () {
-              ref.read(itemProvider.notifier).deleteItem(item.id);
+              // Handle delete logic here
               Navigator.pop(context);
             },
           ),
@@ -27,7 +24,7 @@ class MiscDetailsScreen extends ConsumerWidget {
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.save),
         onPressed: () {
-          ref.read(itemProvider.notifier).updateItem(item);
+          // Handle saving logic here
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Item details saved!')),
           );

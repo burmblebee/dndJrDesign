@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../fixed_item.dart';
-import '../item_provider.dart';
 
-class WondrousDetailsScreen extends ConsumerWidget {
-  const WondrousDetailsScreen({super.key});
+class WondrousDetailsScreen extends StatelessWidget {
+  final WondrousItem item; // Accept the WondrousItem as a parameter
+
+  const WondrousDetailsScreen({Key? key, required this.item}) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final itemState = ref.watch(itemProvider);
-    final item = itemState.selectedItem as WondrousItem;
-
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(item.name),
@@ -18,7 +15,7 @@ class WondrousDetailsScreen extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.delete),
             onPressed: () {
-              ref.read(itemProvider.notifier).deleteItem(item.id);
+              // Handle delete logic here
               Navigator.pop(context);
             },
           ),
@@ -27,7 +24,7 @@ class WondrousDetailsScreen extends ConsumerWidget {
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.save),
         onPressed: () {
-          ref.read(itemProvider.notifier).updateItem(item);
+          // Handle saving logic here
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Item details saved!')),
           );
@@ -89,9 +86,7 @@ class WondrousDetailsScreen extends ConsumerWidget {
                     const SizedBox(height: 20),
                   ],
                 ),
-              const SizedBox(
-                height: 20,
-              ),
+              const SizedBox(height: 20),
               Row(
                 children: [
                   const Text(
@@ -110,33 +105,33 @@ class WondrousDetailsScreen extends ConsumerWidget {
                     const Text(
                       'Activation Requirement: ',
                       style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                      TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                     ),
                     Text('${item.activationDescription ?? 'None'}',
                         style: const TextStyle(fontSize: 20)),
                   ],
                 ),
               const SizedBox(height: 20),
-              if(item.charges != null && item.charges! > 0)
+              if (item.charges != null && item.charges! > 0)
                 Column(
                   children: [
                     const Text(
                       'Charges: ',
                       style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                      TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                     ),
                     Text('${item.charges} charges ',
                         style: const TextStyle(fontSize: 20)),
                   ],
                 ),
               const SizedBox(height: 10),
-              if(!item.consumable && item.charges! > 0 && item.charges != null)
+              if (!item.consumable && item.charges! > 0 && item.charges != null)
                 Column(
                   children: [
                     const Text(
                       'Reset Condition: ',
                       style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                      TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                     ),
                     Text(item.resetCondition ?? 'None',
                         style: const TextStyle(fontSize: 20)),

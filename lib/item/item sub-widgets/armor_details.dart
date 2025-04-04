@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../fixed_item.dart';
-import '../item_provider.dart';
 
-class ArmorDetailsScreen extends ConsumerWidget {
-  const ArmorDetailsScreen({super.key});
+class ArmorDetailsScreen extends StatelessWidget {
+  final ArmorItem armor; // Accept the ArmorItem as a parameter
+
+  const ArmorDetailsScreen({Key? key, required this.armor}) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final itemState = ref.watch(itemProvider);
-    final armor = itemState.selectedItem as ArmorItem;
-
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(armor.name),
@@ -18,7 +15,7 @@ class ArmorDetailsScreen extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.delete),
             onPressed: () {
-              ref.read(itemProvider.notifier).deleteItem(armor.id);
+              // Handle delete logic here
               Navigator.pop(context);
             },
           ),
@@ -27,7 +24,7 @@ class ArmorDetailsScreen extends ConsumerWidget {
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.save),
         onPressed: () {
-          ref.read(itemProvider.notifier).updateItem(armor);
+          // Handle saving logic here
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Item details saved!')),
           );
@@ -86,7 +83,7 @@ class ArmorDetailsScreen extends ConsumerWidget {
                   Text('${armor.weight} lbs', style: const TextStyle(fontSize: 20)),
                 ],
               ),
-              const SizedBox(height:20),
+              const SizedBox(height: 20),
               if (armor.requiresAttunement)
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -170,39 +167,32 @@ class ArmorDetailsScreen extends ConsumerWidget {
         builder: (context) {
           return AlertDialog(
             title: const Text("AC Details"),
-            content: Consumer(
-              builder: (context, ref, _) {
-                int acState = armor.armorClass;
-                ArmorType armorType = armor.armorType;
-
-                return Column(mainAxisSize: MainAxisSize.min, children: [
-                  if (armorType == ArmorType.Light)
-                    Row(
-                      children: [
-                        const Text("Light Armor: ",
-                            style: TextStyle(fontWeight: FontWeight.bold)),
-                        Text('$acState + Dex Modifier'),
-                      ],
-                    ),
-                  if (armorType == ArmorType.Medium)
-                    Row(
-                      children: [
-                        const Text("Medium Armor: ",
-                            style: TextStyle(fontWeight: FontWeight.bold)),
-                        Text('$acState + Dex Modifier (max 2)'),
-                      ],
-                    ),
-                  if (armorType == ArmorType.Heavy)
-                    Row(
-                      children: [
-                        const Text("Heavy Armor: ",
-                            style: TextStyle(fontWeight: FontWeight.bold)),
-                        Text('$acState'),
-                      ],
-                    ),
-                ]);
-              },
-            ),
+            content: Column(mainAxisSize: MainAxisSize.min, children: [
+              if (armor.armorType == ArmorType.Light)
+                Row(
+                  children: [
+                    const Text("Light Armor: ",
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text('${armor.armorClass} + Dex Modifier'),
+                  ],
+                ),
+              if (armor.armorType == ArmorType.Medium)
+                Row(
+                  children: [
+                    const Text("Medium Armor: ",
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text('${armor.armorClass} + Dex Modifier (max 2)'),
+                  ],
+                ),
+              if (armor.armorType == ArmorType.Heavy)
+                Row(
+                  children: [
+                    const Text("Heavy Armor: ",
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text('${armor.armorClass}'),
+                  ],
+                ),
+            ]),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),

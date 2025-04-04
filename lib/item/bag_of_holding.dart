@@ -1,61 +1,119 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:warlocks_of_the_beach/widgets/navigation/combat_nav_bar.dart';
 
-class BagOfHolding extends StatefulWidget {
+import 'fixed_item.dart';
+
+class BagOfHolding extends ConsumerStatefulWidget {
   BagOfHolding({super.key, required this.campaignId, required this.isDM});
   String campaignId;
   bool isDM;
 
   @override
-  State<BagOfHolding> createState() => _BagOfHoldingState();
+  ConsumerState<BagOfHolding> createState() => _BagOfHoldingState();
 }
 
-class _BagOfHoldingState extends State<BagOfHolding> {
+class _BagOfHoldingState extends ConsumerState<BagOfHolding> {
   final List<String> _items = [];
   final TextEditingController _textController = TextEditingController();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   // Track the index of the item being edited
   int? _editingIndex;
+  final List<Item> _premadeItems = [];
+  final List<Item> _selectedPremadeItems = [];
 
   @override
   void initState() {
     super.initState();
     _loadItems();
+    pullPremadeItems();
   }
 
-  Future<void> _addPremadeItem() async {
-      final newItem = _textController.text;
-      await _firestore
-          .collection('user_campaigns')
-          .doc(widget.campaignId)
-          .collection('bag_o_holding')
-          .add({
-        'item': newItem,
-        // Add a timestamp
-        'timestamp': FieldValue.serverTimestamp(),
-        'isString': true,
-      });
-      setState(() {
-        // Add the new item to the list
-        _items.add(newItem);
-      });
-      // Clear the text field
-      _textController.clear();
+  Future<void> pullPremadeItems() async {
+    final uuid = FirebaseAuth.instance.currentUser?.uid;
+    final snapshot = await _firestore
+        .collection('app_user_profiles')
+        .doc(uuid)
+        .collection('items')
+        .get();
 
+    setState(() {
+      for (var doc in snapshot.docs) {
+        final data = doc.data();
+        final id = data['id'];
+        final type = data['itemType'];
+        debugPrint(type);
+        switch (type) {
+          case 'Weapon':
+            _premadeItems.add(CombatItem.fromMap(id, data));
+            break;
+          case 'Armor':
+            _premadeItems.add(ArmorItem.fromMap(id, data));
+            break;
+          case 'Wondrous':
+            _premadeItems.add(WondrousItem.fromMap(id, data));
+            break;
+          default:
+            _premadeItems.add(Item.fromMap(id, data));
+        }
+      }
+    });
   }
 
+  Future<void> _addPremadeItem(Item newItem) async {
+    await _firestore
+        .collection('user_campaigns')
+        .doc(widget.campaignId)
+        .collection('bag_of_holding_premade')
+        .add(
+          newItem.toMap(),
+        );
+    setState(() {
+      _selectedPremadeItems.add(newItem);
+    });
+  }
+
+  void pickItem() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Choose an item'),
+          content: SizedBox(
+            width: double.maxFinite,
+            height: 300, // Set a fixed height
+            child: _premadeItems.isEmpty
+                ? const Center(child: Text("No items available."))
+                : ListView.builder(
+                    shrinkWrap: true, // Prevents layout issues
+                    itemCount: _premadeItems.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return ListTile(
+                        title: Text(_premadeItems[index].name),
+                        onTap: () {
+                          _addPremadeItem(_premadeItems[index]);
+                          Navigator.pop(context);
+                        },
+                      );
+                    },
+                  ),
+          ),
+        );
+      },
+    );
+  }
 
   // Load the Firestore items
   void _loadItems() async {
     final snapshot = await _firestore
         .collection('user_campaigns')
         .doc(widget.campaignId)
-        .collection('bag_o_holding')
+        .collection('bag_of_holding_basic')
         .orderBy('timestamp')
         .get();
     setState(() {
-      // Clear the existing items
       _items.clear();
       _items.addAll(snapshot.docs.map((doc) => doc['item'] as String));
     });
@@ -68,12 +126,11 @@ class _BagOfHoldingState extends State<BagOfHolding> {
       await _firestore
           .collection('user_campaigns')
           .doc(widget.campaignId)
-          .collection('bag_o_holding')
+          .collection('bag_of_holding_basic')
           .add({
         'item': newItem,
         // Add a timestamp
         'timestamp': FieldValue.serverTimestamp(),
-        'isString': true,
       });
       setState(() {
         // Add the new item to the list
@@ -90,7 +147,7 @@ class _BagOfHoldingState extends State<BagOfHolding> {
     final snapshot = await _firestore
         .collection('user_campaigns')
         .doc(widget.campaignId)
-        .collection('bag_o_holding')
+        .collection('bag_of_holding_basic')
         .where('item', isEqualTo: itemToRemove)
         .get();
 
@@ -110,7 +167,7 @@ class _BagOfHoldingState extends State<BagOfHolding> {
     final snapshot = await _firestore
         .collection('user_campaigns')
         .doc(widget.campaignId)
-        .collection('bag_o_holding')
+        .collection('bag_of_holding_basic')
         .where('item', isEqualTo: oldItem)
         .get();
 
@@ -135,6 +192,14 @@ class _BagOfHoldingState extends State<BagOfHolding> {
         appBar: AppBar(
           backgroundColor: const Color(0xFF25291C),
           title: const Text('Bag of Holding'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: () {
+                pickItem();
+              },
+            ),
+          ],
         ),
         body: Column(
           children: [
@@ -156,64 +221,85 @@ class _BagOfHoldingState extends State<BagOfHolding> {
                 ),
                 child: SingleChildScrollView(
                   child: Column(
-                    children: _items.asMap().entries.map((entry) {
-                      int index = entry.key;
-                      String item = entry.value;
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4.0),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.remove,
-                                  color: Color.fromARGB(255, 241, 187, 87)),
-                              onPressed: () => _removeItem(index),
-                            ),
-                            Flexible(
-                              child: _editingIndex == index
-                                  ? TextField(
-                                      autofocus: true,
-                                      // Pre-fill with current text
-                                      controller:
-                                          TextEditingController(text: item),
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 17,
-                                      ),
-                                      onSubmitted: (newValue) =>
-                                          _saveEditedItem(index, newValue),
-                                      decoration: const InputDecoration(
-                                        border: InputBorder.none,
-                                        hintText: 'Edit item',
-                                        hintStyle:
-                                            TextStyle(color: Colors.white54),
-                                      ),
-                                    )
-                                  : GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          // Enter editing mode
-                                          _editingIndex = index;
-                                        });
-                                      },
-                                      child: Text(
-                                        item,
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 17,
-                                        ),
-                                        softWrap: true,
-                                      ),
+                    children: [
+                      // Basic text items
+                      ..._items.asMap().entries.map((entry) {
+                        int index = entry.key;
+                        String item = entry.value;
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4.0),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.remove,
+                                    color: Color.fromARGB(255, 241, 187, 87)),
+                                onPressed: () => _removeItem(index),
+                              ),
+                              Flexible(
+                                child: _editingIndex == index
+                                    ? TextField(
+                                  autofocus: true,
+                                  controller: TextEditingController(text: item),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 17,
+                                  ),
+                                  onSubmitted: (newValue) =>
+                                      _saveEditedItem(index, newValue),
+                                  decoration: const InputDecoration(
+                                    border: InputBorder.none,
+                                    hintText: 'Edit item',
+                                    hintStyle: TextStyle(color: Colors.white54),
+                                  ),
+                                )
+                                    : GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _editingIndex = index;
+                                    });
+                                  },
+                                  child: Text(
+                                    item,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 17,
                                     ),
+                                    softWrap: true,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+
+                      const SizedBox(height: 10),
+
+                      // Premade items
+                      ..._selectedPremadeItems.map((item) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 6.0),
+                          child: ListTile(
+                            tileColor: const Color(0xFFD4C097).withOpacity(0.5),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
                             ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
+                            visualDensity: const VisualDensity(vertical: 4),
+                            title: Text(item.name,
+                                style: const TextStyle(fontSize: 20, color: Colors.black)),
+                            onTap: () {
+                              // Optional: handle premade item tap
+                            },
+                          ),
+                        );
+                      }).toList(),
+                    ],
                   ),
                 ),
               ),
             ),
+
             const SizedBox(height: 15),
 
             // The text field and button to add new items
