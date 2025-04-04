@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:warlocks_of_the_beach/content_selection.dart';
+import 'package:warlocks_of_the_beach/screens/your_content_screen.dart';
 import 'package:warlocks_of_the_beach/npc/npc_list.dart';
 import 'package:warlocks_of_the_beach/screens/campaign_screen.dart';
 
