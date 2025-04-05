@@ -462,9 +462,10 @@ class _AddSessionState extends State<AddSession> {
               context: context,
               builder: (context) {
                 TextEditingController descriptionController = TextEditingController();
-              //default time & min
+              //default time & min & am/pm
                 String selectedHour = "00"; 
                 String selectedMinute = "00"; 
+                String selectedAmPm = "AM"; 
 
                 return StatefulBuilder(
                   builder: (context, setState) {
@@ -500,7 +501,7 @@ class _AddSessionState extends State<AddSession> {
                               dropdownColor: Color(0xFF464538),
                               style: TextStyle(color: Colors.white),
                               items: List.generate(24, (index) {
-                                String hour = index.toString().padLeft(2, '0');
+                                String hour = index.toString().padLeft(2, '0'); 
                                 return DropdownMenuItem(
                                   value: hour,
                                   child: Text(hour),
@@ -534,6 +535,23 @@ class _AddSessionState extends State<AddSession> {
                                 });
                               },
                             ),
+                            // AM/PM dropdown
+                            DropdownButton<String>(
+                              value: selectedAmPm,
+                              dropdownColor: Color(0xFF464538),
+                              style: TextStyle(color: Colors.white),
+                              items: ["AM", "PM"].map((period) {
+                                return DropdownMenuItem(
+                                  value: period,
+                                  child: Text(period),
+                                );
+                              }).toList(),
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedAmPm = value!;
+                                });
+                              },
+                            ),
                           ],
                         ),
                       ],
@@ -547,14 +565,22 @@ class _AddSessionState extends State<AddSession> {
                         onPressed: () {
                           if (descriptionController.text.isNotEmpty) {
                             try {
-                              // Combine selected date and time
-                              DateTime normalizedDate = DateTime(
-                                _selectedDay!.year,
-                                _selectedDay!.month,
-                                _selectedDay!.day,
-                                int.parse(selectedHour),
-                                int.parse(selectedMinute),
-                              );
+                              // Convert selected time to 24-hour format
+                              int hour = int.parse(selectedHour);
+                              if (selectedAmPm == "PM" && hour != 12) {
+                                hour += 12;
+                              } else if (selectedAmPm == "AM" && hour == 12) {
+                                hour = 0;
+                            }
+
+                        // Combine selected date and time
+                        DateTime normalizedDate = DateTime(
+                          _selectedDay!.year,
+                          _selectedDay!.month,
+                          _selectedDay!.day,
+                          hour,
+                          int.parse(selectedMinute),
+                        );
 
                               setState(() {
                                 // Add the event to the map
@@ -574,7 +600,7 @@ class _AddSessionState extends State<AddSession> {
                                 _saveEventToFirestore(
                                   normalizedDate,
                                   descriptionController.text,
-                                  "$selectedHour:$selectedMinute",
+                                  "$selectedHour:$selectedMinute $selectedAmPm", // Store time in 12-hour format
                                 );
                               });
 
@@ -594,7 +620,7 @@ class _AddSessionState extends State<AddSession> {
                             // Show an error if description is missing
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text("Add session"),
+                                content: Text("Please add a session."),
                               ),
                             );
                           }
@@ -670,6 +696,7 @@ class _AddSessionState extends State<AddSession> {
                     });
                   }
                 },
+                //SURPRISE HELLO IF READING :D
                 onPageChanged: (focusedDay) {
                   _focusedDay = focusedDay;
                 }),

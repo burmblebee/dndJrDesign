@@ -35,17 +35,17 @@ class _ScheduleState extends State<Schedule> {
 
     for (var doc in querySnapshot.docs) {
       String dateString = doc['session_date'];
+      String? timeString = doc['session_time'];
       if (dateString.isNotEmpty) {
         DateTime date = DateFormat('M/d/y').parse(dateString);
         String title = doc['session_name'];
 
         if (events.containsKey(date)) {
-          // Avoid adding duplicate event names
           if (!events[date]!.any((event) => event.title == title)) {
-            events[date]!.add(Event(title));
+            events[date]!.add(Event(title, time: timeString));
           }
         } else {
-          events[date] = [Event(title)];
+          events[date] = [Event(title, time: timeString)];
         }
       }
     }
@@ -72,7 +72,7 @@ class _ScheduleState extends State<Schedule> {
 
     // Format the next scheduled session date
     String nextSessionText = nextSession != null
-        ? DateFormat('M/d/y').format(nextSession)
+        ? '${DateFormat('M/d/y').format(nextSession)} at ${events[nextSession]?.first.time ?? "N/A"}'
         : 'No upcoming session';
 
     return Scaffold(
@@ -179,47 +179,49 @@ class _ScheduleState extends State<Schedule> {
                         ),
                       )
                     : Expanded(
-                        child: ListView.builder(
-                          itemCount: events.length,
-                          itemBuilder: (context, index) {
-                            DateTime eventDate = sortedDates[index];
-                            List<Event> eventsForDate = events[eventDate]!;
+                      child: ListView.builder(
+                        itemCount: events.length,
+                        itemBuilder: (context, index) {
+                          DateTime eventDate = sortedDates[index];
+                          List<Event> eventsForDate = events[eventDate]!;
 
-                            return Center(
-                              child: Container(
-                                margin: EdgeInsets.symmetric(vertical: 8),
-                                padding: EdgeInsets.all(8),
-                                width: 168,
-                                decoration: BoxDecoration(
-                                  color: Color.fromARGB(255, 241, 241, 192),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: Colors.black),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      DateFormat('M/d/y').format(eventDate),
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                        color: Colors.black,
-                                      ),
-                                    ),
-                                    SizedBox(height: 4),
-                                    ...eventsForDate.map((event) {
-                                      return Text(
-                                        event.title,
-                                        style: TextStyle(color: Colors.black),
-                                      );
-                                    }).toList(),
-                                  ],
-                                ),
+                          return Center(
+                            child: Container(
+                              margin: EdgeInsets.symmetric(vertical: 8),
+                              padding: EdgeInsets.all(8),
+                              width: 200,
+                              decoration: BoxDecoration(
+                                color: Color.fromARGB(255, 241, 241, 192),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: Colors.black),
                               ),
-                            );
-                          },
-                        ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                // Display the date and time together
+                                  Text(
+                                    '${DateFormat('M/d/y').format(eventDate)} at ${eventsForDate.first.time ?? "N/A"}',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                  SizedBox(height: 4),
+                                  // Display the descriptions
+                                  ...eventsForDate.map((event) {
+                                    return Text(
+                                      event.title,
+                                      style: TextStyle(color: Colors.black),
+                                    );
+                                  }).toList(),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
                       ),
+                    ),
                 SizedBox(height: 10),
                 //will add session button
                 ElevatedButton(
