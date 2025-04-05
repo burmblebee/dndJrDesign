@@ -1,6 +1,6 @@
-import 'package:dnd_app/add_session.dart';
+import 'package:dnd_app/screens/add_session.dart';
 import 'package:flutter/material.dart';
-import 'package:dnd_app/event.dart';
+import 'package:dnd_app/screens/event.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 

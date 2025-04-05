@@ -1,5 +1,5 @@
 import 'dart:typed_data';
-import 'package:dnd_app/utils.dart';
+import 'package:dnd_app/screens/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
