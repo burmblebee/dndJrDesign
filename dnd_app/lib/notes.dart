@@ -1,8 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class ExpandableSection extends StatefulWidget {
   final String title;
-  final Widget expandedContent; 
+  final Widget expandedContent;
 
   const ExpandableSection({
     Key? key,
@@ -22,9 +23,10 @@ class _ExpandableSectionState extends State<ExpandableSection> {
     // expandable section with animation
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
-      width: 340,
+      // width: 340,
       //70 for norm & 200 for expanded
       height: isExpanded ? 200 : 70,
+      width: isExpanded ? 340 : 300, 
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: const Color.fromARGB(81, 0, 0, 0),
@@ -60,7 +62,7 @@ class _ExpandableSectionState extends State<ExpandableSection> {
           if (isExpanded)
             Expanded(
               child: SingleChildScrollView(
-                child: widget.expandedContent, 
+                child: widget.expandedContent,
               ),
             ),
         ],
@@ -77,6 +79,76 @@ class Notes extends StatefulWidget {
 }
 
 class _NotesState extends State<Notes> {
+  final List<Map<String, dynamic>> _notes = []; // Store notes with timestamps
+  final TextEditingController _textController = TextEditingController();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final String collectionPath = "/notes";
+  int? _editingIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadNotes();
+  }
+
+  // Load notes from Firestore
+  void _loadNotes() async {
+    final snapshot = await _firestore
+        .collection(collectionPath)
+        .orderBy('timestamp', descending: false)
+        .get();
+    setState(() {
+      _notes.clear();
+      _notes.addAll(snapshot.docs.map((doc) {
+        return {
+          'id': doc.id,
+          'note': doc['user_notes'],
+          'timestamp': doc['timestamp'],
+        };
+      }));
+    });
+  }
+
+  // Add a new note to Firestore
+  Future<void> _addNote() async {
+    if (_textController.text.isNotEmpty) {
+      final newNote = _textController.text;
+      final docRef = await _firestore.collection(collectionPath).add({
+        'user_notes': newNote,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+      setState(() {
+        _notes.add({
+          'id': docRef.id,
+          'note': newNote,
+          'timestamp': DateTime.now(),
+        });
+      });
+      _textController.clear();
+    }
+  }
+
+  // Remove a note from Firestore
+  Future<void> _removeNote(int index) async {
+    final noteId = _notes[index]['id'];
+    await _firestore.collection(collectionPath).doc(noteId).delete();
+    setState(() {
+      _notes.removeAt(index);
+    });
+  }
+
+  // Save an edited note to Firestore
+  Future<void> _saveEditedNote(int index, String newValue) async {
+    final noteId = _notes[index]['id'];
+    await _firestore.collection(collectionPath).doc(noteId).update({
+      'user_notes': newValue,
+    });
+    setState(() {
+      _notes[index]['note'] = newValue;
+      _editingIndex = null;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -107,15 +179,69 @@ class _NotesState extends State<Notes> {
             Expanded(
               child: Container(
                 width: 340,
-                height: 100,
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: const Color.fromARGB(81, 0, 0, 0),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const SingleChildScrollView(
-                  padding: EdgeInsets.all(16),
-                  child: Column(),
+                child: SingleChildScrollView(
+                  child: Column(
+                    //making sure notes are shown in order based of time
+                    children: _notes.asMap().entries.map((entry) {
+                      int index = entry.key;
+                      String note = entry.value['note'];
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4.0),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            //to remove stuff
+                            IconButton(
+                              icon: const Icon(Icons.remove,
+                                  color: Color.fromARGB(255, 241, 187, 87)),
+                              onPressed: () => _removeNote(index),
+                            ),
+                            //enable editing
+                            Flexible(
+                              child: _editingIndex == index
+                                  ? TextField(
+                                      autofocus: true,
+                                      controller:
+                                          TextEditingController(text: note),
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 17,
+                                      ),
+                                      onSubmitted: (newValue) =>
+                                          _saveEditedNote(index, newValue),
+                                      decoration: const InputDecoration(
+                                        border: InputBorder.none,
+                                        hintText: 'Edit note',
+                                        hintStyle:
+                                            TextStyle(color: Colors.white54),
+                                      ),
+                                    )
+                                  : GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          _editingIndex = index;
+                                        });
+                                      },
+                                      child: Text(
+                                        note,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 17,
+                                        ),
+                                        softWrap: true,
+                                      ),
+                                    ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
                 ),
               ),
             ),
@@ -124,55 +250,190 @@ class _NotesState extends State<Notes> {
             const SizedBox(height: 10),
             ExpandableSection(
               title: "View Player Character Sheets",
-              expandedContent: Row(
+              expandedContent: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
-                    Icons.person,
-                    color: Colors.white,
-                    size: 24,
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.person,
+                        color: Colors.white,
+                        size: 27,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          "Dingus",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 17,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                const SizedBox(width: 10), 
-                Expanded(
-                  child: Text(
-                    "Twmpyy",
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.person,
+                        color: Colors.white,
+                        size: 27,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          "Bee",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 17,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.person,
+                        color: Colors.white,
+                        size: 27,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          "Eldrin",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 17,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            //save npcs section
+            const SizedBox(height: 10),
+            ExpandableSection(
+              title: "View Saved NPC's & Characters",
+              expandedContent: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.person,
+                        color: Colors.white,
+                        size: 27,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          "Dart",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 17,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.person,
+                        color: Colors.white,
+                        size: 27,
+                      ),
+                      //are you reading this 0-0
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          "Cart",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 17,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+          ],
+        ),
+      ),
+      
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                backgroundColor: const Color(0xFF464538),
+                title: const Text(
+                "Add a New Note",
+                style: TextStyle(color: Colors.white),
+              ),
+            content: SizedBox(
+            // height for typing
+            height: 150, 
+            child: Column(
+              children: [
+                TextField(
+                  controller: _textController,
+                  style: const TextStyle(color: Colors.white),
+                  //multi-line input
+                  maxLines: null, 
+                  decoration: const InputDecoration(
+                    hintText: "Enter your note",
+                    hintStyle: TextStyle(color: Colors.white54),
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.white),
                     ),
                   ),
                 ),
               ],
             ),
           ),
-
-          // save npcs section
-            const SizedBox(height: 10),
-            ExpandableSection(
-              title: "View Saved NPC's & Characters",
-              expandedContent: Row(
-                children: [
-                  Icon(
-                    Icons.group,
-                    color: Colors.white,
-                    size: 24,
-                  ),
-            const SizedBox(width: 10), 
-            Expanded(
-              child: Text(
-                "Tempy",
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  ),
-                ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              //if press cancel it will close without saving
+              child: const Text(
+                "Cancel",
+                style: TextStyle(color: Colors.white),
               ),
-              ],
             ),
-          ),
-            const SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: () {
+                _addNote();
+                Navigator.of(context).pop();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromARGB(255, 241, 187, 87),
+              ),
+              child: const Text("Add"),
+            ),
           ],
-        ),
-      ),
+        );
+      },
+    );
+  },
+  backgroundColor: const Color.fromARGB(255, 241, 187, 87),
+  // Changed to pencil icon
+  child: const Icon(Icons.edit, color: Colors.black), 
+),
+
       //temp bot nav
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: const Color(0xFF25291C),
