@@ -1,0 +1,2 @@
+C:/Users/mike9/Desktop/JuniorDesign/PreLaunchCampaignTesting/dndJrDesign/android/app/.cxx/RelWithDebInfo/g15443x5/arm64-v8a/CMakeFiles/edit_cache.dir
+C:/Users/mike9/Desktop/JuniorDesign/PreLaunchCampaignTesting/dndJrDesign/android/app/.cxx/RelWithDebInfo/g15443x5/arm64-v8a/CMakeFiles/rebuild_cache.dir

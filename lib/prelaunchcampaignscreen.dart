@@ -71,9 +71,22 @@ class PreLaunchCampaignScreen extends StatelessWidget {
               child: const Text('Launch Campaign'),
             ),
 
+            // Note Screen Button, should be a button that leads to the note screen
+            const SizedBox(height: 10),
+            const Icon(Icons.note, size: 40),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const notesScreen(campaignId: campaignID)),
+                );
+              },
+              child: const Text('Notes'),
+            ),
+            const SizedBox(height: 10),
+
             // DM Combat Screen button, should only be visible to the DM
-            // Commented out due to AddCOmbat not being usable.
-            /**
+            // Check to see if works because I cannot check this (Michael 4/7/25 1:29pm)
             if (isDM) ... [
              ElevatedButton(
                 onPressed: () {
@@ -84,8 +97,12 @@ class PreLaunchCampaignScreen extends StatelessWidget {
                 },
                 child: const Text('DM Combat Screen'),
               ),
+              Text()(
+                'Campaign Invite Code: $campaignID',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
             ],
-            */
+            
             
             // A list of players in the campaign, should be pulled from the database
             const SizedBox(height: 20),
