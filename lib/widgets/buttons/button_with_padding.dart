@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 class ButtonWithPadding extends StatefulWidget {
-
   const ButtonWithPadding({
     super.key,
     required this.onPressed,
@@ -18,7 +17,6 @@ class ButtonWithPadding extends StatefulWidget {
 }
 
 class _ButtonWithPaddingState extends State<ButtonWithPadding> {
-
   @override
   Widget build(BuildContext context) {
     Color customColor = const Color.fromARGB(255, 138, 28, 20);
@@ -26,8 +24,7 @@ class _ButtonWithPaddingState extends State<ButtonWithPadding> {
     if (widget.color != null) {
       customColor = widget.color!;
     }
-    if(widget.color == Colors.blueGrey[800])
-    {
+    if (widget.color == Colors.blueGrey[800]) {
       textColor = Colors.blueGrey;
     }
     return Padding(
@@ -37,13 +34,17 @@ class _ButtonWithPaddingState extends State<ButtonWithPadding> {
           widget.onPressed();
         },
         style: ButtonStyle(
-            padding: WidgetStateProperty.all(const EdgeInsets.all(10)),
-            minimumSize: WidgetStateProperty.all(const Size(110, 50)),
-            backgroundColor:
-            WidgetStateProperty.all(customColor)),
-        child: Text(widget.textContent, style: TextStyle(color: textColor),),
+          padding: WidgetStateProperty.all(const EdgeInsets.all(10)),
+          shadowColor: WidgetStateProperty.all(Colors.black),
+          minimumSize: WidgetStateProperty.all(const Size(110, 50)),
+          backgroundColor: WidgetStateProperty.all(customColor),
+          elevation: WidgetStateProperty.all(5), // Add shadow with elevation
+        ),
+        child: Text(
+          widget.textContent,
+          style: TextStyle(color: textColor),
+        ),
       ),
     );
-
   }
 }

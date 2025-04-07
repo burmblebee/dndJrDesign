@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:warlocks_of_the_beach/screens/profile.dart';
-import '../../home_screen.dart';
-import '../../screens/dnd_forms/character_name.dart';
+import 'package:warlocks_of_the_beach/home_screen.dart';
+import 'package:warlocks_of_the_beach/login_screen.dart';
+import 'package:warlocks_of_the_beach/screens/Compendium/spell_compendium.dart';
+
+import '../../screens/profile.dart';
 
 class MainDrawer extends StatelessWidget{
   const MainDrawer({super.key});
@@ -24,41 +26,51 @@ class MainDrawer extends StatelessWidget{
           ),
           const Divider(),
           ListTile(
+            tileColor: Color(0xFF25291C),
             leading: const Icon(Icons.home),
             title: const Text('Home', style: TextStyle(color: Colors.white),),
             onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const HomePage(),
-                ),
-              );
+              Navigator.of(context).push(MaterialPageRoute(builder: (context) => HomePage()));
             },
           ),
           const Divider(),
           ListTile(
+            tileColor: Color(0xFF25291C),
             leading: const Icon(Icons.group),
             title: const Text('Character Creator', style: TextStyle(color: Colors.white),),
             onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const CharacterName(),
-                ),
-              );
+              Navigator.of(context).pushReplacementNamed('/character_creator');
+            },
+          ),
+          const Divider(),
+          ListTile(
+            tileColor: Color(0xFF25291C),
+            leading: const Icon(Icons.group),
+            title: const Text('Character Sheets', style: TextStyle(color: Colors.white),),
+            onTap: () {
+              Navigator.of(context).pushReplacementNamed('/character_sheets');
+            },
+          ),
+          const Divider(),
+          ListTile(
+            tileColor: Color(0xFF25291C),
+            leading: const Icon(Icons.speaker_phone_outlined),
+            title: const Text('Spell Conpendium', style: TextStyle(color: Colors.white),),
+            onTap: () {
+              Navigator.of(context).push(MaterialPageRoute(builder: (context) => SpellCompendium(),));
             },
           ),
           const Spacer(),
           const Divider(),
           ListTile(
+            tileColor: Color(0xFF25291C),
             leading: const Icon(Icons.person),
             title: const Text('Profile', style: TextStyle(color: Colors.white),),
             onTap: () {
-             Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const ProfilePage(),
-                ),
-              );
+              Navigator.of(context).push(MaterialPageRoute(builder: (context) => ProfilePage()));
             },
           ),
+         
           Align(
             alignment: Alignment.bottomCenter,
             child: Column(
@@ -67,10 +79,11 @@ class MainDrawer extends StatelessWidget{
               children: [
                 const Divider(),
                 ListTile(
+                  tileColor: Color(0xFF25291C),
                   leading: const Icon(Icons.logout),
                   title: const Text('Logout', style: TextStyle(color: Colors.white),),
                   onTap: () {
-                    Navigator.of(context).pushReplacementNamed('/login');
+                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => LoginScreen()));
                   },
                 ),
                 const Divider(),

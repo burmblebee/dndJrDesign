@@ -16,38 +16,39 @@ class CampaignScreen extends StatefulWidget {
 }
 
 class _CampaignScreenState extends State<CampaignScreen> {
-  final List<Campaign> _campaigns = [
-    Campaign(
-        id: '1',
-        imageUrl: 'assets/Wizard_Lady.jpg',
-        title: 'Journey to Waterdeep',
-        isDM: true),
-    Campaign(
-        id: '2',
-        imageUrl: 'assets/evocation-wizard-dnd-2024-2.webp',
-        title: 'The Lost Mines of Phandelver',
-        isDM: false),
-    Campaign(
-        id: '3',
-        imageUrl: 'assets/Wizard_Lady.jpg',
-        title: 'The Curse of Strahd',
-        isDM: false),
-    Campaign(
-        id: '4',
-        imageUrl: 'assets/Wizard_Lady.jpg',
-        title: 'The Rise of Tiamat',
-        isDM: true),
-    Campaign(
-        id: '5',
-        imageUrl: 'assets/Wizard_Lady.jpg',
-        title: 'The Tomb of Annihilation',
-        isDM: false),
-    Campaign(
-        id: '6',
-        imageUrl: 'assets/Wizard_Lady.jpg',
-        title: 'The Dragon Heist',
-        isDM: true),
-  ];
+  // final List<Campaign> _campaigns = [
+  //   Campaign(
+  //       id: '1',
+  //       imageUrl: 'assets/Wizard_Lady.jpg',
+  //       title: 'Journey to Waterdeep',
+  //       isDM: true),
+  //   Campaign(
+  //       id: '2',
+  //       imageUrl: 'assets/evocation-wizard-dnd-2024-2.webp',
+  //       title: 'The Lost Mines of Phandelver',
+  //       isDM: false),
+  //   Campaign(
+  //       id: '3',
+  //       imageUrl: 'assets/Wizard_Lady.jpg',
+  //       title: 'The Curse of Strahd',
+  //       isDM: false),
+  //   Campaign(
+  //       id: '4',
+  //       imageUrl: 'assets/Wizard_Lady.jpg',
+  //       title: 'The Rise of Tiamat',
+  //       isDM: true),
+  //   Campaign(
+  //       id: '5',
+  //       imageUrl: 'assets/Wizard_Lady.jpg',
+  //       title: 'The Tomb of Annihilation',
+  //       isDM: false),
+  //   Campaign(
+  //       id: '6',
+  //       imageUrl: 'assets/Wizard_Lady.jpg',
+  //       title: 'The Dragon Heist',
+  //       isDM: true),
+  // ];
+  final List<Campaign> _campaigns = [];
 
   String _gameType(bool isDm) {
     return isDm ? 'Dungeon Master' : 'Player';
@@ -123,10 +124,11 @@ class _CampaignScreenState extends State<CampaignScreen> {
                                     ),
                                   ],
                                 ),
-                                child: Image.asset(
-                                  campaign.imageUrl,
+                                child: (campaign.imageUrl != null) ? Image.asset(
+                                  campaign.imageUrl!,
                                   fit: BoxFit.cover,
-                                ),
+                                ) : const Icon(Icons.image, size: 100, color: Colors.grey,  // Placeholder icon
+                                 ),
                               ),
                             ),
                             Center(

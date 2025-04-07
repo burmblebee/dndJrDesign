@@ -58,6 +58,7 @@ dependencies:
   google_sign_in: ^6.2.2
   riverpod_annotation: ^2.6.1
   image_picker: ^1.1.2
+  flutter_svg: ^2.0.17
 
 dev_dependencies:
   flutter_test:

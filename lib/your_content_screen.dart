@@ -1,10 +1,10 @@
 // screen with 2 buttons, one leading to npc list and one leading to item list
  import 'package:flutter/material.dart';
-import 'package:warlocks_of_the_beach/widgets/main_drawer.dart';
+import 'package:warlocks_of_the_beach/widgets/navigation/main_drawer.dart';
 import 'package:warlocks_of_the_beach/widgets/navigation/bottom_navbar.dart';
 
-import '../item/item_list.dart';
-import '../npc/npc_list.dart';
+import 'item/item_list.dart';
+import 'npc/npc_list.dart';
 
 class ContentSelection extends StatelessWidget {
 

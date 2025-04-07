@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:warlocks_of_the_beach/widgets/navigation/main_drawer.dart';
-import '../../models/character_item.dart';
 import '../../screens/dnd_forms/character_loader_screen.dart';
 import '../../screens/dnd_forms/character_name.dart';
 import 'package:flutter/material.dart';

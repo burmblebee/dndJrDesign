@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:warlocks_of_the_beach/widgets/main_appbar.dart';
-import '../widgets/main_drawer.dart';
+import '../widgets/navigation/main_drawer.dart';
 import '../widgets/navigation/bottom_navbar.dart';
 import 'edit_profile.dart';
 

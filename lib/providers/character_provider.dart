@@ -3,10 +3,44 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/character.dart';
 
 class CharacterNotifier extends StateNotifier<Character> {
-  CharacterNotifier() : super(Character(name: '', race: '', characterClass: '', background: '', picture: '', abilityScores: {}, weapons: {}, spells: {}, specifics: {}));
+  CharacterNotifier()
+      : super(Character(
+          name: '',
+          race: '',
+          characterClass: '',
+          background: '',
+          picture: '',
+          abilityScores: {},
+          weapons: [],
+          cantrips: [],
+          spells: [],
+          proficiencies: [],
+          languages: [],
+          traits: {},
+          selectedKit: [],
+          selectedArmor: null,
+          selectedEquipment: [],
+          selectedInstrument: null,
+        ));
+
+  void updateSelectedKit(List<String> kit) {
+    state = state.copyWith(selectedKit: kit); 
+  }
+
+  void updateSelectedArmor(String armor) {
+    state = state.copyWith(selectedArmor: armor);
+  }
+
+  void updateSelectedEquipment(List<String> items) {
+    state = state.copyWith(selectedEquipment: items);
+  }
 
   void updateCharacterName(String name) {
     state = state.copyWith(name: name);
+  }
+
+  void updateSelectedInstrument(String instrument) {
+    state = state.copyWith(selectedInstrument: instrument);
   }
 
   void updateSelectedRace(String race) {
@@ -25,20 +59,35 @@ class CharacterNotifier extends StateNotifier<Character> {
     state = state.copyWith(abilityScores: scores);
   }
 
-  void updateWeapons(Map<String, dynamic> weapons) {
+  void updateWeapons(List<String> weapons) {
     state = state.copyWith(weapons: weapons);
   }
 
-  void updateSpells(Map<String, dynamic> spells) {
+  void updateCantrips(List<String> cantrips) {
+    state = state.copyWith(cantrips: cantrips);
+  }
+
+  void updateSpells(List<String> spells) {
     state = state.copyWith(spells: spells);
   }
 
-  void updateSpecifics(Map<String, dynamic> specifics) {
-    state = state.copyWith(specifics: specifics);
+  void updateProficiencies(List<String> proficiencies) {
+    state = state.copyWith(proficiencies: proficiencies);
+  }
+
+  void updateLanguages(List<String> languages) {
+    state = state.copyWith(languages: languages);
   }
 
   void updatePicture(String picture) {
     state = state.copyWith(picture: picture);
+  }
+
+  void updateTrait(String key, String value) {
+    final currentTraits = state.traits;
+    final newTraits = Map<String, String>.from(currentTraits);
+    newTraits[key] = value;
+    state = state.copyWith(traits: newTraits);
   }
 
   Future<void> saveCharacterToFirestore(String userId) async {
@@ -56,6 +105,7 @@ class CharacterNotifier extends StateNotifier<Character> {
   }
 }
 
-final characterProvider = StateNotifierProvider<CharacterNotifier, Character>((ref) {
+final characterProvider =
+    StateNotifierProvider<CharacterNotifier, Character>((ref) {
   return CharacterNotifier();
 });
