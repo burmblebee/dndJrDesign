@@ -7,12 +7,13 @@ import '../widgets/navigation/bottom_navbar.dart';
 import '../combat/dm_combat_screen.dart';
 import '../combat/player_combat_screen.dart';
 import '../combat/create_combat.dart';
+import '../screens/notes.dart';
 
 class PreLaunchCampaignScreen extends StatelessWidget {
   const PreLaunchCampaignScreen({super.key, required this.campaignID, required this.isDM});
 
-  final isDM;
-  final campaignID;
+  final bool isDM;
+  final String campaignID;
 
   Stream<List<String>> _getPlayers() async* {
     final user = FirebaseAuth.instance.currentUser;
@@ -78,7 +79,7 @@ class PreLaunchCampaignScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const notesScreen(campaignId: campaignID)),
+                  MaterialPageRoute(builder: (context) =>  Notes(campaignID: campaignID)),
                 );
               },
               child: const Text('Notes'),
