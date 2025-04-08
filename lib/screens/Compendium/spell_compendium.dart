@@ -509,9 +509,10 @@ class _SpellCompendiumState extends State<SpellCompendium> {
                               Navigator.pop(context); // Close the modal
                             },
                             style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all<Color>(
-                                  Theme.of(context).iconTheme.color!),
-                            ),
+                                backgroundColor: Theme.of(context)
+                                    .elevatedButtonTheme
+                                    .style!
+                                    .backgroundColor),
                             child: const Text('Done',
                                 style: TextStyle(color: Colors.white)),
                           ),
@@ -583,11 +584,12 @@ class _SpellCompendiumState extends State<SpellCompendium> {
                             onPressed: () {
                               Navigator.pop(context); // Close the modal
                             },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  Theme.of(context).colorScheme.secondary,
-                            ),
-                            child: const Text('Apply Filters'),
+                            style: ButtonStyle(
+                                backgroundColor: Theme.of(context)
+                                    .elevatedButtonTheme
+                                    .style!
+                                    .backgroundColor),
+                            child: const Text('Apply Filters', style: TextStyle(color: Colors.white),),
                           ),
                         ),
                         const SizedBox(height: 16),

@@ -41,7 +41,6 @@ class _MonsterCompendiumState extends State<MonsterCompendium> {
   Set<String> selectedTypes = {};
   Set<String> selectedChallengeRatings = {};
 
-  // Define some heading keywords (optional).
   final Set<String> headingKeywords = {
     'Armor Class',
     'Hit Points',
@@ -210,12 +209,34 @@ class _MonsterCompendiumState extends State<MonsterCompendium> {
   }
 
   /// Simple function to remove markdown characters like asterisks or inline links.
-  String cleanText(String text) {
-    return text
-        .replaceAll('*', '')
-        .replaceAll(RegExp(r'\[.*?\]'), '')
-        .trim();
+  /// Simple function to remove markdown characters like asterisks or inline links
+/// and add colons after specific keywords.
+String cleanText(String text) {
+  // List of keywords that should have a colon appended
+  final keywordsWithColons = [
+    'Hit Points',
+    'Speed',
+    'Saving Throws',
+    'Damage Immunities',
+    'Condition Immunities',
+    'Senses',
+    'Languages',
+    'Challenge',
+  ];
+
+  // Remove markdown characters
+  String cleaned = text.replaceAll('*', '').replaceAll(RegExp(r'\[.*?\]'), '').trim();
+
+  // Add a colon if the line starts with one of the keywords
+  for (final keyword in keywordsWithColons) {
+    if (cleaned.startsWith(keyword) && !cleaned.endsWith(':')) {
+      cleaned = '$cleaned:';
+      break;
+    }
   }
+
+  return cleaned;
+}
 
   /// Decide if a line should be styled as a "heading" based on known keywords.
   bool isHeadingLine(String line) {
@@ -513,8 +534,8 @@ class _MonsterCompendiumState extends State<MonsterCompendium> {
                               applyFilters();
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.deepOrangeAccent,
-                              foregroundColor: Colors.white,
+                              backgroundColor: Theme.of(context).elevatedButtonTheme.style?.backgroundColor?.resolve({}),
+                              foregroundColor: Colors.white, 
                             ),
                             child: const Text('Apply Filters'),
                           ),
