@@ -1,22 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:warlocks_of_the_beach/login_screen.dart';
 import 'package:warlocks_of_the_beach/screens/campaign_screen.dart';
+import 'package:warlocks_of_the_beach/screens/character_sheet/character_list.dart';
 import 'package:warlocks_of_the_beach/screens/dnd_forms/character_name.dart';
-import 'package:warlocks_of_the_beach/screens/dnd_forms/race_selection.dart';
+import 'package:warlocks_of_the_beach/spash_screen.dart';
 import 'firebase_options.dart';
-import 'package:warlocks_of_the_beach/screens/login_screen.dart';
-
-
-
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized(); // Ensure this is the first line
+  WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  runApp(const MyApp(),); // Run app AFTER Firebase initializes
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -37,6 +35,18 @@ class MyApp extends StatelessWidget {
               color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold,
             ),
             iconTheme: IconThemeData(color: Colors.white),
+          ),
+          listTileTheme: const ListTileThemeData(
+            textColor: Colors.white,
+            tileColor: Color.fromARGB(255, 28, 28, 34),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(12)),
+            ),
+          ),
+          segmentedButtonTheme: SegmentedButtonThemeData(
+            style: ButtonStyle(
+              backgroundColor: WidgetStateProperty.all<Color>(Color.fromARGB(255, 28, 28, 34)),
+            ),
           ),
           bottomNavigationBarTheme: const BottomNavigationBarThemeData(
             backgroundColor: Color(0xFF25291C),
@@ -63,8 +73,14 @@ class MyApp extends StatelessWidget {
             color: Color(0xFFD4C097), // Matching accent color for icons
           ),
         ),
-        home: const LoginScreen(),
-
+        initialRoute: '/',
+        routes: {
+          '/': (context) => const SplashScreen(),
+          '/character_creator': (context) => const CharacterName(),
+          '/campaign_screen': (context) => const CampaignScreen(),
+          '/login_screen': (context) => const LoginScreen(),
+          '/character_sheets' :(context) => CharacterList(),
+        },
       ),
     );
   }

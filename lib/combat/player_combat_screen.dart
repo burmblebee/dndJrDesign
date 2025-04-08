@@ -453,6 +453,10 @@ class PlayerCombatScreen extends ConsumerWidget {
 
   Widget currentTurn(context, List<CombatCharacter> characters, int currentTurnIndex,
       WidgetRef ref) {
+    if (characters.isEmpty || currentTurnIndex >= characters.length) {
+      return const Text("Waiting for characters to be added...");
+    }
+
     return Container(
       padding: const EdgeInsets.all(8.0),
       height: 200,
