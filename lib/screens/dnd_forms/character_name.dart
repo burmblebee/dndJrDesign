@@ -36,108 +36,110 @@ class _CharacterNameState extends ConsumerState<CharacterName> {
       drawer: MainDrawer(),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Image.asset('assets/dragon.png', height: 244), // Fixed usage
-            const SizedBox(height: 20),
-            const Text(
-              'Enter your character name:',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: _characterNameController,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Character Name',
-              ),
-            ),
-            const SizedBox(height: 30),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton.icon(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.arrow_back, color: Colors.white),
-                  label: const Text("Back"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: customColor,
-                    foregroundColor: Colors.white,
-                  ),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Image.asset('assets/dragon.png', height: 244), // Fixed usage
+              const SizedBox(height: 20),
+              const Text(
+                'Enter your character name:',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
                 ),
-                const SizedBox(width: 30),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    if (_characterNameController.text.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Character name cannot be empty!'),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                controller: _characterNameController,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Character Name',
+                ),
+              ),
+              const SizedBox(height: 30),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton.icon(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.arrow_back, color: Colors.white),
+                    label: const Text("Back"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: customColor,
+                      foregroundColor: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(width: 30),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      if (_characterNameController.text.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Character name cannot be empty!'),
+                          ),
+                        );
+                        return;
+                      }
+                      ref.read(characterProvider.notifier).updateCharacterName(_characterNameController.text);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => RaceSelection(),
                         ),
                       );
-                      return;
-                    }
-                    ref.read(characterProvider.notifier).updateCharacterName(_characterNameController.text);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => RaceSelection(),
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.arrow_forward, color: Colors.white),
-                  label: const Text("Next"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: customColor,
-                    foregroundColor: Colors.white,
+                    },
+                    icon: const Icon(Icons.arrow_forward, color: Colors.white),
+                    label: const Text("Next"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: customColor,
+                      foregroundColor: Colors.white,
+                    ),
                   ),
-                ),
-              ],
-            ),
-            // Row(
-            //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            //   children: [
-            //     ElevatedButton(
-            //       onPressed: () {
-            //         Navigator.pushReplacement(
-            //           context,
-            //           MaterialPageRoute(
-            //             builder: (context) => const HomePage(),
-            //           ),
-            //         ); // Navigate backgit
-            //       },
-            //       child: const Text('Back'),
-            //     ),
-            //     ElevatedButton(
-            //       onPressed: () {
-            //         if (_characterNameController.text.isNotEmpty) {
-            //           ref
-            //               .read(characterProvider.notifier)
-            //               .updateCharacterName(_characterNameController.text);
-            //           Navigator.push(
-            //             context,
-            //             MaterialPageRoute(
-            //               builder: (context) => RaceSelection(),
-            //             ),
-            //           ); // Navigate to RaceSelection
-            //         } else {
-            //           ScaffoldMessenger.of(context).showSnackBar(
-            //             const SnackBar(
-            //               content: Text('Character name cannot be empty!'),
-            //             ),
-            //           );
-            //         }
-            //       },
-            //       child: const Text('Next'),
-            //     ),
-            //   ],
-            // ),
-          ],
+                ],
+              ),
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              //   children: [
+              //     ElevatedButton(
+              //       onPressed: () {
+              //         Navigator.pushReplacement(
+              //           context,
+              //           MaterialPageRoute(
+              //             builder: (context) => const HomePage(),
+              //           ),
+              //         ); // Navigate backgit
+              //       },
+              //       child: const Text('Back'),
+              //     ),
+              //     ElevatedButton(
+              //       onPressed: () {
+              //         if (_characterNameController.text.isNotEmpty) {
+              //           ref
+              //               .read(characterProvider.notifier)
+              //               .updateCharacterName(_characterNameController.text);
+              //           Navigator.push(
+              //             context,
+              //             MaterialPageRoute(
+              //               builder: (context) => RaceSelection(),
+              //             ),
+              //           ); // Navigate to RaceSelection
+              //         } else {
+              //           ScaffoldMessenger.of(context).showSnackBar(
+              //             const SnackBar(
+              //               content: Text('Character name cannot be empty!'),
+              //             ),
+              //           );
+              //         }
+              //       },
+              //       child: const Text('Next'),
+              //     ),
+              //   ],
+              // ),
+            ],
+          ),
         ),
       ),
     );
