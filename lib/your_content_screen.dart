@@ -1,5 +1,7 @@
 // screen with 2 buttons, one leading to npc list and one leading to item list
  import 'package:flutter/material.dart';
+import 'package:warlocks_of_the_beach/screens/campaign_screen.dart';
+import 'package:warlocks_of_the_beach/screens/character_sheet/character_list.dart';
 import 'package:warlocks_of_the_beach/widgets/navigation/main_drawer.dart';
 import 'package:warlocks_of_the_beach/widgets/navigation/bottom_navbar.dart';
 
@@ -53,8 +55,20 @@ const ContentSelection({super.key});
                         );
                       } else if (index == 2) {
                         // Navigate to Characters
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const CharacterList(),
+                          ),
+                        );
                       } else if (index == 3) {
-                        // Navigate to Campaigns that user dms?
+                        // Navigate to Campaigns that user dms? For now just all campaigns
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const CampaignScreen(),
+                          ),
+                        );
                       }
                     },
                     child:(index == 0) ? const Center(

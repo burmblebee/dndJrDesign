@@ -107,7 +107,7 @@ class PreLaunchCampaignScreen extends StatelessWidget {
                               AddCombat(campaignId: campaignID)),
                     );
                   },
-                  child: const Text('DM Combat Screen'),
+                  child: const Text('Add Combat'),
                 ),
                 Text(
                   'Campaign Invite Code: $campaignID',
