@@ -57,86 +57,73 @@ class _BackgroundScreenState extends ConsumerState<BackgroundScreen> {
       appBar: MainAppbar(),
       drawer: const MainDrawer(),
       bottomNavigationBar: MainBottomNavBar(),
-      // bottomNavigationBar: Padding("F"
-      //   padding: const EdgeInsets.all(16.0),
-      //   child: Row(
-      //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      //     children: [
-      //       NavigationButton(
-      //         onPressed: () => Navigator.pop(context),
-      //         textContent: 'Back',
-      //       ),
-      //       NavigationButton(
-      //         textContent: "Next",
-      //         onPressed: () {
-      //           updateSelectedBackground(_selectedBackground);
-      //           Navigator.push(
-      //             context,
-      //             MaterialPageRoute(
-      //               builder: (context) => SpecificsScreen(),
-      //             ),
-      //           );
-      //         },
-      //       ),
-      //     ],
-      //   ),
-      // ),
-      body: Column(
+      body: Stack(
         children: [
-          SizedBox(height: 20),
-          Text(
-            "Background Selection for $characterName",
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 20),
-          const Text(
-            'Pick your background',
-            style: TextStyle(fontSize: 18),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 20),
-          DropdownButton<String>(
-            value: _selectedBackground,
-            items: backgrounds.keys
-                .map((background) => DropdownMenuItem(
-                      value: background,
-                      child: Text(background),
-                    ))
-                .toList(),
-            onChanged: (value) => setState(() => _selectedBackground = value!),
-          ),
-          const SizedBox(height: 20),
-          Expanded(
-            child: Center(
-              child: Container(
-                width: 350,
-                height: 350,
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.black),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: SingleChildScrollView(
-                  child: BackgroundDataLoader(
-                    backgroundName: _selectedBackground,
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 20),
+                  Text(
+                    "Background Selection for $characterName",
+                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                   ),
-                ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Pick your background',
+                    style: TextStyle(fontSize: 18),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 20),
+                  DropdownButton<String>(
+                    value: _selectedBackground,
+                    items: backgrounds.keys
+                        .map((background) => DropdownMenuItem(
+                              value: background,
+                              child: Text(background),
+                            ))
+                        .toList(),
+                    onChanged: (value) => setState(() => _selectedBackground = value!),
+                  ),
+                  const SizedBox(height: 20),
+                  Center(
+                    child: Container(
+                      width: 350,
+                      height: 350,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: SingleChildScrollView(
+                        child: BackgroundDataLoader(
+                          backgroundName: _selectedBackground,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+                ],
               ),
             ),
           ),
-          SizedBox(height: 15),
-          Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+          Positioned(
+            bottom: 16, 
+            left: 16,
+            right: 16,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 ElevatedButton.icon(
                   onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.arrow_back, color: Colors.white,),
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
                   label: const Text("Back"),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: customColor,
                     foregroundColor: Colors.white,
                   ),
                 ),
-                const SizedBox(width: 30),
                 ElevatedButton.icon(
                   onPressed: () {
                     ref.read(characterProvider.notifier).updateSelectedBackground(_selectedBackground);
@@ -147,7 +134,7 @@ class _BackgroundScreenState extends ConsumerState<BackgroundScreen> {
                       ),
                     );
                   },
-                  icon: const Icon(Icons.arrow_forward, color: Colors.white,),
+                  icon: const Icon(Icons.arrow_forward, color: Colors.white),
                   label: const Text("Next"),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: customColor,
@@ -156,6 +143,7 @@ class _BackgroundScreenState extends ConsumerState<BackgroundScreen> {
                 ),
               ],
             ),
+          ),
         ],
       ),
     );

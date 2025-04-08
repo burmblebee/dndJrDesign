@@ -30,38 +30,54 @@ class _CharacterNameState extends ConsumerState<CharacterName> {
 
   @override
   Widget build(BuildContext context) {
+    final double availableHeight = MediaQuery.of(context).size.height -
+        kToolbarHeight - // Height of the app bar
+        kBottomNavigationBarHeight; // Height of the bottom navigation bar
+
     return Scaffold(
       appBar: MainAppbar(),
       bottomNavigationBar: MainBottomNavBar(),
       drawer: MainDrawer(),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Image.asset('assets/dragon.png', height: 244), // Fixed usage
-              const SizedBox(height: 20),
-              const Text(
-                'Enter your character name:',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
+      body: SizedBox(
+        height: availableHeight,
+        child: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Image.asset('assets/dragon.png', height: 244), // Fixed usage
+                    const SizedBox(height: 20),
+                    const Text(
+                      'Enter your character name:',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 20),
+                    TextField(
+                      controller: _characterNameController,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'Character Name',
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+                  ],
                 ),
-                textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: _characterNameController,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Character Name',
-                ),
-              ),
-              const SizedBox(height: 30),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+            ),
+            Positioned(
+              bottom: 16, // Positioned 16px above the bottom navigation bar
+              left: 16,
+              right: 16,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   ElevatedButton.icon(
                     onPressed: () => Navigator.pop(context),
@@ -72,7 +88,6 @@ class _CharacterNameState extends ConsumerState<CharacterName> {
                       foregroundColor: Colors.white,
                     ),
                   ),
-                  const SizedBox(width: 30),
                   ElevatedButton.icon(
                     onPressed: () {
                       if (_characterNameController.text.isEmpty) {
@@ -100,46 +115,8 @@ class _CharacterNameState extends ConsumerState<CharacterName> {
                   ),
                 ],
               ),
-              // Row(
-              //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              //   children: [
-              //     ElevatedButton(
-              //       onPressed: () {
-              //         Navigator.pushReplacement(
-              //           context,
-              //           MaterialPageRoute(
-              //             builder: (context) => const HomePage(),
-              //           ),
-              //         ); // Navigate backgit
-              //       },
-              //       child: const Text('Back'),
-              //     ),
-              //     ElevatedButton(
-              //       onPressed: () {
-              //         if (_characterNameController.text.isNotEmpty) {
-              //           ref
-              //               .read(characterProvider.notifier)
-              //               .updateCharacterName(_characterNameController.text);
-              //           Navigator.push(
-              //             context,
-              //             MaterialPageRoute(
-              //               builder: (context) => RaceSelection(),
-              //             ),
-              //           ); // Navigate to RaceSelection
-              //         } else {
-              //           ScaffoldMessenger.of(context).showSnackBar(
-              //             const SnackBar(
-              //               content: Text('Character name cannot be empty!'),
-              //             ),
-              //           );
-              //         }
-              //       },
-              //       child: const Text('Next'),
-              //     ),
-              //   ],
-              // ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
