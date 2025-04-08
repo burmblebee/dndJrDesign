@@ -317,8 +317,10 @@ class _CharacterSheetState extends State<CharacterSheet> {
           startingArmor = "Robe";
         }
 
-        userPack = characterData?["startingKit"]?.toString().replaceAll(RegExp(r'[\[\]]'), '') ?? "Scholar’s Pack";
-
+        userPack = characterData?["startingKit"]
+                ?.toString()
+                .replaceAll(RegExp(r'[\[\]]'), '') ??
+            "Scholar’s Pack";
 
         // Map of starting armors with their base AC and rules.
         final Map<String, Map<String, dynamic>> armorStats = {
@@ -793,7 +795,6 @@ class _CharacterSheetState extends State<CharacterSheet> {
   Widget _buildInventoryTab() {
     // In a real app, you'd likely store the user's pack type in a variable.
     // For demonstration, we're just using "Scholar’s Pack".
-    
 
     // Retrieve the string for the user's pack; provide a fallback if necessary.
     final String packItemsString = packDescriptions[userPack] ?? "";
@@ -1180,14 +1181,13 @@ class _CharacterSheetState extends State<CharacterSheet> {
             IconButton(
               onPressed: () {
                 // Roll to hit, then prompt to see if user wants to roll damage
-                showDiceRollPopup(context,
-                        "1d20", // Attack roll dice (always a d20 for weapon attacks)
-                        modifier:
-                            int.parse(attackModifier), // Attack roll modifier
-                        attackRollDamage: damage,
-                        isAttack: true // Damage roll dice
-                        )
-                    .then((result) {
+                showDiceRollPopup(
+                  context,
+                  "1d20", // Attack roll dice (always a d20 for weapon attacks)
+                  modifier: int.parse(attackModifier), // Attack roll modifier
+                  attackRollDamage: damage,
+                  isAttack: true,
+                ).then((result) {
                   //just some logging
                   if (result != null) {
                     print("Final Result: $result");

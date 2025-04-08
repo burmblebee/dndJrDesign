@@ -4,10 +4,11 @@ import 'package:warlocks_of_the_beach/content_selection.dart';
 import 'package:warlocks_of_the_beach/screens/browse_content/browse_content.dart';
 
 import 'package:warlocks_of_the_beach/screens/campaign_screen.dart';
+import 'package:warlocks_of_the_beach/screens/dnd_forms/character_name.dart';
 import '../../diceRoller.dart'; // Import the DiceRollScreen
 
 class MainBottomNavBar extends StatefulWidget {
-  const MainBottomNavBar({super.key});
+  const MainBottomNavBar({super.key,});
 
   @override
   State<MainBottomNavBar> createState() => _MainBottomNavBarState();
@@ -24,28 +25,28 @@ class _MainBottomNavBarState extends State<MainBottomNavBar> {
     switch (index) {
       case 0:
         // Navigate to Browse Content
-        Navigator.push(
+        Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => BrowseContent()),
+          MaterialPageRoute(builder: (context) => CharacterName()),
         );
         break;
       case 1:
         // Navigate to Dice Roller
-        Navigator.push(
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => DiceRollScreen()),
         );
         break;
       case 2:
         // Navigate to Your Content
-        Navigator.push(
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => ContentSelection()),
         );
         break;
       case 3:
         // Navigate to Campaigns
-        Navigator.push(
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => CampaignScreen()),
         );
@@ -66,8 +67,8 @@ class _MainBottomNavBarState extends State<MainBottomNavBar> {
       type: BottomNavigationBarType.fixed, // Ensures background stays consistent
       items: const [
         BottomNavigationBarItem(
-          icon: Icon(Icons.search),
-          label: 'Browse\nContent',
+          icon: Icon(Icons.person_add),
+          label: '   Create\nCharacter',
         ),
         BottomNavigationBarItem(
           icon: FaIcon(FontAwesomeIcons.diceD20),
