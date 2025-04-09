@@ -299,7 +299,7 @@ class _EquipmentSelectionState extends ConsumerState<EquipmentSelection> {
             ),
           ),
           Positioned(
-            bottom: 16,
+            bottom: 40,
             left: 16,
             right: 16,
             child: Row(

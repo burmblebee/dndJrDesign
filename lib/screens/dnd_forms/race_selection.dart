@@ -120,7 +120,7 @@ class _RaceSelectionState extends ConsumerState<RaceSelection> {
               ),
             ),
             Positioned(
-              bottom: 16, 
+              bottom: 40, 
               left: 16,
               right: 16,
               child: Row(

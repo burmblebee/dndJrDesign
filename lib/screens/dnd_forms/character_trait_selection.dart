@@ -76,25 +76,63 @@ class _CharacterTraitScreenState extends ConsumerState<CharacterTraitScreen> {
   String _currentSection = "Details";
 
   void _saveSelections(WidgetRef ref) {
-    ref.read(characterProvider.notifier).updateTrait('alignment', chosenAlignment);
-    ref.read(characterProvider.notifier).updateTrait('faith', _faithController.text);
-    ref.read(characterProvider.notifier).updateTrait('lifestyle', chosenLifestyle);
-    ref.read(characterProvider.notifier).updateTrait('hair', _hairController.text);
-    ref.read(characterProvider.notifier).updateTrait('eyes', _eyesController.text);
-    ref.read(characterProvider.notifier).updateTrait('skin', _skinController.text);
-    ref.read(characterProvider.notifier).updateTrait('height', _heightController.text);
-    ref.read(characterProvider.notifier).updateTrait('weight', _weightController.text);
-    ref.read(characterProvider.notifier).updateTrait('age', _ageController.text);
-    ref.read(characterProvider.notifier).updateTrait('gender', _genderController.text);
-    ref.read(characterProvider.notifier).updateTrait('personalityTraits', _personalityTraitsController.text);
-    ref.read(characterProvider.notifier).updateTrait('ideals', _idealsController.text);
-    ref.read(characterProvider.notifier).updateTrait('bonds', _bondsController.text);
-    ref.read(characterProvider.notifier).updateTrait('flaws', _flawsController.text);
-    ref.read(characterProvider.notifier).updateTrait('organization', _organizationsController.text);
-    ref.read(characterProvider.notifier).updateTrait('allies', _alliesController.text);
-    ref.read(characterProvider.notifier).updateTrait('enemies', _enemiesController.text);
-    ref.read(characterProvider.notifier).updateTrait('backstory', _backstoryController.text);
-    ref.read(characterProvider.notifier).updateTrait('other', _otherController.text);
+    ref
+        .read(characterProvider.notifier)
+        .updateTrait('alignment', chosenAlignment);
+    ref
+        .read(characterProvider.notifier)
+        .updateTrait('faith', _faithController.text);
+    ref
+        .read(characterProvider.notifier)
+        .updateTrait('lifestyle', chosenLifestyle);
+    ref
+        .read(characterProvider.notifier)
+        .updateTrait('hair', _hairController.text);
+    ref
+        .read(characterProvider.notifier)
+        .updateTrait('eyes', _eyesController.text);
+    ref
+        .read(characterProvider.notifier)
+        .updateTrait('skin', _skinController.text);
+    ref
+        .read(characterProvider.notifier)
+        .updateTrait('height', _heightController.text);
+    ref
+        .read(characterProvider.notifier)
+        .updateTrait('weight', _weightController.text);
+    ref
+        .read(characterProvider.notifier)
+        .updateTrait('age', _ageController.text);
+    ref
+        .read(characterProvider.notifier)
+        .updateTrait('gender', _genderController.text);
+    ref
+        .read(characterProvider.notifier)
+        .updateTrait('personalityTraits', _personalityTraitsController.text);
+    ref
+        .read(characterProvider.notifier)
+        .updateTrait('ideals', _idealsController.text);
+    ref
+        .read(characterProvider.notifier)
+        .updateTrait('bonds', _bondsController.text);
+    ref
+        .read(characterProvider.notifier)
+        .updateTrait('flaws', _flawsController.text);
+    ref
+        .read(characterProvider.notifier)
+        .updateTrait('organization', _organizationsController.text);
+    ref
+        .read(characterProvider.notifier)
+        .updateTrait('allies', _alliesController.text);
+    ref
+        .read(characterProvider.notifier)
+        .updateTrait('enemies', _enemiesController.text);
+    ref
+        .read(characterProvider.notifier)
+        .updateTrait('backstory', _backstoryController.text);
+    ref
+        .read(characterProvider.notifier)
+        .updateTrait('other', _otherController.text);
   }
 
   Widget detailsScreen() {
@@ -441,6 +479,10 @@ class _CharacterTraitScreenState extends ConsumerState<CharacterTraitScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final double availableHeight = MediaQuery.of(context).size.height -
+        kToolbarHeight - // Height of the app bar
+        kBottomNavigationBarHeight; // Height of the bottom navigation bar
+
     return DefaultTabController(
       length: 4, // Number of tabs
       child: Scaffold(
@@ -448,65 +490,81 @@ class _CharacterTraitScreenState extends ConsumerState<CharacterTraitScreen> {
         appBar: MainAppbar(),
         drawer: const MainDrawer(),
         bottomNavigationBar: MainBottomNavBar(),
-        body: Column(
-          children: [
-            // Tab Bar
-            Container(
-              color: Theme.of(context).scaffoldBackgroundColor,
-              child: const TabBar(
-                isScrollable: false,
-                labelColor: Colors.white,
-                unselectedLabelColor: Colors.grey,
-                indicatorColor: Colors.white,
-                tabs: [
-                  Tab(child: Text('Details')),
-                  Tab(child: Text('Physical')),
-                  Tab(child: Text('Personal')),
-                  Tab(child: Text('Notes')),
-                ],
-              ),
-            ),
-            // Tab Bar View
-            Expanded(
-              child: TabBarView(
-                children: [
-                  detailsScreen(), // Details Tab
-                  physicalScreen(), // Physical Tab
-                  personalScreen(), // Personal Tab
-                  notesScreen(), // Notes Tab
-                ],
-              ),
-            ),
-          ],
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        floatingActionButton: Padding(
-          padding: const EdgeInsets.only(bottom: 16.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        body: SizedBox(
+          height: availableHeight,
+          child: Stack(
             children: [
-              ElevatedButton.icon(
-                onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
-                label: const Text("Back"),
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                ),
-              ),
-              ElevatedButton.icon(
-                onPressed: () {
-                  _saveSelections(ref);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => SummarizationScreen(),
+              Column(
+                children: [
+                  // Tab Bar
+                  Container(
+                    color: Theme.of(context).scaffoldBackgroundColor,
+                    child: const TabBar(
+                      isScrollable: false,
+                      labelColor: Colors.white,
+                      unselectedLabelColor: Colors.grey,
+                      indicatorColor: Colors.white,
+                      tabs: [
+                        Tab(child: Text('Details')),
+                        Tab(child: Text('Physical')),
+                        Tab(child: Text('Personal')),
+                        Tab(child: Text('Notes')),
+                      ],
                     ),
-                  );
-                },
-                icon: const Icon(Icons.arrow_forward, color: Colors.white),
-                label: const Text("Next"),
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.white,
+                  ),
+                  // Tab Bar View
+                  Expanded(
+                    child: TabBarView(
+                      children: [
+                        detailsScreen(), // Details Tab
+                        physicalScreen(), // Physical Tab
+                        personalScreen(), // Personal Tab
+                        notesScreen(), // Notes Tab
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              // Positioned Buttons
+              Positioned(
+                bottom: 40,
+                left: 16,
+                right: 16,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.arrow_back, color: Colors.white),
+                      label: const Text("Back"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context)
+                            .floatingActionButtonTheme
+                            .backgroundColor,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        _saveSelections(ref);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SummarizationScreen(),
+                          ),
+                        );
+                      },
+                      icon:
+                          const Icon(Icons.arrow_forward, color: Colors.white),
+                      label: const Text("Next"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context)
+                            .floatingActionButtonTheme
+                            .backgroundColor,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],

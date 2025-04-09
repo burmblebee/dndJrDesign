@@ -345,6 +345,16 @@ class _StartingEquipmentSelectionState extends ConsumerState<StartingEquipmentSe
     final selectedClass = character.characterClass;
     List<String> packsInEquipment = _getPacksInEquipment();
 
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    // Adjusted height to include 40px buffer above BottomNav
+    final availableHeight = screenHeight -
+        kToolbarHeight -
+        kBottomNavigationBarHeight -
+        MediaQuery.of(context).padding.top -
+        MediaQuery.of(context).padding.bottom -
+        40;
+
     // Determine if we need to show an instrument selector.
     bool showInstrumentSelector = false;
     final kitInstrumentManual = _getKitAndInstrumentManually(selectedClass, selectedOption ?? '');
@@ -359,70 +369,73 @@ class _StartingEquipmentSelectionState extends ConsumerState<StartingEquipmentSe
       bottomNavigationBar: MainBottomNavBar(),
       body: Stack(
         children: [
-          SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text("Select Starting Equipment", style: Theme.of(context).textTheme.headlineMedium),
-                const SizedBox(height: 20),
-                if (equipmentOptions.containsKey(selectedClass)) ...[
-                  Text("Choose Starting Equipment", style: Theme.of(context).textTheme.titleMedium),
-                  const SizedBox(height: 10),
-                  // Build radio buttons for each option.
-                  Column(
-                    children: equipmentOptions[selectedClass]!.entries.map((entry) {
-                      return RadioListTile<String>(
-                        title: Text("Option ${entry.key}"),
-                        value: entry.key,
-                        groupValue: selectedOption,
-                        onChanged: (value) {
+          SizedBox(
+            height: availableHeight,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Select Starting Equipment", style: Theme.of(context).textTheme.headlineMedium),
+                  const SizedBox(height: 20),
+                  if (equipmentOptions.containsKey(selectedClass)) ...[
+                    Text("Choose Starting Equipment", style: Theme.of(context).textTheme.titleMedium),
+                    const SizedBox(height: 10),
+                    // Build radio buttons for each option.
+                    Column(
+                      children: equipmentOptions[selectedClass]!.entries.map((entry) {
+                        return RadioListTile<String>(
+                          title: Text("Option ${entry.key}"),
+                          value: entry.key,
+                          groupValue: selectedOption,
+                          onChanged: (value) {
+                            setState(() {
+                              selectedOption = value!;
+                              selectedEquipmentDisplay = List<String>.from(equipmentOptions[selectedClass]![value]!);
+                            });
+                          },
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 10),
+                    Text("Selected Equipment (Display Only):", style: Theme.of(context).textTheme.titleMedium),
+                    const SizedBox(height: 5),
+                    ...selectedEquipmentDisplay.map((item) => Text("- $item")),
+                    const SizedBox(height: 20),
+                    // Display pack descriptions.
+                    if (packsInEquipment.isNotEmpty) ...[
+                      Text("Pack Descriptions:", style: Theme.of(context).textTheme.titleMedium),
+                      const SizedBox(height: 5),
+                      ...packsInEquipment.map((pack) => Text("$pack: ${packDescriptions[pack]}", style: const TextStyle(fontSize: 14))),
+                    ],
+                    const SizedBox(height: 20),
+                    // If a musical instrument option is present, show the dropdown.
+                    if (showInstrumentSelector) ...[
+                      Text("Select an Instrument", style: Theme.of(context).textTheme.titleMedium),
+                      const SizedBox(height: 5),
+                      DropdownButtonFormField<String>(
+                        value: selectedInstrument,
+                        hint: const Text("Choose instrument"),
+                        items: instrumentOptions
+                            .map((instr) => DropdownMenuItem(
+                                  value: instr,
+                                  child: Text(instr),
+                                ))
+                            .toList(),
+                        onChanged: (val) {
                           setState(() {
-                            selectedOption = value!;
-                            selectedEquipmentDisplay = List<String>.from(equipmentOptions[selectedClass]![value]!);
+                            selectedInstrument = val;
                           });
                         },
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 10),
-                  Text("Selected Equipment (Display Only):", style: Theme.of(context).textTheme.titleMedium),
-                  const SizedBox(height: 5),
-                  ...selectedEquipmentDisplay.map((item) => Text("- $item")),
-                  const SizedBox(height: 20),
-                  // Display pack descriptions.
-                  if (packsInEquipment.isNotEmpty) ...[
-                    Text("Pack Descriptions:", style: Theme.of(context).textTheme.titleMedium),
-                    const SizedBox(height: 5),
-                    ...packsInEquipment.map((pack) => Text("$pack: ${packDescriptions[pack]}", style: const TextStyle(fontSize: 14))),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+                  ] else ...[
+                    Text("No equipment options available for class: $selectedClass"),
                   ],
-                  const SizedBox(height: 20),
-                  // If a musical instrument option is present, show the dropdown.
-                  if (showInstrumentSelector) ...[
-                    Text("Select an Instrument", style: Theme.of(context).textTheme.titleMedium),
-                    const SizedBox(height: 5),
-                    DropdownButtonFormField<String>(
-                      value: selectedInstrument,
-                      hint: const Text("Choose instrument"),
-                      items: instrumentOptions
-                          .map((instr) => DropdownMenuItem(
-                                value: instr,
-                                child: Text(instr),
-                              ))
-                          .toList(),
-                      onChanged: (val) {
-                        setState(() {
-                          selectedInstrument = val;
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 20),
-                  ],
-                ] else ...[
-                  Text("No equipment options available for class: $selectedClass"),
+                  const SizedBox(height: 100), // Add extra space to prevent overlap
                 ],
-                const SizedBox(height: 100), // Add extra space to prevent overlap
-              ],
+              ),
             ),
           ),
           Positioned(

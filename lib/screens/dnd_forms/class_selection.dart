@@ -37,120 +37,124 @@ class _ClassSelectionState extends ConsumerState<ClassSelection> {
   @override
   Widget build(BuildContext context) {
     final characterName = ref.watch(characterProvider).name;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    // Adjusted height to include 40px buffer above BottomNav
+    final availableHeight = screenHeight -
+        kToolbarHeight -
+        kBottomNavigationBarHeight -
+        MediaQuery.of(context).padding.top -
+        MediaQuery.of(context).padding.bottom -
+        40;
 
     return Scaffold(
-      bottomNavigationBar: MainBottomNavBar(),
-      appBar: MainAppbar(),
-      drawer: MainDrawer(),
-      body: Stack(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
+      bottomNavigationBar: const MainBottomNavBar(),
+      appBar: const MainAppbar(),
+      drawer: const MainDrawer(),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: SizedBox(
+          height: availableHeight,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const SizedBox(height: 15),
+                      Text(
+                        'Class Selection for $characterName',
+                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 15),
+                      const Text(
+                        'Pick your class',
+                        style: TextStyle(fontSize: 18),
+                      ),
+                      const SizedBox(height: 20),
+                      Center(
+                        child: DropdownButton<String>(
+                          value: selectedClassName,
+                          icon: const Icon(Icons.arrow_drop_down),
+                          elevation: 16,
+                          style: const TextStyle(color: Colors.white, fontSize: 16),
+                          underline: Container(
+                            height: 2,
+                            color: customColor,
+                          ),
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              selectedClassName = newValue!;
+                            });
+                          },
+                          items: classOptions.map<DropdownMenuItem<String>>((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.black),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: SizedBox(
+                          height: 325,
+                          width: 325,
+                          child: SingleChildScrollView(
+                            child: ClassDataWidget(className: selectedClassName),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const SizedBox(height: 15),
-                  Text(
-                    'Class Selection for $characterName',
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 15),
-                  const Text(
-                    'Pick your class',
-                    style: TextStyle(fontSize: 18),
-                  ),
-                  const SizedBox(height: 20),
-                  Center(
-                    child: DropdownButton<String>(
-                      value: selectedClassName,
-                      icon: const Icon(Icons.arrow_drop_down),
-                      elevation: 16,
-                      style: const TextStyle(color: Colors.white, fontSize: 16),
-                      underline: Container(
-                        height: 2,
-                        color: customColor,
-                      ),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          selectedClassName = newValue!;
-                        });
-                      },
-                      items: classOptions.map<DropdownMenuItem<String>>((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        );
-                      }).toList(),
+                  ElevatedButton.icon(
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const RaceSelection()),
+                    ),
+                    icon: const Icon(Icons.arrow_back, color: Colors.white),
+                    label: const Text("Back"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: customColor,
+                      foregroundColor: Colors.white,
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: SizedBox(
-                      height: 325,
-                      width: 325,
-                      child: SingleChildScrollView(
-                        child: ClassDataWidget(className: selectedClassName),
-                      ),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      ref.read(characterProvider.notifier).updateSelectedClass(selectedClassName);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const BackgroundScreen(),
+                        ),
+                      );
+                    },
+                    label: const Text("Next"),
+                    icon: const Icon(Icons.arrow_forward, color: Colors.white),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: customColor,
+                      foregroundColor: Colors.white,
                     ),
                   ),
-                  const SizedBox(height: 20),
                 ],
               ),
-            ),
+              const SizedBox(height: 20), // Final 20px to reach total of 40px bottom margin
+            ],
           ),
-          Positioned(
-            bottom: 16,
-            left: 16,
-            right: 16,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                ElevatedButton.icon(
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => RaceSelection()),
-                  ),
-                  icon: const Icon(
-                    Icons.arrow_back,
-                    color: Colors.white,
-                  ),
-                  label: const Text("Back"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: customColor,
-                    foregroundColor: Colors.white,
-                  ),
-                ),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    ref
-                        .read(characterProvider.notifier)
-                        .updateSelectedClass(selectedClassName);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => BackgroundScreen(),
-                      ),
-                    );
-                  },
-                  label: const Text("Next"),
-                  icon: const Icon(
-                    Icons.arrow_forward,
-                    color: Colors.white,
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: customColor,
-                    foregroundColor: Colors.white,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

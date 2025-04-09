@@ -659,7 +659,7 @@ class _SpellSelectionScreenState extends ConsumerState<SpellSelectionScreen> {
                       ),
                     ),
                     Positioned(
-                      bottom: 16,
+                      bottom: 40,
                       left: 16,
                       right: 16,
                       child: Row(
