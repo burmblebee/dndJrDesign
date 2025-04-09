@@ -37,37 +37,12 @@ class MainDrawer extends StatelessWidget{
           ListTile(
             tileColor: Color(0xFF25291C),
             leading: const Icon(Icons.group),
-            title: const Text('Character Creator', style: TextStyle(color: Colors.white),),
-            onTap: () {
-              Navigator.of(context).pushReplacementNamed('/character_creator');
-            },
-          ),
-          const Divider(),
-          ListTile(
-            tileColor: Color(0xFF25291C),
-            leading: const Icon(Icons.group),
             title: const Text('Character Sheets', style: TextStyle(color: Colors.white),),
             onTap: () {
               Navigator.of(context).pushReplacementNamed('/character_sheets');
             },
           ),
           const Divider(),
-          ListTile(
-            tileColor: Color(0xFF25291C),
-            leading: const Icon(Icons.speaker_phone_outlined),
-            title: const Text('Spell Conpendium', style: TextStyle(color: Colors.white),),
-            onTap: () {
-              Navigator.of(context).push(MaterialPageRoute(builder: (context) => SpellCompendium(),));
-            },
-          ),
-          ListTile(
-            tileColor: Color(0xFF25291C),
-            leading: const Icon(Icons.speaker_phone_outlined),
-            title: const Text('Monster Conpendium', style: TextStyle(color: Colors.white),),
-            onTap: () {
-              Navigator.of(context).push(MaterialPageRoute(builder: (context) => MonsterCompendium(),));
-            },
-          ),
           const Spacer(),
           const Divider(),
           ListTile(
