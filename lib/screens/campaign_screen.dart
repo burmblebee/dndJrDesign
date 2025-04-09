@@ -343,7 +343,7 @@ class _CampaignScreenState extends State<CampaignScreen> {
     return Scaffold(
       appBar: const MainAppbar(),
       drawer: const MainDrawer(),
-      bottomNavigationBar: const MainBottomNavBar(),
+      bottomNavigationBar: const MainBottomNavBar(initialIndex: 3,),
       backgroundColor: theme,
       body: Column(
         children: [

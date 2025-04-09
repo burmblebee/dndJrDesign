@@ -409,7 +409,7 @@ class _DiceRollScreenState extends State<DiceRollScreen>
     return Scaffold(
       appBar: AppBar(title: Text("Dice Roller")),
       drawer: MainDrawer(),
-      bottomNavigationBar: MainBottomNavBar(),
+      bottomNavigationBar: MainBottomNavBar(initialIndex: 1,),
       body: LayoutBuilder(
         builder: (context, constraints) {
           return SingleChildScrollView(

@@ -36,7 +36,7 @@ class _CharacterNameState extends ConsumerState<CharacterName> {
 
     return Scaffold(
       appBar: MainAppbar(),
-      bottomNavigationBar: MainBottomNavBar(),
+      bottomNavigationBar: MainBottomNavBar(initialIndex: 0,),
       drawer: MainDrawer(),
       body: SizedBox(
         height: availableHeight,
@@ -73,7 +73,7 @@ class _CharacterNameState extends ConsumerState<CharacterName> {
               ),
             ),
             Positioned(
-              bottom: 16, // Positioned 16px above the bottom navigation bar
+              bottom: 16, 
               left: 16,
               right: 16,
               child: Row(

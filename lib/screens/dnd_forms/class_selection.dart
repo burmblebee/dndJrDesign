@@ -104,7 +104,7 @@ class _ClassSelectionState extends ConsumerState<ClassSelection> {
             ),
           ),
           Positioned(
-            bottom: 16, // 50px above the bottom nav bar
+            bottom: 16,
             left: 16,
             right: 16,
             child: Row(
