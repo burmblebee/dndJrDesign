@@ -13,8 +13,6 @@ import '../../widgets/loaders/lifestyle_data_loader.dart';
 class CharacterTraitScreen extends ConsumerStatefulWidget {
   CharacterTraitScreen({super.key});
 
-  
-
   @override
   ConsumerState<ConsumerStatefulWidget> createState() {
     return _CharacterTraitScreenState();
@@ -443,109 +441,77 @@ class _CharacterTraitScreenState extends ConsumerState<CharacterTraitScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_currentSection == 'Details') {
-      mainContent = detailsScreen();
-    }
-    if (_currentSection == 'Physical') {
-      mainContent = physicalScreen();
-    }
-    if (_currentSection == 'Personal') {
-      mainContent = personalScreen();
-    }
-    if (_currentSection == 'Notes') {
-      mainContent = notesScreen();
-    }
-
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      appBar: MainAppbar(),
-      drawer: const MainDrawer(),
-      bottomNavigationBar: MainBottomNavBar(),
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            child: Column(
-              children: [
-                const SizedBox(height: 20),
-                SegmentedButton<String>(
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                      (states) {
-                        if (states.contains(MaterialState.selected)) {
-                          return Theme.of(context).listTileTheme.tileColor!;
-                        }
-                        return Colors.grey;
-                      },
-                    ),
-                    foregroundColor: const MaterialStatePropertyAll(Colors.white),
-                  ),
-                  showSelectedIcon: false,
-                  segments: const <ButtonSegment<String>>[
-                    ButtonSegment<String>(
-                      value: 'Details',
-                      label: Center(child: Text('Details')),
-                    ),
-                    ButtonSegment<String>(
-                      value: 'Physical',
-                      label: Center(child: Text('Physical')),
-                    ),
-                    ButtonSegment<String>(
-                      value: 'Personal',
-                      label: Center(child: Text('Personal')),
-                    ),
-                    ButtonSegment<String>(
-                      value: 'Notes',
-                      label: Center(child: Text('Notes')),
-                    ),
-                  ],
-                  selected: {_currentSection},
-                  emptySelectionAllowed: false,
-                  onSelectionChanged: (Set<String> newSelection) {
-                    setState(() {
-                      _currentSection = newSelection.first;
-                    });
-                  },
-                ),
-                mainContent,
-                const SizedBox(height: 100), // Add extra space to prevent overlap
-              ],
+    return DefaultTabController(
+      length: 4, // Number of tabs
+      child: Scaffold(
+        resizeToAvoidBottomInset: true,
+        appBar: MainAppbar(),
+        drawer: const MainDrawer(),
+        bottomNavigationBar: MainBottomNavBar(),
+        body: Column(
+          children: [
+            // Tab Bar
+            Container(
+              color: Theme.of(context).scaffoldBackgroundColor,
+              child: const TabBar(
+                isScrollable: false,
+                labelColor: Colors.white,
+                unselectedLabelColor: Colors.grey,
+                indicatorColor: Colors.white,
+                tabs: [
+                  Tab(child: Text('Details')),
+                  Tab(child: Text('Physical')),
+                  Tab(child: Text('Personal')),
+                  Tab(child: Text('Notes')),
+                ],
+              ),
             ),
-          ),
-          Positioned(
-            bottom: 16,
-            left: 16,
-            right: 16,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                ElevatedButton.icon(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.arrow_back, color: Colors.white),
-                  label: const Text("Back"),
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                  ),
-                ),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    _saveSelections(ref);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SummarizationScreen(),
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.arrow_forward, color: Colors.white),
-                  label: const Text("Next"),
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                  ),
-                ),
-              ],
+            // Tab Bar View
+            Expanded(
+              child: TabBarView(
+                children: [
+                  detailsScreen(), // Details Tab
+                  physicalScreen(), // Physical Tab
+                  personalScreen(), // Personal Tab
+                  notesScreen(), // Notes Tab
+                ],
+              ),
             ),
+          ],
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        floatingActionButton: Padding(
+          padding: const EdgeInsets.only(bottom: 16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              ElevatedButton.icon(
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                label: const Text("Back"),
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                ),
+              ),
+              ElevatedButton.icon(
+                onPressed: () {
+                  _saveSelections(ref);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SummarizationScreen(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.arrow_forward, color: Colors.white),
+                label: const Text("Next"),
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
