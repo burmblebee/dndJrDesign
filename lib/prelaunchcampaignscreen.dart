@@ -8,6 +8,9 @@ import '../combat/dm_combat_screen.dart';
 import '../combat/player_combat_screen.dart';
 import '../combat/create_combat.dart';
 import '../screens/notes.dart';
+import '../screens/bag_of_holding.dart';
+import '../screens/notes.dart';
+import '../screens/schedule.dart';
 
 class PreLaunchCampaignScreen extends StatelessWidget {
   const PreLaunchCampaignScreen({super.key, required this.campaignID, required this.isDM});
@@ -48,19 +51,35 @@ class PreLaunchCampaignScreen extends StatelessWidget {
             // Image asset (should be replaced with a campaign image)
             Image.asset('assets/Wizard_Lady.jpg'),
 
-            // Calendar Session information, should be pulled from the database
+            // Calendar Session information, should be pulled from the database (Currently Isn't)
             const SizedBox(height: 20),
             const Text(
               'Next Scheduled Session: 2/13/2025 @ 6pm',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
 
-            // Calendar Icon, should be a button that leads to calendar screen
+            // Calendar Icon that is a button that leads to the schedule screen 
+            // (Might need to be changed depending on what Gabby says is the correct calendar screen)
             const SizedBox(height: 10),
-            const Icon(Icons.calendar_today, size: 40),
+            ElevatedButton.icon( // Changed to ElevatedButton.icon to see if it is more clear that it is a button
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const Schedule()));
+              },
+              icon: const Icon(Icons.calendar_today, size: 40),
+              label: const Text('Session Calendar'),
+            ),
+            //IconButton(
+            //  onPressed: () {
+            //    Navigator.push(context, MaterialPageRoute(builder: (context) => const Schedule()));
+            //  },
+            //   icon: const Icon(Icons.calendar_today, size: 40)),
+            //const SizedBox(height: 10),
+            //ElevatedButton(onPressed: () {
+            //  Navigator.push(context, MaterialPageRoute(builder: (context) => const Schedule()));
+            //}, child: const Text('Session Calendar')),
             const SizedBox(height: 20),
 
-            // Elevated Button to launch the campaign
+            // Elevated Button to launch the campaign, Want to make the button more impressive
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
@@ -74,20 +93,21 @@ class PreLaunchCampaignScreen extends StatelessWidget {
 
             // Note Screen Button, should be a button that leads to the note screen
             const SizedBox(height: 10),
-            const Icon(Icons.note, size: 40),
-            ElevatedButton(
+            //const Icon(Icons.note, size: 40), // ITS JUST GONNA STAY SIDEWAYS
+            ElevatedButton.icon(
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) =>  Notes(campaignID: campaignID)),
+                  MaterialPageRoute(builder: (context) =>  Notes(campaignId: campaignID)),
                 );
               },
-              child: const Text('Notes'),
+              icon: const Icon(Icons.note, size: 40),
+              label: const Text('Notes'),
             ),
             const SizedBox(height: 10),
 
             // DM Combat Screen button, should only be visible to the DM
-            // Check to see if works because I cannot check this (Michael 4/7/25 1:29pm)
+            // Check to see if works because I cannot check this (Michael 4/7/25 1:29pm){Works!}
             if (isDM) ... [
              ElevatedButton(
                 onPressed: () {
@@ -98,15 +118,34 @@ class PreLaunchCampaignScreen extends StatelessWidget {
                 },
                 child: const Text('DM Combat Screen'),
               ),
-              Text()(
-                'Campaign Invite Code: $campaignID',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              const SizedBox(height: 10),
+              Center( // Centered Text to hopefully make it look better
+                child: Text(
+                  'Campaign Invite Code: $campaignID',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
               ),
             ],
-            
-            
-            // A list of players in the campaign, should be pulled from the database
+
+            // Bag of Holding button (Consider switching icon to Icons.shopping_bag)
+            const SizedBox(height: 10),
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const BagOfHolding()));
+              },
+              icon: const Icon(Icons.backpack, size: 40),
+              label: const Text('Bag of Holding'),
+            ),
+
+            // Title card for the player list
             const SizedBox(height: 20),
+            const Text(
+              'Your Players',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+
+            // A list of players in the campaign, should be pulled from the database
+            //const SizedBox(height: 20), {Commented out to see if it looks better}
             StreamBuilder<List<String>>(
               stream: _getPlayers(),
               builder: (context, snapshot) {
@@ -133,26 +172,6 @@ class PreLaunchCampaignScreen extends StatelessWidget {
                   );
                 }
               },
-            ),
-
-            const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () {},
-              child: const Text('Your Notes'),
-            ),
-            const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () {},
-              child: const Text('Bag of Holding'),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'Your Players',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            const ListTile(
-              leading: Icon(Icons.account_circle),
             ),
           ],
         ),
