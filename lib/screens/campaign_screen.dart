@@ -1,20 +1,14 @@
-import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as path;
 import 'package:uuid/uuid.dart';
 import 'package:warlocks_of_the_beach/prelaunch_campaign_screen.dart';
+import '../combat/dm_combat_screen.dart';
 import '../widgets/navigation/main_appbar.dart';
 import '../widgets/navigation/main_drawer.dart';
 import '../widgets/navigation/bottom_navbar.dart';
 import '../models/campaign.dart';
-import 'campaign_screen.dart';
-
-enum ImageSourceOption { upload, link }
 
 class CampaignScreen extends StatefulWidget {
   const CampaignScreen({super.key});
@@ -24,41 +18,14 @@ class CampaignScreen extends StatefulWidget {
 }
 
 class _CampaignScreenState extends State<CampaignScreen> {
-  final List<Campaign> _campaigns = [];
   final _createFormKey = GlobalKey<FormState>();
   final _joinFormKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _campaignCodeController = TextEditingController();
-  final _imageLinkController = TextEditingController();
-  File? _imageFile;
   String? _selectedCharacterId;
-  ImageSourceOption _imageSourceOption = ImageSourceOption.upload;
+  Color _selectedColor = Colors.blue; // Default color
 
   void rebuild() => setState(() {});
-
-  Future<void> _pickImage() async {
-    final pickedFile =
-    await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      final directory = await getApplicationDocumentsDirectory();
-      final fileName = path.basename(pickedFile.path);
-      final savedImage =
-      await File(pickedFile.path).copy('${directory.path}/$fileName');
-      setState(() {
-        _imageFile = savedImage;
-      });
-    }
-  }
-
-  Future<List<Map<String, dynamic>>> _fetchUserCharacters(String userId) async {
-    final snapshot = await FirebaseFirestore.instance
-        .collection('app_user_profiles')
-        .doc(userId)
-        .collection('characters')
-        .get();
-
-    return snapshot.docs.map((doc) => {'id': doc.id, ...doc.data()}).toList();
-  }
 
   Future<void> _saveCampaignToFirestore() async {
     final user = FirebaseAuth.instance.currentUser;
@@ -66,30 +33,10 @@ class _CampaignScreenState extends State<CampaignScreen> {
 
     if (_createFormKey.currentState!.validate()) {
       final campaignId = Uuid().v4();
-      String? imageUrl;
-
-      // Use the uploaded image if available
-      if (_imageFile != null) {
-        try {
-          final storageRef = FirebaseStorage.instance.ref().child(
-              'campaign_images/${user.uid}/$campaignId/${path.basename(_imageFile!.path)}');
-          final uploadTask = await storageRef.putFile(_imageFile!);
-          imageUrl = await uploadTask.ref.getDownloadURL();
-        } catch (e) {
-          print('Error uploading image: $e');
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Failed to upload image')),
-          );
-          return;
-        }
-      } else if (_imageLinkController.text.trim().isNotEmpty) {
-        // Use the provided image link if no image is uploaded
-        imageUrl = _imageLinkController.text.trim();
-      }
 
       final campaign = Campaign(
         id: campaignId,
-        imageUrl: imageUrl,
+        imageUrl: null, // No image URL
         title: _titleController.text,
         isDM: true,
       );
@@ -111,7 +58,8 @@ class _CampaignScreenState extends State<CampaignScreen> {
           .doc(campaignId)
           .set({
         'title': campaign.title,
-        'imageUrl': campaign.imageUrl,
+        'color':
+            '#${_selectedColor.value.toRadixString(16).substring(2)}', // Save color as hex
         'DM': user.uid,
         'players': [],
         'createdDate': DateTime.now(),
@@ -123,7 +71,14 @@ class _CampaignScreenState extends State<CampaignScreen> {
 
   Future<void> _joinCampaign(String joinCodeCampaignId) async {
     final user = FirebaseAuth.instance.currentUser;
-    if (user == null || _selectedCharacterId == null) return;
+    if (user == null) return;
+
+    if (_selectedCharacterId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select a character before joining!')),
+      );
+      return;
+    }
 
     if (_joinFormKey.currentState!.validate()) {
       final campaignDoc = await FirebaseFirestore.instance
@@ -156,50 +111,30 @@ class _CampaignScreenState extends State<CampaignScreen> {
           'campaign_code': joinCodeCampaignId,
         });
 
+        // Close the modal
         Navigator.of(context).pop();
-      } else {
+
+        // Show success message
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Campaign code does not exist')),
+          const SnackBar(content: Text('Successfully joined the campaign!')),
+        );
+      } else {
+        // Show error message for invalid join code
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Invalid campaign code. Please try again.')),
         );
       }
     }
   }
 
-  Stream<List<Campaign>> _getCampaigns() async* {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      yield [];
-      return;
-    }
-
-    final userCampaignsSnapshot = await FirebaseFirestore.instance
+  Future<List<Map<String, dynamic>>> _fetchUserCharacters(String userId) async {
+    final snapshot = await FirebaseFirestore.instance
         .collection('app_user_profiles')
-        .doc(user.uid)
-        .collection('your_campaigns')
+        .doc(userId)
+        .collection('characters')
         .get();
 
-    final campaignIds =
-    userCampaignsSnapshot.docs.map((doc) => doc.id).toList();
-
-    final campaigns = <Campaign>[];
-    for (final campaignId in campaignIds) {
-      final campaignSnapshot = await FirebaseFirestore.instance
-          .collection('user_campaigns')
-          .doc(campaignId)
-          .get();
-
-      if (campaignSnapshot.exists) {
-        final data = campaignSnapshot.data()!;
-        campaigns.add(Campaign(
-          id: campaignId,
-          imageUrl: data['imageUrl'],
-          title: data['title'],
-          isDM: data['DM'] == user.uid,
-        ));
-      }
-    }
-
-    yield campaigns;
+    return snapshot.docs.map((doc) => {'id': doc.id, ...doc.data()}).toList();
   }
 
   void _createNewCampaignSheet(BuildContext context) {
@@ -207,7 +142,7 @@ class _CampaignScreenState extends State<CampaignScreen> {
       context: context,
       builder: (_) => Padding(
         padding:
-        EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+            EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -225,36 +160,43 @@ class _CampaignScreenState extends State<CampaignScreen> {
                     TextFormField(
                       controller: _titleController,
                       decoration:
-                      const InputDecoration(labelText: 'Campaign Title'),
+                          const InputDecoration(labelText: 'Campaign Title'),
                       validator: (value) => value == null || value.isEmpty
                           ? 'Please enter a campaign title'
                           : null,
                     ),
                     const SizedBox(height: 20),
 
-                    // Optional Image URL Field
-                    TextFormField(
-                      controller: _imageLinkController,
-                      decoration: const InputDecoration(
-                        labelText: 'Optional: Image URL',
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Optional Pick Image Button
+                    // Color Picker
                     ElevatedButton(
-                      onPressed: _pickImage,
-                      child: const Text('Optional: Pick Image'),
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              title: const Text('Pick a Color'),
+                              content: SingleChildScrollView(
+                                child: BlockPicker(
+                                  pickerColor: _selectedColor,
+                                  onColorChanged: (color) {
+                                    setState(() {
+                                      _selectedColor = color;
+                                    });
+                                  },
+                                ),
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.of(context).pop(),
+                                  child: const Text('Done'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                      child: const Text('Pick Campaign Color'),
                     ),
-                    if (_imageFile != null)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 10),
-                        child: Text(
-                          'Selected Image: ${path.basename(_imageFile!.path)}',
-                          style:
-                          const TextStyle(fontSize: 14, color: Colors.grey),
-                        ),
-                      ),
                     const SizedBox(height: 20),
 
                     // Save Campaign Button
@@ -288,7 +230,7 @@ class _CampaignScreenState extends State<CampaignScreen> {
       context: context,
       builder: (_) => Padding(
         padding:
-        EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+            EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
           child: Column(children: [
@@ -307,7 +249,7 @@ class _CampaignScreenState extends State<CampaignScreen> {
                 const SizedBox(height: 20),
                 DropdownButtonFormField<String>(
                   decoration:
-                  const InputDecoration(labelText: 'Select Character'),
+                      const InputDecoration(labelText: 'Select Character'),
                   items: characters.map((char) {
                     return DropdownMenuItem<String>(
                       value: char['id'],
@@ -320,12 +262,12 @@ class _CampaignScreenState extends State<CampaignScreen> {
                     });
                   },
                   validator: (val) =>
-                  val == null ? 'Please select a character' : null,
+                      val == null ? 'Please select a character' : null,
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () => _joinCampaign(_campaignCodeController.text),
-                  child: Text('Join Campaign'),
+                  child: const Text('Join Campaign'),
                 ),
               ]),
             ),
@@ -335,17 +277,12 @@ class _CampaignScreenState extends State<CampaignScreen> {
     ).then((_) => rebuild());
   }
 
-  String _gameType(bool isDm) => isDm ? 'Dungeon Master' : 'Player';
-
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context).primaryColor;
-
     return Scaffold(
       appBar: const MainAppbar(),
       drawer: const MainDrawer(),
-      bottomNavigationBar: const MainBottomNavBar(),
-      backgroundColor: theme,
+      bottomNavigationBar: const MainBottomNavBar(initialIndex: 3),
       body: Column(
         children: [
           Expanded(
@@ -365,86 +302,63 @@ class _CampaignScreenState extends State<CampaignScreen> {
                   itemCount: campaigns.length,
                   itemBuilder: (context, index) {
                     final campaign = campaigns[index];
-                    return Column(children: [
-                      const SizedBox(height: 20),
-                      Center(
-                        child: Text(
-                          'Campaign: ${campaign.title}',
-                          style: const TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => PreLaunchCampaignScreen(campaignID: campaign.id, isDM: campaign.isDM),
+                    final colorHex =
+                        campaign.imageUrl ?? '#6A11CB'; // Default color if none
+                    final color =
+                        Color(int.parse('0xFF${colorHex.substring(1)}'));
+
+                    return Column(
+                      children: [
+                        const SizedBox(height: 20),
+                        Center(
+                          child: Text(
+                            'Campaign: ${campaign.title}',
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
                             ),
-                          );
-                        },
-                        child: Container(
-                          margin: const EdgeInsets.all(8.0),
-                          height: 200,
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.black),
-                            boxShadow: const [
-                              BoxShadow(
-                                spreadRadius: 2,
-                                color: Colors.black,
-                                blurRadius: 5,
-                                offset: Offset(0, 3),
-                              ),
-                            ],
                           ),
-                          child: campaign.imageUrl != null &&
-                              campaign.imageUrl!.isNotEmpty
-                              ? Image.network(
-                            campaign.imageUrl!,
-                            fit: BoxFit.cover,
-                            loadingBuilder:
-                                (context, child, loadingProgress) {
-                              if (loadingProgress == null) return child;
-                              return const Center(
-                                  child: CircularProgressIndicator());
-                            },
-                            errorBuilder: (context, error, stackTrace) {
-                              return const Center(
-                                child: Text(
-                                  'Failed to load image',
-                                  style: TextStyle(color: Colors.red),
-                                ),
-                              );
-                            },
-                          )
-                              : Container(
-                            decoration: const BoxDecoration(
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    PreLaunchCampaignScreen(campaignID: campaign.id, isDM: campaign.isDM,),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.all(8.0),
+                            height: 100,
+                            width: double.infinity,
+                            decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 colors: [
-                                  Color(0xFF6A11CB),
-                                  Color(0xFF2575FC)
+                                  color.withOpacity(0.7),
+                                  color.withOpacity(0.3),
                                 ],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ),
-                            ),
-                            child: const Center(
-                              child: Text(
-                                'No Image Available',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
+                              border: Border.all(color: Colors.black),
+                              boxShadow: const [
+                                BoxShadow(
+                                  spreadRadius: 2,
+                                  color: Colors.black,
+                                  blurRadius: 5,
+                                  offset: Offset(0, 3),
                                 ),
-                              ),
+                              ],
                             ),
                           ),
                         ),
-                      ),
-                      Center(
-                          child:
-                          Text('Your Role: ${_gameType(campaign.isDM)}')),
-                    ]);
+                        Center(
+                          child: Text(
+                              'Your Role: ${campaign.isDM ? 'Dungeon Master' : 'Player'}'),
+                        ),
+                      ],
+                    );
                   },
                 );
               },
@@ -453,15 +367,52 @@ class _CampaignScreenState extends State<CampaignScreen> {
           const SizedBox(height: 20),
           ElevatedButton(
             onPressed: () => _createNewCampaignSheet(context),
-            child: Text('Create a Campaign'),
+            child: const Text('Create a Campaign'),
           ),
           ElevatedButton(
             onPressed: () => _joinCampaignSheet(context),
-            child: Text('Join a Campaign'),
+            child: const Text('Join a Campaign'),
           ),
           const SizedBox(height: 20),
         ],
       ),
     );
+  }
+
+  Stream<List<Campaign>> _getCampaigns() async* {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      yield [];
+      return;
+    }
+
+    final userCampaignsSnapshot = await FirebaseFirestore.instance
+        .collection('app_user_profiles')
+        .doc(user.uid)
+        .collection('your_campaigns')
+        .get();
+
+    final campaignIds =
+        userCampaignsSnapshot.docs.map((doc) => doc.id).toList();
+
+    final campaigns = <Campaign>[];
+    for (final campaignId in campaignIds) {
+      final campaignSnapshot = await FirebaseFirestore.instance
+          .collection('user_campaigns')
+          .doc(campaignId)
+          .get();
+
+      if (campaignSnapshot.exists) {
+        final data = campaignSnapshot.data()!;
+        campaigns.add(Campaign(
+          id: campaignId,
+          imageUrl: data['color'], // Use color instead of imageUrl
+          title: data['title'],
+          isDM: data['DM'] == user.uid,
+        ));
+      }
+    }
+
+    yield campaigns;
   }
 }

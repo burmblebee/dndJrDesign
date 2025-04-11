@@ -233,163 +233,172 @@ class _SpecificsScreenState extends ConsumerState<SpecificsScreen> {
       appBar: MainAppbar(),
       drawer: const MainDrawer(),
       bottomNavigationBar: MainBottomNavBar(),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Text(
-              'Specifics Selection for $characterName',
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            Text(
-                "Delete me later: $characterClass + $background + $race"), //DELETE ME LATER
-            const SizedBox(height: 20),
-            SegmentedButton<String>(
-              style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                  (states) {
-                    if (states.contains(MaterialState.selected)) {
-                      return elevatedButtonColor;
-                    }
-                    return Colors.grey;
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            child: Column(
+              children: [
+                Text(
+                  'Specifics Selection for $characterName',
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                Text(
+                    "Delete me later: $characterClass + $background + $race"), //DELETE ME LATER
+                const SizedBox(height: 20),
+                SegmentedButton<String>(
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                      (states) {
+                        if (states.contains(MaterialState.selected)) {
+                          return elevatedButtonColor;
+                        }
+                        return Colors.grey;
+                      },
+                    ),
+                    foregroundColor: const MaterialStatePropertyAll(Colors.white),
+                  ),
+                  segments: const <ButtonSegment<String>>[
+                    ButtonSegment<String>(
+                      value: 'Proficiency',
+                      label: SizedBox(
+                          width: 130, child: Center(child: Text('Proficiencies'))),
+                      icon: Icon(Icons.catching_pokemon),
+                    ),
+                    ButtonSegment<String>(
+                      value: 'Language',
+                      label: SizedBox(
+                          width: 130, child: Center(child: Text('Languages'))),
+                      icon: Icon(Icons.language),
+                    ),
+                  ],
+                  selected: {_currentSection},
+                  emptySelectionAllowed: false,
+                  onSelectionChanged: (Set<String> newSelection) {
+                    setState(() {
+                      _currentSection = newSelection.first;
+                    });
                   },
                 ),
-                foregroundColor: const MaterialStatePropertyAll(Colors.white),
-              ),
-              segments: const <ButtonSegment<String>>[
-                ButtonSegment<String>(
-                  value: 'Proficiency',
-                  label: SizedBox(
-                      width: 130, child: Center(child: Text('Proficiencies'))),
-                  icon: Icon(Icons.catching_pokemon),
-                ),
-                ButtonSegment<String>(
-                  value: 'Language',
-                  label: SizedBox(
-                      width: 130, child: Center(child: Text('Languages'))),
-                  icon: Icon(Icons.language),
-                ),
-              ],
-              selected: {_currentSection},
-              emptySelectionAllowed: false,
-              onSelectionChanged: (Set<String> newSelection) {
-                setState(() {
-                  _currentSection = newSelection.first;
-                });
-              },
-            ),
-            const SizedBox(height: 15),
-            IndexedStack(
-              index: _getIndexForMainContent(),
-              alignment: Alignment.topCenter,
-              children: [
-                Column(
+                const SizedBox(height: 15),
+                IndexedStack(
+                  index: _getIndexForMainContent(),
+                  alignment: Alignment.topCenter,
                   children: [
-                    const SizedBox(height: 10),
-                    SizedBox(
-                      height: 390,
-                      child: SingleChildScrollView(
-                        child: Center(
-                          child: Wrap(
-                            alignment: WrapAlignment.center,
-                            children: <Widget>[
-                              for (final proficiency in proficiencies)
-                                ButtonWithPadding(
-                                  onPressed: () {
-                                    if (_possibleProficiencies
-                                            .contains(proficiency) ||
-                                        _givenProficiencies
-                                            .contains(proficiency)) {
-                                      updateSelectedProficiency(proficiency);
-                                    } else {
-                                      showSnackbar(
-                                          'This proficiency is not within your class or background!');
-                                    }
-                                  },
-                                  textContent: proficiency,
-                                  color: (_selectedProficiencies
-                                              .contains(proficiency) ||
-                                          _givenProficiencies
-                                              .contains(proficiency))
-                                      ? elevatedButtonColor
-                                      : _possibleProficiencies
-                                              .contains(proficiency)
-                                          ? Colors.grey
-                                          : Colors.blueGrey[800],
-                                ),
-                            ],
+                    Column(
+                      children: [
+                        const SizedBox(height: 10),
+                        SizedBox(
+                          height: 390,
+                          child: SingleChildScrollView(
+                            child: Center(
+                              child: Wrap(
+                                alignment: WrapAlignment.center,
+                                children: <Widget>[
+                                  for (final proficiency in proficiencies)
+                                    ButtonWithPadding(
+                                      onPressed: () {
+                                        if (_possibleProficiencies
+                                                .contains(proficiency) ||
+                                            _givenProficiencies
+                                                .contains(proficiency)) {
+                                          updateSelectedProficiency(proficiency);
+                                        } else {
+                                          showSnackbar(
+                                              'This proficiency is not within your class or background!');
+                                        }
+                                      },
+                                      textContent: proficiency,
+                                      color: (_selectedProficiencies
+                                                  .contains(proficiency) ||
+                                              _givenProficiencies
+                                                  .contains(proficiency))
+                                          ? elevatedButtonColor
+                                          : _possibleProficiencies
+                                                  .contains(proficiency)
+                                              ? Colors.grey
+                                              : Colors.blueGrey[800],
+                                    ),
+                                ],
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 25),
-                    Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: SizedBox(
-                        height: 175,
-                        width: 350,
-                        child: SingleChildScrollView(
-                          child: ProficiencyDataWidget(
-                              backgroundName: background,
-                              className: characterClass),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                Column(
-                  children: [
-                    SizedBox(
-                      height: 400,
-                      child: SingleChildScrollView(
-                        child: Wrap(
-                          alignment: WrapAlignment.center,
-                          children: <Widget>[
-                            for (final language in languages)
-                              ButtonWithPadding(
-                                  onPressed: () {
-                                    if (!_givenLanguages.contains(language)) {
-                                      updateSelectedLanguage(language);
-                                    } else {
-                                      showSnackbar(
-                                          'This language is included in your race!');
-                                    }
-                                  },
-                                  textContent: language,
-                                  color: (_selectedLanguages
-                                              .contains(language) ||
-                                          _givenLanguages.contains(language))
-                                      ? elevatedButtonColor
-                                      : Colors.grey),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 15),
-                    Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: SizedBox(
-                        height: 130,
-                        width: 350,
-                        child: SingleChildScrollView(
-                          child: LanguageDataWidget(
-                            backgroundName: background,
-                            raceName: race,
+                        const SizedBox(height: 25),
+                        Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.black),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: SizedBox(
+                            height: 175,
+                            width: 350,
+                            child: SingleChildScrollView(
+                              child: ProficiencyDataWidget(
+                                  backgroundName: background,
+                                  className: characterClass),
+                            ),
                           ),
                         ),
-                      ),
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        SizedBox(
+                          height: 400,
+                          child: SingleChildScrollView(
+                            child: Wrap(
+                              alignment: WrapAlignment.center,
+                              children: <Widget>[
+                                for (final language in languages)
+                                  ButtonWithPadding(
+                                      onPressed: () {
+                                        if (!_givenLanguages.contains(language)) {
+                                          updateSelectedLanguage(language);
+                                        } else {
+                                          showSnackbar(
+                                              'This language is included in your race!');
+                                        }
+                                      },
+                                      textContent: language,
+                                      color: (_selectedLanguages
+                                                  .contains(language) ||
+                                              _givenLanguages.contains(language))
+                                          ? elevatedButtonColor
+                                          : Colors.grey),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 15),
+                        Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.black),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: SizedBox(
+                            height: 130,
+                            width: 350,
+                            child: SingleChildScrollView(
+                              child: LanguageDataWidget(
+                                backgroundName: background,
+                                raceName: race,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ],
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+          ),
+          Positioned(
+            bottom: 40,
+            left: 16,
+            right: 16,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 ElevatedButton.icon(
                   onPressed: () => Navigator.pop(context),
@@ -400,7 +409,6 @@ class _SpecificsScreenState extends ConsumerState<SpecificsScreen> {
                     foregroundColor: Colors.white,
                   ),
                 ),
-                const SizedBox(width: 30),
                 ElevatedButton.icon(
                   onPressed: () {
                     ref
@@ -424,8 +432,8 @@ class _SpecificsScreenState extends ConsumerState<SpecificsScreen> {
                 ),
               ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

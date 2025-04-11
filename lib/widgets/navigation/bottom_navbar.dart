@@ -1,53 +1,59 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-
 import 'package:warlocks_of_the_beach/screens/campaign_screen.dart';
+import 'package:warlocks_of_the_beach/screens/dnd_forms/character_name.dart';
 
 import '../../dice/diceRoller.dart';
 import '../../your_content_screen.dart';
 
 class MainBottomNavBar extends StatefulWidget {
-  const MainBottomNavBar({super.key});
+  final int initialIndex;
+
+  const MainBottomNavBar({super.key, this.initialIndex = 4}); // 4 = no tab selected
 
   @override
   State<MainBottomNavBar> createState() => _MainBottomNavBarState();
 }
 
 class _MainBottomNavBarState extends State<MainBottomNavBar> {
-  int _selectedIndex = 0;
+  late int _selectedIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.initialIndex;
+  }
 
   void _onItemTapped(int index) {
+    if (_selectedIndex == index) return;
+
     setState(() {
       _selectedIndex = index;
     });
 
     switch (index) {
       case 0:
-        // Navigate to Browse Content
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(builder: (context) => BrowseContent()),
-        // );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const CharacterName()),
+        );
         break;
       case 1:
-        // Navigate to Dice Roller
-        Navigator.push(
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => DiceRollScreen()),
         );
         break;
       case 2:
-        // Navigate to Your Content
-        Navigator.push(
+        Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => ContentSelection()),
+          MaterialPageRoute(builder: (context) => const ContentSelection()),
         );
         break;
       case 3:
-        // Navigate to Campaigns
-        Navigator.push(
+        Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => CampaignScreen()),
+          MaterialPageRoute(builder: (context) => const CampaignScreen()),
         );
         break;
     }
@@ -56,18 +62,21 @@ class _MainBottomNavBarState extends State<MainBottomNavBar> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).bottomNavigationBarTheme;
+    final bool noSelection = _selectedIndex >= 4;
 
     return BottomNavigationBar(
-      backgroundColor: theme.backgroundColor, // Uses theme color
-      selectedItemColor: theme.selectedItemColor, // Theme-selected color
-      unselectedItemColor: theme.unselectedItemColor, // Theme-unselected color
-      currentIndex: _selectedIndex,
+      backgroundColor: theme.backgroundColor,
+      selectedItemColor: noSelection
+          ? theme.unselectedItemColor // visually deselect all
+          : theme.selectedItemColor,
+      unselectedItemColor: theme.unselectedItemColor,
+      currentIndex: noSelection ? 0 : _selectedIndex, // must stay within bounds
       onTap: _onItemTapped,
-      type: BottomNavigationBarType.fixed, // Ensures background stays consistent
+      type: BottomNavigationBarType.fixed,
       items: const [
         BottomNavigationBarItem(
-          icon: Icon(Icons.search),
-          label: 'Browse\nContent',
+          icon: Icon(Icons.person_add),
+          label: '   Create\nCharacter',
         ),
         BottomNavigationBarItem(
           icon: FaIcon(FontAwesomeIcons.diceD20),

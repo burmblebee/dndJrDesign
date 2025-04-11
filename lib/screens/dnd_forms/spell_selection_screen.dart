@@ -538,7 +538,8 @@ class _SpellSelectionScreenState extends ConsumerState<SpellSelectionScreen> {
   @override
   Widget build(BuildContext context) {
     final characterClass =
-        ref.watch(characterProvider).characterClass ?? 'Unknown Class';
+        ref.watch(characterProvider).characterClass;
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       bottomNavigationBar: MainBottomNavBar(),
@@ -560,53 +561,50 @@ class _SpellSelectionScreenState extends ConsumerState<SpellSelectionScreen> {
               ? Center(
                   child: Text(errorMessage,
                       style: const TextStyle(color: Colors.white)))
-              : Column(
+              : Stack(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: TextField(
-                        controller: _searchController,
-                        decoration: InputDecoration(
-                          hintText: 'Search Spells',
-                          prefixIcon: const Icon(Icons.search, size: 20),
-                          contentPadding: const EdgeInsets.symmetric(
-                              vertical: 8, horizontal: 12),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12.0),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: FutureBuilder<List<String>>(
-                        future: filterSpells(availableCantrips),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const Center(
-                                child: CircularProgressIndicator());
-                          } else if (snapshot.hasError) {
-                            return Center(
-                                child: Text('Error: ${snapshot.error}',
-                                    style:
-                                        const TextStyle(color: Colors.white)));
-                          } else {
-                            final filteredCantrips = snapshot.data ?? [];
-                            return SingleChildScrollView(
-                              padding: const EdgeInsets.all(12.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Cantrips (Select $allowedCantrips)',
-                                    style: const TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white),
-                                  ),
-
-                                  const Divider(color: Colors.white70),
-                                  ListView.builder(
+                      padding: const EdgeInsets.all(16.0),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            TextField(
+                              controller: _searchController,
+                              decoration: InputDecoration(
+                                hintText: 'Search Spells',
+                                prefixIcon: const Icon(Icons.search, size: 20),
+                                contentPadding: const EdgeInsets.symmetric(
+                                    vertical: 8, horizontal: 12),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12.0),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            Text(
+                              'Cantrips (Select $allowedCantrips)',
+                              style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white),
+                            ),
+                            const Divider(color: Colors.white70),
+                            FutureBuilder<List<String>>(
+                              future: filterSpells(availableCantrips),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return const Center(
+                                      child: CircularProgressIndicator());
+                                } else if (snapshot.hasError) {
+                                  return Center(
+                                      child: Text('Error: ${snapshot.error}',
+                                          style: const TextStyle(
+                                              color: Colors.white)));
+                                } else {
+                                  final filteredCantrips = snapshot.data ?? [];
+                                  return ListView.builder(
                                     shrinkWrap: true,
                                     physics:
                                         const NeverScrollableScrollPhysics(),
@@ -615,96 +613,88 @@ class _SpellSelectionScreenState extends ConsumerState<SpellSelectionScreen> {
                                       return buildSpellTile(
                                           filteredCantrips[index], true);
                                     },
-                                  ),
-                                  const SizedBox(height: 20),
-                                  Text(
-                                    '1st Level Spells (Select $allowedSpells)',
-                                    style: const TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white),
-                                  ),
-                                  // Text(
-                                  //   'Selected: ${selectedSpells.length} / $allowedSpells',
-                                  //   style: const TextStyle(color: Colors.white),
-                                  // ),
-                                  const Divider(color: Colors.white70),
-                                  FutureBuilder<List<String>>(
-                                    future: filterSpells(availableSpells),
-                                    builder: (context, snapshot) {
-                                      if (snapshot.connectionState ==
-                                          ConnectionState.waiting) {
-                                        return const Center(
-                                            child: CircularProgressIndicator());
-                                      } else if (snapshot.hasError) {
-                                        return Center(
-                                            child: Text(
-                                                'Error: ${snapshot.error}',
-                                                style: const TextStyle(
-                                                    color: Colors.white)));
-                                      } else {
-                                        final filteredSpells =
-                                            snapshot.data ?? [];
-                                        return ListView.builder(
-                                          shrinkWrap: true,
-                                          physics:
-                                              const NeverScrollableScrollPhysics(),
-                                          itemCount: filteredSpells.length,
-                                          itemBuilder: (context, index) {
-                                            return buildSpellTile(
-                                                filteredSpells[index], false);
-                                          },
-                                        );
-                                      }
+                                  );
+                                }
+                              },
+                            ),
+                            const SizedBox(height: 20),
+                            Text(
+                              '1st Level Spells (Select $allowedSpells)',
+                              style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white),
+                            ),
+                            const Divider(color: Colors.white70),
+                            FutureBuilder<List<String>>(
+                              future: filterSpells(availableSpells),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return const Center(
+                                      child: CircularProgressIndicator());
+                                } else if (snapshot.hasError) {
+                                  return Center(
+                                      child: Text('Error: ${snapshot.error}',
+                                          style: const TextStyle(
+                                              color: Colors.white)));
+                                } else {
+                                  final filteredSpells = snapshot.data ?? [];
+                                  return ListView.builder(
+                                    shrinkWrap: true,
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
+                                    itemCount: filteredSpells.length,
+                                    itemBuilder: (context, index) {
+                                      return buildSpellTile(
+                                          filteredSpells[index], false);
                                     },
-                                  ),
-                                  const SizedBox(height: 20),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      ElevatedButton.icon(
-                                        onPressed: () => Navigator.pop(context),
-                                        icon: const Icon(Icons.arrow_back,
-                                            color: Colors.white),
-                                        label: const Text("Back"),
-                                        style: ElevatedButton.styleFrom(
-                                          foregroundColor: Colors.white,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 30),
-                                      ElevatedButton.icon(
-                                        onPressed: () {
-                                          // ref
-                                          //     .read(characterProvider.notifier)
-                                          //     .updateSpells({
-                                          //   'cantrips':
-                                          //       selectedCantrips.toList(),
-                                          //   'spells': selectedSpells.toList(),
-                                          // });
-                                          ref.read(characterProvider.notifier).updateSpells(selectedSpells.toList());
-                                          ref.read(characterProvider.notifier).updateCantrips(selectedCantrips.toList());
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  CharacterTraitScreen(),
-                                            ),
-                                          );
-                                        },
-                                        icon: const Icon(Icons.arrow_forward,
-                                            color: Colors.white),
-                                        label: const Text("Next"),
-                                        style: ElevatedButton.styleFrom(
-                                          foregroundColor: Colors.white,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            );
-                          }
-                        },
+                                  );
+                                }
+                              },
+                            ),
+                            const SizedBox(height: 100), // Add extra space
+                          ],
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 40,
+                      left: 16,
+                      right: 16,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          ElevatedButton.icon(
+                            onPressed: () => Navigator.pop(context),
+                            icon: const Icon(Icons.arrow_back, color: Colors.white),
+                            label: const Text("Back"),
+                            style: ElevatedButton.styleFrom(
+                              foregroundColor: Colors.white,
+                            ),
+                          ),
+                          ElevatedButton.icon(
+                            onPressed: () {
+                              ref
+                                  .read(characterProvider.notifier)
+                                  .updateSpells(selectedSpells.toList());
+                              ref
+                                  .read(characterProvider.notifier)
+                                  .updateCantrips(selectedCantrips.toList());
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => CharacterTraitScreen(),
+                                ),
+                              );
+                            },
+                            icon: const Icon(Icons.arrow_forward, color: Colors.white),
+                            label: const Text("Next"),
+                            style: ElevatedButton.styleFrom(
+                              foregroundColor: Colors.white,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
