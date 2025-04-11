@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../widgets/navigation/bottom_navbar.dart';
+import '../widgets/navigation/main_drawer.dart';
 import 'npc_creator.dart';
 import 'npc_details.dart';
 import 'npc_provider.dart';
@@ -15,14 +17,8 @@ class NPCListScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('NPC List')),
-      bottomNavigationBar: BottomAppBar(
-        color: const Color(0xFF25291C),
-        child: Container(
-          height: 50,
-          alignment: Alignment.center,
-          child: const Text('Bottom Navigation Bar', style: TextStyle(color: Colors.white)),
-        ),
-      ),
+      bottomNavigationBar: MainBottomNavBar(),
+      drawer: MainDrawer(),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
@@ -36,36 +32,39 @@ class NPCListScreen extends ConsumerWidget {
       ),
       body: npcState.npcs.isEmpty
           ? const Center(child: Text('No NPCs available', style: TextStyle(fontSize: 20, color: Colors.white)))
-          : ListView.builder(
+          : Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ListView.builder(
 
-        itemCount: npcState.npcs.length,
-        itemBuilder: (context, index) {
-          final npc = npcState.npcs[index];
-          return Column(
-            children: [
-              const SizedBox(height: 10),
-              ListTile(
-                tileColor: const Color(0xFFD4C097).withOpacity(0.5),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                    itemCount: npcState.npcs.length,
+                    itemBuilder: (context, index) {
+            final npc = npcState.npcs[index];
+            return Column(
+              children: [
+                const SizedBox(height: 10),
+                ListTile(
+                  tileColor: const Color(0xFFD4C097).withOpacity(0.5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  visualDensity: const VisualDensity(vertical: 4),
+                  title: Text(npc.name, style: const TextStyle(fontSize: 20)),
+                  onTap: () {
+                    ref.read(npcProvider.notifier).selectNPC(npc);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const NPCDetailScreen(), // Pass no parameters, fetch from the provider
+                      ),
+                    );
+                  },
                 ),
-                visualDensity: const VisualDensity(vertical: 4),
-                title: Text(npc.name, style: const TextStyle(fontSize: 20)),
-                onTap: () {
-                  ref.read(npcProvider.notifier).selectNPC(npc);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const NPCDetailScreen(), // Pass no parameters, fetch from the provider
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 10),
-            ],
-          );
-        },
-      ),
+                const SizedBox(height: 10),
+              ],
+            );
+                    },
+                  ),
+          ),
     );
   }
 }

@@ -303,8 +303,8 @@ class AddArmorWidget extends ConsumerWidget {
               ref.read(selectedBaseArmorProvider.notifier).state = base;
             },
           );
-        case ArmorType.Shield:
-          return const SizedBox.shrink();
+        // case ArmorType.Shield:
+        //   return const SizedBox.shrink();
       }
     }
   }

@@ -59,7 +59,7 @@ enum ArmorType {
   Light,
   Medium,
   Heavy,
-  Shield,
+ // Shield,
 }
 
 class Item {

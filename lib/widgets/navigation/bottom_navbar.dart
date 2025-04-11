@@ -78,7 +78,7 @@ class _MainBottomNavBarState extends State<MainBottomNavBar> {
           label: 'Your Content',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.person),
+          icon: FaIcon(FontAwesomeIcons.dungeon),
           label: 'Campaigns',
         ),
       ],

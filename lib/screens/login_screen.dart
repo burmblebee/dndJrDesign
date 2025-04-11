@@ -110,7 +110,6 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Authentication')),
       body: Stack(
         children: [
           Positioned.fill(
@@ -119,15 +118,12 @@ class LoginScreen extends StatelessWidget {
               child: FractionallySizedBox(
                 widthFactor: 1.2, // 120% of the screen width
                 heightFactor: 1.2, // 120% of the screen height
-                child: ColorFiltered(
-                  colorFilter: ColorFilter.mode(
-                      Colors.amberAccent.withOpacity(0.7), BlendMode.srcATop),
                   child: Image.asset(
                     'assets/dragon.png',
                     fit: BoxFit
                         .contain, // Ensures the image scales while maintaining aspect ratio
                   ),
-                ),
+
               ),
             ),
           ),

@@ -1,5 +1,7 @@
 // screen with 2 buttons, one leading to npc list and one leading to item list
  import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:warlocks_of_the_beach/screens/campaign_screen.dart';
 import 'package:warlocks_of_the_beach/screens/character_sheet/character_list.dart';
 import 'package:warlocks_of_the_beach/widgets/navigation/main_drawer.dart';
@@ -50,7 +52,7 @@ const ContentSelection({super.key});
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const itemListScreen(),
+                            builder: (context) => itemListScreen(),
                           ),
                         );
                       } else if (index == 2) {
@@ -72,25 +74,53 @@ const ContentSelection({super.key});
                       }
                     },
                     child:(index == 0) ? const Center(
-                      child: Text(
-                        'NPCs',
-                        style: TextStyle(fontSize: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          FaIcon(FontAwesomeIcons.dragon, size: 50),
+                          Text(
+                            'NPCs',
+                            style: TextStyle(fontSize: 20),
+                          ),
+                        ],
                       ),
                     ) : (index == 1) ?  const Center(
-                      child: Text(
-                        'Items',
-                        style: TextStyle(fontSize: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          FaIcon(FontAwesomeIcons.sackXmark, size: 50),
+                          Text(
+                            'Items',
+                            style: TextStyle(fontSize: 20),
+                          ),
+                        ],
                       ),
                     ) : (index == 2) ?
-                    const Center(
-                      child: Text(
-                        'Characters',
-                        style: TextStyle(fontSize: 20),
+                    Center(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          FaIcon(Icons.people, size: 50),
+                          const Text(
+                            'Characters',
+                            style: TextStyle(fontSize: 20),
+                          ),
+                        ],
                       ),
                     ) : const Center(
-                      child: Text(
-                        'Campaigns',
-                        style: TextStyle(fontSize: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          FaIcon(FontAwesomeIcons.dungeon, size: 50),
+                          Text(
+                            'Campaigns',
+                            style: TextStyle(fontSize: 20),
+                          ),
+                        ],
                       ),
                     ),
                   ),
