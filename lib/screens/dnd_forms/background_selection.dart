@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:warlocks_of_the_beach/screens/dnd_forms/class_selection.dart';
 import 'package:warlocks_of_the_beach/widgets/main_appbar.dart';
 import 'package:warlocks_of_the_beach/widgets/navigation/bottom_navbar.dart';
 import 'specifics_screen.dart';
@@ -106,7 +107,7 @@ class _BackgroundScreenState extends ConsumerState<BackgroundScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   ElevatedButton.icon(
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ClassSelection())),
                     icon: const Icon(Icons.arrow_back, color: Colors.white),
                     label: const Text("Back"),
                     style: ElevatedButton.styleFrom(

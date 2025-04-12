@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:warlocks_of_the_beach/screens/dnd_forms/background_selection.dart';
 import 'package:warlocks_of_the_beach/widgets/main_appbar.dart';
 import 'package:warlocks_of_the_beach/widgets/navigation/bottom_navbar.dart';
 import '../../screens/dnd_forms/stats_screen.dart';
@@ -401,7 +402,7 @@ class _SpecificsScreenState extends ConsumerState<SpecificsScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 ElevatedButton.icon(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => BackgroundScreen())),
                   icon: const Icon(Icons.arrow_back, color: Colors.white),
                   label: const Text("Back"),
                   style: ElevatedButton.styleFrom(

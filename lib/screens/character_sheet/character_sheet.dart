@@ -443,6 +443,7 @@ class _CharacterSheetState extends State<CharacterSheet>
     try {
       await docRef.set(
           {
+            'name': characterData?['name'] ?? 'Unknown Name',
             'abilityScores': {
               'Strength': int.parse(strengthScore),
               'Dexterity': int.parse(dexterityScore),
@@ -562,7 +563,19 @@ class _CharacterSheetState extends State<CharacterSheet>
       canPop: canPop,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(characterData?['name'] ?? 'Character Sheet'),
+          title: EditableTextField(
+            initialText: characterData?['name'] ?? 'Character Sheet',
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+            onChanged: (newValue) {
+              setState(() {
+                characterData?['name'] =
+                    newValue.isEmpty ? characterData!['name'] : newValue;
+              });
+            },
+          ),
           leading: widget.inSession
               ? IconButton(
                   onPressed: () {},
