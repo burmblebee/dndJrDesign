@@ -82,16 +82,19 @@ class _CampaignScreenState extends State<CampaignScreen> {
     }
 
     if (_joinFormKey.currentState!.validate()) {
+      // Remove spaces from the join code
+      final sanitizedJoinCode = joinCodeCampaignId.replaceAll(' ', '');
+
       final campaignDoc = await FirebaseFirestore.instance
           .collection('user_campaigns')
-          .doc(joinCodeCampaignId)
+          .doc(sanitizedJoinCode)
           .get();
 
       if (campaignDoc.exists) {
         // Add player with character to the campaign
         await FirebaseFirestore.instance
             .collection('user_campaigns')
-            .doc(joinCodeCampaignId)
+            .doc(sanitizedJoinCode)
             .update({
           'players': FieldValue.arrayUnion([
             {
@@ -106,10 +109,10 @@ class _CampaignScreenState extends State<CampaignScreen> {
             .collection('app_user_profiles')
             .doc(user.uid)
             .collection('your_campaigns')
-            .doc(joinCodeCampaignId)
+            .doc(sanitizedJoinCode)
             .set({
           'your role': 'Player',
-          'campaign_code': joinCodeCampaignId,
+          'campaign_code': sanitizedJoinCode,
         });
 
         // Close the modal
