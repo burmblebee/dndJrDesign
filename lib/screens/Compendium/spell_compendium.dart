@@ -12,7 +12,9 @@ class CombinedSpell {
 }
 
 class SpellCompendium extends StatefulWidget {
-  const SpellCompendium({Key? key}) : super(key: key);
+  final bool inSession; // Add the inSession parameter
+
+  const SpellCompendium({Key? key, this.inSession = false}) : super(key: key);
 
   @override
   _SpellCompendiumState createState() => _SpellCompendiumState();
@@ -645,9 +647,22 @@ class _SpellCompendiumState extends State<SpellCompendium> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('Spell Compendium',
-            style: TextStyle(color: Colors.white)),
+        title: const Text(
+          'Spell Compendium',
+          style: TextStyle(color: Colors.white),
+        ),
         backgroundColor: Colors.grey[900],
+        leading: widget.inSession
+            ? IconButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Navigate back if inSession is true
+                },
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+              )
+            : IconButton(
+                onPressed: () {}, // Invisible button with no action
+                icon: const SizedBox.shrink(),
+              ),
         actions: [
           IconButton(
             icon: const Icon(Icons.filter_alt, color: Colors.white),

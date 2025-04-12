@@ -189,7 +189,7 @@ class _CharacterListState extends State<CharacterList> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) =>
-                                    CharacterSheet(characterID: characterID),
+                                    CharacterSheet(characterID: characterID, inSession: false,),
                               ),
                             );
                           },

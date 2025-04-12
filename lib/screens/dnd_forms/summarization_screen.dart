@@ -22,6 +22,8 @@ class SummarizationScreen extends ConsumerWidget {
       final uuid = user.uid;
       final String characterId = const Uuid().v4();
 
+
+
       final characterData = {
         'name': character.name,
         'race': character.race,
@@ -64,7 +66,11 @@ class SummarizationScreen extends ConsumerWidget {
         'startingArmor': character.selectedArmor,
         'selectedEquipment': character.selectedEquipment,
         'level': 1, // Hard-coded until leveling up functionality is added.
+        'hp' : calculateHP(character.characterClass, character.abilityScores['Constitution']),
+        'ac' : calculateArmorClass(character.selectedArmor, character.abilityScores['Dexterity']),
+        'hitDice' : calculateHitDice(character.characterClass),
       };
+
 
       try {
         await FirebaseFirestore.instance
@@ -83,6 +89,125 @@ class SummarizationScreen extends ConsumerWidget {
       }
     }
   }
+
+  String calculateHitDice(String characterClass) {
+  switch (characterClass) {
+    case "Barbarian":
+      return "1d12"; // Barbarian uses a d12 for hit dice
+    case "Fighter":
+    case "Paladin":
+    case "Ranger":
+      return "1d10"; // Fighter, Paladin, and Ranger use a d10 for hit dice
+    case "Bard":
+    case "Cleric":
+    case "Druid":
+    case "Monk":
+    case "Rogue":
+    case "Warlock":
+      return "1d8"; // Bard, Cleric, Druid, Monk, Rogue, and Warlock use a d8 for hit dice
+    case "Sorcerer":
+    case "Wizard":
+      return "1d6"; // Sorcerer and Wizard use a d6 for hit dice
+    default:
+      return "Unknown Hit Dice"; // Default case for unknown or unsupported classes
+  }
+}
+
+
+  String calculateArmorClass(String? selectedArmor, int dexterityModifier) {
+  final Map<String, String> armorClassMap = {
+    // Light Armor
+    "Padded": "11 + Dexterity modifier",
+    "Leather": "11 + Dexterity modifier",
+    "Studded Leather": "12 + Dexterity modifier",
+
+    // Medium Armor
+    "Hide": "12 + Dexterity modifier (max 2)",
+    "Chain Shirt": "13 + Dexterity modifier (max 2)",
+    "Scale Mail": "14 + Dexterity modifier (max 2)",
+    "Breastplate": "14 + Dexterity modifier (max 2)",
+    "Half Plate": "15 + Dexterity modifier (max 2)",
+
+    // Heavy Armor
+    "Ring Mail": "14 (no Dexterity modifier)",
+    "Chain Mail": "16 (no Dexterity modifier, requires Strength 13)",
+    "Splint": "17 (no Dexterity modifier, requires Strength 15)",
+    "Plate": "18 (no Dexterity modifier, requires Strength 15)",
+
+    // Shields
+    "Shield": "+2 AC (added to base AC)",
+
+    // Robes (Custom/Homebrew)
+    "Robes": "10 + Dexterity modifier",
+  };
+
+  if (selectedArmor == null || selectedArmor.isEmpty) {
+    selectedArmor = "Robes"; // Default to Robes if no armor is selected
+  }
+
+  switch (selectedArmor) {
+    case "Padded":
+    case "Leather":
+      return (11 + dexterityModifier).toString();
+    case "Studded Leather":
+      return (12 + dexterityModifier).toString();
+    case "Hide":
+      return (12 + (dexterityModifier > 2 ? 2 : dexterityModifier)).toString();
+    case "Chain Shirt":
+      return (13 + (dexterityModifier > 2 ? 2 : dexterityModifier)).toString();
+    case "Scale Mail":
+      return (14 + (dexterityModifier > 2 ? 2 : dexterityModifier)).toString();
+    case "Breastplate":
+      return (14 + (dexterityModifier > 2 ? 2 : dexterityModifier)).toString();
+    case "Half Plate":
+      return (15 + (dexterityModifier > 2 ? 2 : dexterityModifier)).toString();
+    case "Ring Mail":
+      return "14";
+    case "Chain Mail":
+      return "16";
+    case "Splint":
+      return "17";
+    case "Plate":
+      return "18";
+    case "Shield":
+      return "+2 AC (add to base AC)";
+    case "Robes":
+      return (10 + dexterityModifier).toString();
+    default:
+      return "Unknown Armor Type";
+  }
+}
+
+  String calculateHP(String characterClass, int constitution) {
+    switch (characterClass) {
+      case "Barbarian":
+        return (12 + constitution).toString();
+      case "Bard":
+        return (8 + constitution).toString();
+      case "Cleric":
+        return (8 + constitution).toString();
+      case "Druid":
+        return (8 + constitution).toString();
+      case "Fighter":
+        return (10 + constitution).toString();
+      case "Monk":
+        return (8 + constitution).toString();
+      case "Paladin":
+        return (10 + constitution).toString();
+      case "Ranger":
+        return (10 + constitution).toString();
+      case "Rogue":
+        return (8 + constitution).toString();
+      case "Sorcerer":
+        return (6 + constitution).toString();
+      case "Warlock":
+        return (8 + constitution).toString();
+      case "Wizard":
+        return (6 + constitution).toString();
+      default:
+        return 'Unknown Class';
+    }
+  } 
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

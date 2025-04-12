@@ -63,7 +63,7 @@ class MainDrawer extends StatelessWidget {
               style: TextStyle(color: Colors.white),
             ),
             onTap: () {
-              Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const OtherCampaignScreen()));
+              Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const OtherCampaignScreen(campaignID: "", isDM: false,)));
             },
           ),
 

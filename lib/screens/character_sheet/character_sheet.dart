@@ -10,7 +10,10 @@ import '../../services/class_service.dart';
 
 class CharacterSheet extends StatefulWidget {
   final String characterID;
-  const CharacterSheet({Key? key, required this.characterID}) : super(key: key);
+  final bool inSession;
+  const CharacterSheet(
+      {Key? key, required this.characterID, required this.inSession})
+      : super(key: key);
 
   @override
   _CharacterSheetState createState() => _CharacterSheetState();
@@ -63,6 +66,9 @@ class _CharacterSheetState extends State<CharacterSheet> {
   String backstory = '';
   String other = '';
   String userPack = '';
+  String hp = '';
+  String ac = '';
+  String hitDice = '';
 
   final Map<String, String> packDescriptions = {
     "Scholar’s Pack":
@@ -308,68 +314,9 @@ class _CharacterSheetState extends State<CharacterSheet> {
         for (var weapon in characterData?["weapons"] ?? []) {
           selectedWeapons.add(weapon);
         }
-
-        // Calculate Armor Class.
-        // Grab startingArmor from Firebase (if missing, assume "Robe").
-        String startingArmor =
-            characterData?["startingArmor"]?.toString() ?? "";
-        if (startingArmor.isEmpty) {
-          startingArmor = "Robe";
-        }
-
-        userPack = characterData?["startingKit"]
-                ?.toString()
-                .replaceAll(RegExp(r'[\[\]]'), '') ??
-            "Scholar’s Pack";
-
-        // Map of starting armors with their base AC and rules.
-        final Map<String, Map<String, dynamic>> armorStats = {
-          "Robe": {
-            "base": 10,
-            "plusDex": true,
-            "maxDex": null, // No cap.
-          },
-          "Chain Mail": {
-            "base": 16,
-            "plusDex": false,
-          },
-          "Studded Leather Armor": {
-            "base": 12,
-            "plusDex": true,
-            "maxDex": null,
-          },
-          "Scale Mail": {
-            "base": 14,
-            "plusDex": true,
-            "maxDex": 2, // Maximum Dex modifier of +2.
-          },
-          "Leather Armor": {
-            "base": 11,
-            "plusDex": true,
-            "maxDex": null,
-          },
-        };
-
-        // Calculate the final armor class.
-        if (armorStats.containsKey(startingArmor)) {
-          int baseAC = armorStats[startingArmor]!["base"];
-          bool plusDex = armorStats[startingArmor]!["plusDex"];
-          int additionalDex = 0;
-          if (plusDex) {
-            int dexMod = int.parse(dexterityModifier);
-            // If a maximum Dex modifier is defined, use the lesser of the Dex mod and the cap.
-            if (armorStats[startingArmor]!["maxDex"] != null) {
-              int maxDex = armorStats[startingArmor]!["maxDex"];
-              additionalDex = dexMod > maxDex ? maxDex : dexMod;
-            } else {
-              additionalDex = dexMod;
-            }
-          }
-          armorClass = baseAC + additionalDex;
-        } else {
-          // If the starting armor is not in the map, assume unarmored (10 + Dex mod).
-          armorClass = 10 + int.parse(dexterityModifier);
-        }
+        hp = characterData?["hp"]?.toString() ?? '0';
+        ac = characterData?["ac"]?.toString() ?? '0';
+        hitDice = characterData?["hitDice"]?.toString() ?? '0';
       });
     } catch (e) {
       print('Error fetching character data: $e');
@@ -386,16 +333,20 @@ class _CharacterSheetState extends State<CharacterSheet> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(characterData?['name'] ?? 'Character Sheet'),
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () {
-              // Set the flag to true and pop the screen
-              setState(() {
-                canPop = true;
-              });
-              Navigator.of(context).pop();
-            },
-          ),
+          leading: widget.inSession
+              ? IconButton(
+                  onPressed: () {},
+                  icon: const SizedBox.shrink(), // Creates an invisible icon
+                ) // Remove the back button if inSession is true
+              : IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () {
+                    setState(() {
+                      canPop = true;
+                    });
+                    Navigator.of(context).pop();
+                  },
+                ),
         ),
         body: isLoading
             ? const Center(child: CircularProgressIndicator())
@@ -462,17 +413,13 @@ class _CharacterSheetState extends State<CharacterSheet> {
     // Retrieve character details
     final String name = characterData?['name'] ?? 'Unknown Name';
     final String charClass = characterData?['class'] ?? 'Unknown Class';
-    final int level =
-        characterData?['level'] ?? 1; // Default to level 1 if not provided
+    final int level = characterData?['level'] ?? 1;
 
-    // Replace these placeholder values with your actual data or variables.
-    final int initiative = 2;
-    final int hp = 11; // Replace with actual HP value.
-    final int speed = 25;
-    final String hitDice = "1d8";
+    final int initiative = int.parse(dexterityModifier);
+    final int speed = 30;
+    // final String hitDice = "1d8";
     final int proficiency = 2;
 
-    // Example: The "save" values can be computed from your character data.
     final int strengthSave = calculateSavingThrow("Strength", strengthModifier);
     final int dexSave = calculateSavingThrow("Dexterity", dexterityModifier);
     final int conSave =
