@@ -309,7 +309,7 @@
 
 //dont delete, most updated
 import 'package:dnd_app/screens/event.dart';
-import 'package:dnd_app/screens/schedule.dart';
+import 'package:dnd_app/schedule.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -348,26 +348,28 @@ class _AddSessionState extends State<AddSession> {
   }
 
   void _fetchEventsFromFirestore() async {
-    // Clear the events map to prevent duplication
-    events.clear();
+  // Clear the events map to prevent duplication
+  events.clear();
 
-    CollectionReference sessions = FirebaseFirestore.instance.collection('sessions');
+  CollectionReference sessions = FirebaseFirestore.instance.collection('sessions');
   QuerySnapshot querySnapshot = await sessions.get();
 
   for (var doc in querySnapshot.docs) {
     Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?; // Safely cast to a Map
     if (data != null) {
-      String dateString = data['session_date'];
-      String? timeString = data.containsKey('session_time') ? data['session_time'] : null;
+      String? dateString = data['session_date'];
+      String? timeString = data['session_time'];
+      String? title = data['session_name'];
 
-      if (dateString.isNotEmpty && timeString != null && timeString.isNotEmpty) {
+      // Ensure all required fields are non-null and valid
+      if (dateString != null && dateString.isNotEmpty && 
+          timeString != null && timeString.isNotEmpty && 
+          title != null && title.isNotEmpty) {
         try {
           DateTime date = DateFormat('M/d/y').parse(dateString);
 
           // Normalize the date to only include year, month, and day
           DateTime normalizedDate = DateTime(date.year, date.month, date.day);
-
-          String title = data['session_name'];
 
           if (events.containsKey(normalizedDate)) {
             if (!events[normalizedDate]!.any((event) => event.title == title)) {

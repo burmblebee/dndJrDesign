@@ -1,4 +1,4 @@
-import 'package:dnd_app/screens/add_session.dart';
+import 'package:dnd_app/add_session.dart';
 import 'package:flutter/material.dart';
 import 'package:dnd_app/screens/event.dart';
 import 'package:intl/intl.dart';
@@ -27,30 +27,66 @@ class _ScheduleState extends State<Schedule> {
   }
 
   void _fetchEventsFromFirestore() async {
-    //clear events from map to avoid duplicates
-    events.clear();
+  // Clear events from the map to avoid duplicates
+  events.clear();
 
-    CollectionReference sessions = FirebaseFirestore.instance.collection('sessions');
-    QuerySnapshot querySnapshot = await sessions.get();
+  CollectionReference sessions = FirebaseFirestore.instance.collection('sessions');
+  QuerySnapshot querySnapshot = await sessions.get();
 
-    for (var doc in querySnapshot.docs) {
-      String dateString = doc['session_date'];
-      String? timeString = doc['session_time'];
-      if (dateString.isNotEmpty) {
-        DateTime date = DateFormat('M/d/y').parse(dateString);
-        String title = doc['session_name'];
+  for (var doc in querySnapshot.docs) {
+    Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
+    if (data != null && data.containsKey('session_date')) {
+      String? dateString = data['session_date'];
+      String? timeString = data['session_time'];
+      String? title = data['session_name'];
 
-        if (events.containsKey(date)) {
-          if (!events[date]!.any((event) => event.title == title)) {
-            events[date]!.add(Event(title, time: timeString));
+      // Ensure all required fields are non-null and valid
+      if (dateString != null && dateString.isNotEmpty && 
+          title != null && title.isNotEmpty) {
+        try {
+          DateTime date = DateFormat('M/d/y').parse(dateString);
+
+          if (events.containsKey(date)) {
+            if (!events[date]!.any((event) => event.title == title)) {
+              events[date]!.add(Event(title, time: timeString));
+            }
+          } else {
+            events[date] = [Event(title, time: timeString)];
           }
-        } else {
-          events[date] = [Event(title, time: timeString)];
+        } catch (e) {
+          print('Invalid date format: $dateString');
         }
       }
+    } else {
+      print('Document missing required fields: ${doc.id}');
     }
-    setState(() {});
   }
+
+  // Calculate the next session text
+  if (events.isNotEmpty) {
+    List<DateTime> sortedDates = events.keys.toList()..sort();
+    DateTime? nextSession = sortedDates.isNotEmpty ? sortedDates.first : null;
+
+    String nextSessionText = nextSession != null
+        ? '${DateFormat('M/d/y').format(nextSession)} at ${events[nextSession]?.first.time ?? "N/A"}'
+        : 'No upcoming session';
+
+    // Update Firestore with the next session timestamp
+    await FirebaseFirestore.instance
+        .collection('sessions')
+        .doc('MqcIa6FEXCqIL3p0WY9T') 
+        .set({
+          'session_date': '',
+          'session_time': '',
+          'session_name': '',
+          // Savein the next session text
+          'session_timeStamp': nextSessionText, 
+           // Merges with existing fields
+        }, SetOptions(merge: true)); 
+  }
+
+  setState(() {});
+}
 
   //this is the function that will take you to the add session page
   void _goToAddSession() async {
