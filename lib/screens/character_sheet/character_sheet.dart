@@ -74,6 +74,7 @@ class _CharacterSheetState extends State<CharacterSheet>
   String hp = '';
   String ac = '';
   String hitDice = '';
+  String startingArmor = '';
 
   final Map<String, String> packDescriptions = {
     "Scholar’s Pack":
@@ -280,6 +281,8 @@ class _CharacterSheetState extends State<CharacterSheet>
     _traitsControllers['Enemies'] = TextEditingController(text: enemies);
     _traitsControllers['Backstory'] = TextEditingController(text: backstory);
     _traitsControllers['Other'] = TextEditingController(text: other);
+    armorClass = int.parse(calculateArmorClass(startingArmor, int.parse(dexterityModifier)));
+    
   }
 
   Future<void> _fetchCharacterData() async {
@@ -374,6 +377,7 @@ class _CharacterSheetState extends State<CharacterSheet>
         enemies = characterData?["enemies"]?.toString() ?? '';
         backstory = characterData?["backstory"]?.toString() ?? '';
         other = characterData?["other"]?.toString() ?? '';
+        startingArmor = characterData?["startingArmor"]?.toString() ?? '';
 
         // Now update the trait controllers.
         _traitsControllers['Background']?.text = background;
@@ -471,6 +475,76 @@ class _CharacterSheetState extends State<CharacterSheet>
       print("Character data saved successfully!");
     } catch (e) {
       print("Error saving character data: $e");
+    }
+  }
+
+  String calculateArmorClass(String? selectedArmor, int dexterityModifier) {
+    final Map<String, String> armorClassMap = {
+      // Light Armor
+      "Padded": "11 + Dexterity modifier",
+      "Leather": "11 + Dexterity modifier",
+      "Studded Leather": "12 + Dexterity modifier",
+
+      // Medium Armor
+      "Hide": "12 + Dexterity modifier (max 2)",
+      "Chain Shirt": "13 + Dexterity modifier (max 2)",
+      "Scale Mail": "14 + Dexterity modifier (max 2)",
+      "Breastplate": "14 + Dexterity modifier (max 2)",
+      "Half Plate": "15 + Dexterity modifier (max 2)",
+
+      // Heavy Armor
+      "Ring Mail": "14 (no Dexterity modifier)",
+      "Chain Mail": "16 (no Dexterity modifier, requires Strength 13)",
+      "Splint": "17 (no Dexterity modifier, requires Strength 15)",
+      "Plate": "18 (no Dexterity modifier, requires Strength 15)",
+
+      // Shields
+      "Shield": "+2 AC (added to base AC)",
+
+      // Robes
+      "Robes": "10",
+    };
+
+    // Provide a default if no armor is selected:
+    if (selectedArmor == null || selectedArmor.isEmpty) {
+      selectedArmor = "Robes";
+    }
+
+    switch (selectedArmor) {
+      case "Padded":
+      case "Leather":
+        return (11 + dexterityModifier).toString();
+      case "Studded Leather":
+        return (12 + dexterityModifier).toString();
+      case "Hide":
+        return (12 + (dexterityModifier > 2 ? 2 : dexterityModifier))
+            .toString();
+      case "Chain Shirt":
+        return (13 + (dexterityModifier > 2 ? 2 : dexterityModifier))
+            .toString();
+      case "Scale Mail":
+        return (14 + (dexterityModifier > 2 ? 2 : dexterityModifier))
+            .toString();
+      case "Breastplate":
+        return (14 + (dexterityModifier > 2 ? 2 : dexterityModifier))
+            .toString();
+      case "Half Plate":
+        return (15 + (dexterityModifier > 2 ? 2 : dexterityModifier))
+            .toString();
+      case "Ring Mail":
+        return "14";
+      case "Chain Mail":
+        return "16";
+      case "Splint":
+        return "17";
+      case "Plate":
+        return "18";
+      case "Shield":
+        return "+2 AC (add to base AC)";
+      case "Robes":
+        return "10";
+      default:
+        return "Unknown Armor Type";
     }
   }
 
