@@ -138,21 +138,25 @@ class _MonsterCompendiumState extends State<MonsterCompendium> {
       // Sort monsters by challenge rating (crValue) in ascending order.
       temp.sort((a, b) => a.crValue.compareTo(b.crValue));
 
-      setState(() {
-        allMonsters = temp;
-        displayedMonsters = List.from(allMonsters);
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          allMonsters = temp;
+          displayedMonsters = List.from(allMonsters);
+          isLoading = false;
+        });
+      }
 
       // Print the list of all monsters to the console
       for (var monster in allMonsters) {
         print('Name: ${monster.name}, CR: ${monster.challengeRating}, Size: ${monster.size}, Type: ${monster.type}');
       }
     } catch (e) {
-      setState(() {
-        errorMessage = 'Error loading monsters: $e';
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          errorMessage = 'Error loading monsters: $e';
+          isLoading = false;
+        });
+      }
       print('Error loading monsters: $e');
     }
   }
