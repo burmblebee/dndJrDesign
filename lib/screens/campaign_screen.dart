@@ -52,14 +52,13 @@ class _CampaignScreenState extends State<CampaignScreen> {
         'campaign_code': campaignId,
       });
 
-      // Save campaign details in the global campaigns collection
+      
       await FirebaseFirestore.instance
           .collection('user_campaigns')
           .doc(campaignId)
           .set({
         'title': campaign.title,
-        'color':
-            '#${_selectedColor.value.toRadixString(16).substring(2)}', // Save color as hex
+        'color': '#${_selectedColor.value.toRadixString(16).substring(2)}', 
         'DM': user.uid,
         'players': [],
         'createdDate': DateTime.now(),
@@ -171,8 +170,7 @@ class _CampaignScreenState extends State<CampaignScreen> {
     showModalBottomSheet(
       context: context,
       builder: (_) => Padding(
-        padding:
-            EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -189,8 +187,7 @@ class _CampaignScreenState extends State<CampaignScreen> {
                     // Campaign Title Field
                     TextFormField(
                       controller: _titleController,
-                      decoration:
-                          const InputDecoration(labelText: 'Campaign Title'),
+                      decoration: const InputDecoration(labelText: 'Campaign Title'),
                       validator: (value) => value == null || value.isEmpty
                           ? 'Please enter a campaign title'
                           : null,
@@ -204,15 +201,17 @@ class _CampaignScreenState extends State<CampaignScreen> {
                           context: context,
                           builder: (context) {
                             return AlertDialog(
-                              title: const Text('Pick a Color'),
+                              title: const Text('Pick a Campaign Color'),
                               content: SingleChildScrollView(
-                                child: BlockPicker(
+                                child: ColorPicker(
                                   pickerColor: _selectedColor,
                                   onColorChanged: (color) {
                                     setState(() {
                                       _selectedColor = color;
                                     });
                                   },
+                                  showLabel: true,
+                                  pickerAreaHeightPercent: 0.8,
                                 ),
                               ),
                               actions: [
@@ -368,8 +367,9 @@ class _CampaignScreenState extends State<CampaignScreen> {
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 colors: [
-                                  color.withOpacity(0.7),
-                                  color.withOpacity(0.3),
+                                  color.withOpacity(0.9), 
+                                  color.withOpacity(0.6),
+                                  color.withOpacity(0.3), 
                                 ],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
