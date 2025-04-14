@@ -377,7 +377,7 @@ class PlayerCombatScreen extends ConsumerWidget {
     final currentTurnIndex = combatState.currentTurnIndex;
 
     final oddItemColor = Theme.of(context).canvasColor;
-    final evenItemColor = Colors.white.withOpacity(0.2);
+    final evenItemColor = Color(0xFFD4C097).withOpacity(0.5);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Combat Screen')),
@@ -464,7 +464,7 @@ class PlayerCombatScreen extends ConsumerWidget {
       width: MediaQuery.of(context).size.width,
       decoration: BoxDecoration(
         color: (characters[currentTurnIndex].health > 0)
-            ? Colors.grey[800]
+            ? Color(0xFFD4C097).withOpacity(0.5)
             : Colors.red.withOpacity(0.5),
         borderRadius: BorderRadius.circular(8),
       ),

@@ -110,46 +110,35 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Authentication')),
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: Center(
-              // Centers the scaled image
-              child: FractionallySizedBox(
-                widthFactor: 1.2, // 120% of the screen width
-                heightFactor: 1.2, // 120% of the screen height
-                child: ColorFiltered(
-                  colorFilter: ColorFilter.mode(
-                      Colors.amberAccent.withOpacity(0.7), BlendMode.srcATop),
-                  child: Image.asset(
-                    'assets/dragon.png',
-                    fit: BoxFit
-                        .contain, // Ensures the image scales while maintaining aspect ratio
-                  ),
-                ),
-              ),
+      appBar: AppBar(title: const Text('Authentication'),
+        automaticallyImplyLeading: false,
+
+      ),
+      body: Center(
+        child: Column(
+          children: [
+            const Spacer(),
+            Image.asset(
+              'assets/dragon.png',
+              fit: BoxFit
+                  .contain, // Ensures the image scales while maintaining aspect ratio
+            // ),
+                          ),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.email),
+              label: const Text("Sign in with Email"),
+              onPressed: () => loginPopup(context), // Open login popup
             ),
-          ),
-          Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.email),
-                  label: const Text("Sign in with Email"),
-                  onPressed: () => loginPopup(context), // Open login popup
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.person_add),
-                  label: const Text("Sign Up"),
-                  onPressed: () => signupPopup(context), // Open signup popup
-                ),
-              ],
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.person_add),
+              label: const Text("Sign Up"),
+              onPressed: () => signupPopup(context), // Open signup popup
             ),
-          ),
-        ],
+            const SizedBox(height: 30,),
+            const Spacer()
+          ],
+        ),
       ),
     );
   }

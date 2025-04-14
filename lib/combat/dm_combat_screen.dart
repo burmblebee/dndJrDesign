@@ -401,7 +401,8 @@ class DMCombatScreen extends ConsumerWidget {
     String? selectedCharacter;
 
     final npcState = ref.watch(npcProvider); // Watch the NPC state
-
+    final existingNames = characters.map((c) => c.name).toSet();
+    debugPrint("NPCs available: ${npcState.npcs.map((e) => e.name).toList()}");
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -537,6 +538,23 @@ class DMCombatScreen extends ConsumerWidget {
                                       ac != null &&
                                       ac! > 0) {
                                     // Add character to Firestore and update state
+                                    if (existingNames.contains(selectedName!)) {
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) => AlertDialog(
+                                          title: const Text(
+                                              'Character already exists!'),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () =>
+                                                  Navigator.of(context).pop(),
+                                              child: const Text('OK'),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                      return;
+                                    }
                                     await FirestoreService()
                                         .addCharacterToCampaign(
                                             campaignId,
@@ -544,6 +562,7 @@ class DMCombatScreen extends ConsumerWidget {
                                             hp!,
                                             maxHealth!,
                                             ac!, []);
+
                                     ref
                                         .read(
                                             combatProvider(campaignId).notifier)
@@ -560,6 +579,25 @@ class DMCombatScreen extends ConsumerWidget {
                                         .firstWhere((n) => n.name == npc);
 
                                     // Add NPC to Firestore and update state
+                                    if (existingNames
+                                        .contains(selectedNpc.name)) {
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) => AlertDialog(
+                                          title: const Text(
+                                              'This NPC is already added!'),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () =>
+                                                  Navigator.of(context).pop(),
+                                              child: const Text('OK'),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                      return;
+                                    }
+
                                     await FirestoreService()
                                         .addCharacterToCampaign(
                                             campaignId,
@@ -636,12 +674,12 @@ class DMCombatScreen extends ConsumerWidget {
                             children: [
                               ElevatedButton(
                                 onPressed: () async {
-                                  if (selectedName != null &&
-                                      selectedName!.isNotEmpty) {
+                                  if (selectedCharacter != null &&
+                                      selectedCharacter!.isNotEmpty) {
                                     // Remove character from Firestore and update state
                                     await FirestoreService()
                                         .removeCharacterFromCampaign(
-                                            campaignId, selectedName!);
+                                            campaignId, selectedCharacter!);
                                     ref
                                         .read(
                                             combatProvider(campaignId).notifier)
@@ -761,22 +799,22 @@ class DMCombatScreen extends ConsumerWidget {
                                   }),
                               const SizedBox(height: 20),
                               ElevatedButton(
-                                //TODO: Start a new combat with only player characters
-                                  onPressed: (){},
-                                  child: Text('Reset Combat with No NPCs')
-                              ),
+                                  //TODO: Start a new combat with only player characters
+                                  onPressed: () {},
+                                  child: Text('Reset Combat with No NPCs')),
                               Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceEvenly,
                                 children: [
-                                  ElevatedButton(onPressed: (){
-                                    Navigator.pop(context);
-                                  }, child: Text('Cancel')),
                                   ElevatedButton(
-                                    //TODO: Start new combat with selected combat
-                                      onPressed: (){},
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: Text('Cancel')),
+                                  ElevatedButton(
+                                      //TODO: Start new combat with selected combat
+                                      onPressed: () {},
                                       child: Text('Start New Combat')),
-
                                 ],
                               ),
                               SizedBox(height: 50)
@@ -797,16 +835,26 @@ class DMCombatScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final npcState = ref.watch(npcProvider);
+    final npcNotifier = ref.read(npcProvider.notifier);
+
+    if (npcState.npcs.isEmpty) {
+      Future.microtask(() => npcNotifier.fetchNPCs());
+    }
+
     List<CombatCharacter> characters =
         ref.watch(combatProvider(campaignId)).characters;
     int currentTurnIndex =
         ref.watch(combatProvider(campaignId)).currentTurnIndex;
     final oddItemColor = Theme.of(context).canvasColor;
-    final evenItemColor = Colors.white.withOpacity(0.2);
+    final evenItemColor = Color(0xFFD4C097).withOpacity(0.5);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Combat Screen')),
-      bottomNavigationBar: CombatBottomNavBar(campaignId: campaignId, isDM: true,),
+      bottomNavigationBar: CombatBottomNavBar(
+        campaignId: campaignId,
+        isDM: true,
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
@@ -943,7 +991,7 @@ class DMCombatScreen extends ConsumerWidget {
       height: 200,
       decoration: BoxDecoration(
         color: (characters[currentTurnIndex].health > 0)
-            ? Colors.grey[800]
+            ? Color(0xFFD4C097).withOpacity(0.5)
             : Colors.red.withOpacity(0.5),
         borderRadius: BorderRadius.circular(8),
       ),

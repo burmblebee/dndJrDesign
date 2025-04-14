@@ -110,23 +110,31 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+          automaticallyImplyLeading: false,
+      ),
       body: Stack(
         children: [
-          Positioned.fill(
-            child: Center(
-              // Centers the scaled image
-              child: FractionallySizedBox(
-                widthFactor: 1.2, // 120% of the screen width
-                heightFactor: 1.2, // 120% of the screen height
-                  child: Image.asset(
-                    'assets/dragon.png',
-                    fit: BoxFit
-                        .contain, // Ensures the image scales while maintaining aspect ratio
-                  ),
-
-              ),
-            ),
-          ),
+          // Positioned.fill(
+          //   child: Center(
+          //     // Centers the scaled image
+          //     child: FractionallySizedBox(
+          //       widthFactor: 1.2, // 120% of the screen width
+          //       heightFactor: 1.2, // 120% of the screen height
+          //         child: Image.asset(
+          //           'assets/dragon_login.png',
+          //           fit: BoxFit
+          //               .contain, // Ensures the image scales while maintaining aspect ratio
+          //         ),
+          //
+          //     ),
+          //   ),
+          // ),
+          Image.asset(
+                  'assets/dragon_login.png',
+                  fit: BoxFit
+                      .contain, // Ensures the image scales while maintaining aspect ratio
+                ),
           Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,

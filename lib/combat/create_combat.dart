@@ -69,6 +69,7 @@ class _AddCombatState extends State<AddCombat> {
 
   @override
   Widget build(BuildContext context) {
+    final existingNames = npcs.where((npc) => isSelected[npcs.indexOf(npc)]).map((npc) => npc.name).toList();
     return Scaffold(
       appBar: AppBar(title: const Text('Add Combat')),
       body: Padding(
@@ -99,6 +100,24 @@ class _AddCombatState extends State<AddCombat> {
                     title: Text(npcs[i].name),
                     value: isSelected[i],
                     onChanged: (bool? value) {
+                      if (existingNames
+                          .contains(npcs[i])) {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text(
+                                'This NPC is already added!'),
+                            actions: [
+                              TextButton(
+                                onPressed: () =>
+                                    Navigator.of(context).pop(),
+                                child: const Text('OK'),
+                              ),
+                            ],
+                          ),
+                        );
+                        return;
+                      }
                       setState(() {
                         isSelected[i] = value ?? false;
                       });

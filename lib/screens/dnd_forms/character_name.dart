@@ -55,7 +55,7 @@ class _CharacterNameState extends ConsumerState<CharacterName> {
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                        color: Colors.white,
                       ),
                       textAlign: TextAlign.center,
                     ),
