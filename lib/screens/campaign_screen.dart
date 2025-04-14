@@ -142,6 +142,31 @@ class _CampaignScreenState extends State<CampaignScreen> {
     return snapshot.docs.map((doc) => {'id': doc.id, ...doc.data()}).toList();
   }
 
+  Future<void> _updateLastPlayed(
+      BuildContext context, String campaignID) async {
+    if (FirebaseAuth.instance.currentUser == null) {
+      return;
+    } else {
+      final User user = FirebaseAuth.instance.currentUser!;
+      final uuid = user.uid;
+      final String characterId = const Uuid().v4();
+
+      try {
+        await FirebaseFirestore.instance
+        .collection('app_user_profiles')
+        .doc(uuid)
+        .set({
+          'last_played': DateTime.now(),
+          'last_campaign_player' : campaignID,
+        },);
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update last played: $e')),
+        );
+      }
+    }
+  }
+
   void _createNewCampaignSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -326,6 +351,7 @@ class _CampaignScreenState extends State<CampaignScreen> {
                         ),
                         GestureDetector(
                           onTap: () {
+                            _updateLastPlayed(context, campaign.id);
                             Navigator.of(context).push(
                               MaterialPageRoute(
                                   builder: (_) => OtherCampaignScreen(
