@@ -67,6 +67,7 @@ class SummarizationScreen extends ConsumerWidget {
         'selectedEquipment': character.selectedEquipment,
         'level': 1, // Hard-coded until leveling up functionality is added.
         'hp' : calculateHP(character.characterClass, character.abilityScores['Constitution']),
+        'maxHp' : calculateHP(character.characterClass, character.abilityScores['Constitution']),
         'ac' : 0,
         'hitDice' : calculateHitDice(character.characterClass),
       };

@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import '../../data/character creator data/background_data.dart';
 import '../../data/character creator data/class_data.dart';
 import '../../data/character creator data/race_data.dart';
-import '../../widgets/buttons/navigation_button.dart';
 import '../../widgets/buttons/button_with_padding.dart';
 import '../../widgets/loaders/language_data_loader.dart';
 import '../../widgets/loaders/proficiency_data_loader.dart';
@@ -27,6 +26,7 @@ class _SpecificsScreenState extends ConsumerState<SpecificsScreen> {
     'Animal Handling',
     'Arcana',
     'Athletics',
+    'Deception',
     'History',
     'Insight',
     'Intimidation',
@@ -242,9 +242,7 @@ class _SpecificsScreenState extends ConsumerState<SpecificsScreen> {
                 Text(
                   'Specifics Selection for $characterName',
                   style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                Text(
-                    "Delete me later: $characterClass + $background + $race"), //DELETE ME LATER
+                ),               
                 const SizedBox(height: 20),
                 SegmentedButton<String>(
                   style: ButtonStyle(
@@ -391,6 +389,7 @@ class _SpecificsScreenState extends ConsumerState<SpecificsScreen> {
                     ),
                   ],
                 ),
+                SizedBox(height: 120),
               ],
             ),
           ),

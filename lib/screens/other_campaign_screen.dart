@@ -247,7 +247,7 @@ class _OtherCampaignScreenState extends State<OtherCampaignScreen> {
       MonsterCompendium(),
       SpellCompendium(),
       Notes(campaignId: widget.campaignID),
-      // Replace with your BagOfHolding widget or desired content.
+      // BagOfHolding(campaignId: widget.campaignID, characterId: snapshot.data!),
       const Center(child: Text('Bag of Holding')),
     ];
 
