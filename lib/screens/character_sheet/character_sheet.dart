@@ -5,18 +5,26 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:warlocks_of_the_beach/rpg_awesome_icons.dart';
 import 'package:warlocks_of_the_beach/screens/character_sheet/popup_dice_roller.dart';
+import 'package:warlocks_of_the_beach/widgets/editable_text_field.dart';
 import '../../services/spell_service.dart';
 import '../../services/class_service.dart';
 
 class CharacterSheet extends StatefulWidget {
   final String characterID;
-  const CharacterSheet({Key? key, required this.characterID}) : super(key: key);
+  final bool inSession;
+  const CharacterSheet(
+      {Key? key, required this.characterID, required this.inSession})
+      : super(key: key);
 
   @override
   _CharacterSheetState createState() => _CharacterSheetState();
 }
 
-class _CharacterSheetState extends State<CharacterSheet> {
+class _CharacterSheetState extends State<CharacterSheet>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   bool canPop = false;
   Map<String, dynamic>? characterData;
   bool isLoading = true;
@@ -63,6 +71,10 @@ class _CharacterSheetState extends State<CharacterSheet> {
   String backstory = '';
   String other = '';
   String userPack = '';
+  String hp = '';
+  String ac = '';
+  String hitDice = '';
+  String startingArmor = '';
 
   final Map<String, String> packDescriptions = {
     "Scholar’s Pack":
@@ -92,6 +104,30 @@ class _CharacterSheetState extends State<CharacterSheet> {
     "Warlock": ["Wisdom", "Charisma"],
     "Wizard": ["Intelligence", "Wisdom"],
   };
+  final Map<String, TextEditingController> _traitsControllers = {};
+
+  final List<String> _traitKeys = [
+    'Background',
+    'Alignment',
+    'Faith',
+    'Lifestyle',
+    'Hair',
+    'Eyes',
+    'Skin',
+    'Height',
+    'Weight',
+    'Age',
+    'Gender',
+    'Personality Traits',
+    'Ideals',
+    'Bonds',
+    'Flaws',
+    'Organizations',
+    'Allies',
+    'Enemies',
+    'Backstory',
+    'Other',
+  ];
 
   final List<String> simpleWeapons = [
     'Club',
@@ -223,6 +259,30 @@ class _CharacterSheetState extends State<CharacterSheet> {
   void initState() {
     super.initState();
     _fetchCharacterData();
+    _traitsControllers['Background'] = TextEditingController(text: background);
+    _traitsControllers['Alignment'] = TextEditingController(text: alignment);
+    _traitsControllers['Faith'] = TextEditingController(text: faith);
+    _traitsControllers['Lifestyle'] = TextEditingController(text: lifestyle);
+    _traitsControllers['Hair'] = TextEditingController(text: hair);
+    _traitsControllers['Eyes'] = TextEditingController(text: eyes);
+    _traitsControllers['Skin'] = TextEditingController(text: skin);
+    _traitsControllers['Height'] = TextEditingController(text: height);
+    _traitsControllers['Weight'] = TextEditingController(text: weight);
+    _traitsControllers['Age'] = TextEditingController(text: age);
+    _traitsControllers['Gender'] = TextEditingController(text: gender);
+    _traitsControllers['Personality Traits'] =
+        TextEditingController(text: personalityTraits);
+    _traitsControllers['Ideals'] = TextEditingController(text: ideals);
+    _traitsControllers['Bonds'] = TextEditingController(text: bonds);
+    _traitsControllers['Flaws'] = TextEditingController(text: flaws);
+    _traitsControllers['Organizations'] =
+        TextEditingController(text: organizations);
+    _traitsControllers['Allies'] = TextEditingController(text: allies);
+    _traitsControllers['Enemies'] = TextEditingController(text: enemies);
+    _traitsControllers['Backstory'] = TextEditingController(text: backstory);
+    _traitsControllers['Other'] = TextEditingController(text: other);
+    armorClass = int.parse(calculateArmorClass(startingArmor, int.parse(dexterityModifier)));
+    
   }
 
   Future<void> _fetchCharacterData() async {
@@ -258,45 +318,27 @@ class _CharacterSheetState extends State<CharacterSheet> {
         charismaScore =
             characterData?["abilityScores"]["Charisma"]?.toString() ?? '10';
 
-        // Set the ability modifiers based on the scores.
-        if (strengthScore == '8' || strengthScore == '9') {
-          strengthModifier = '-1';
-        } else {
-          strengthModifier = ((int.parse(strengthScore) - 10) ~/ 2).toString();
-        }
-
-        if (dexterityScore == '8' || dexterityScore == '9') {
-          dexterityModifier = '-1';
-        } else {
-          dexterityModifier =
-              ((int.parse(dexterityScore) - 10) ~/ 2).toString();
-        }
-
-        if (constitutionScore == '8' || constitutionScore == '9') {
-          constitutionModifier = '-1';
-        } else {
-          constitutionModifier =
-              ((int.parse(constitutionScore) - 10) ~/ 2).toString();
-        }
-
-        if (intelligenceScore == '8' || intelligenceScore == '9') {
-          intelligenceModifier = '-1';
-        } else {
-          intelligenceModifier =
-              ((int.parse(intelligenceScore) - 10) ~/ 2).toString();
-        }
-
-        if (wisdomScore == '8' || wisdomScore == '9') {
-          wisdomModifier = '-1';
-        } else {
-          wisdomModifier = ((int.parse(wisdomScore) - 10) ~/ 2).toString();
-        }
-
-        if (charismaScore == '8' || charismaScore == '9') {
-          charismaModifier = '-1';
-        } else {
-          charismaModifier = ((int.parse(charismaScore) - 10) ~/ 2).toString();
-        }
+        // Calculate modifiers.
+        strengthModifier = (strengthScore == '8' || strengthScore == '9')
+            ? '-1'
+            : ((int.parse(strengthScore) - 10) ~/ 2).toString();
+        dexterityModifier = (dexterityScore == '8' || dexterityScore == '9')
+            ? '-1'
+            : ((int.parse(dexterityScore) - 10) ~/ 2).toString();
+        constitutionModifier =
+            (constitutionScore == '8' || constitutionScore == '9')
+                ? '-1'
+                : ((int.parse(constitutionScore) - 10) ~/ 2).toString();
+        intelligenceModifier =
+            (intelligenceScore == '8' || intelligenceScore == '9')
+                ? '-1'
+                : ((int.parse(intelligenceScore) - 10) ~/ 2).toString();
+        wisdomModifier = (wisdomScore == '8' || wisdomScore == '9')
+            ? '-1'
+            : ((int.parse(wisdomScore) - 10) ~/ 2).toString();
+        charismaModifier = (charismaScore == '8' || charismaScore == '9')
+            ? '-1'
+            : ((int.parse(charismaScore) - 10) ~/ 2).toString();
 
         // Set the selected spells, cantrips, and weapons.
         for (var spell in characterData?["spells"] ?? []) {
@@ -308,68 +350,56 @@ class _CharacterSheetState extends State<CharacterSheet> {
         for (var weapon in characterData?["weapons"] ?? []) {
           selectedWeapons.add(weapon);
         }
+        hp = characterData?["hp"]?.toString() ?? '0';
+        ac = characterData?["ac"]?.toString() ?? '0';
+        hitDice = characterData?["hitDice"]?.toString() ?? '0';
 
-        // Calculate Armor Class.
-        // Grab startingArmor from Firebase (if missing, assume "Robe").
-        String startingArmor =
-            characterData?["startingArmor"]?.toString() ?? "";
-        if (startingArmor.isEmpty) {
-          startingArmor = "Robe";
-        }
+        // --- Update Traits ---
+        // Update your local trait variables.
+        background = characterData?["background"]?.toString() ?? '';
+        alignment = characterData?["alignment"]?.toString() ?? '';
+        faith = characterData?["faith"]?.toString() ?? '';
+        lifestyle = characterData?["lifestyle"]?.toString() ?? '';
+        hair = characterData?["hair"]?.toString() ?? '';
+        eyes = characterData?["eyes"]?.toString() ?? '';
+        skin = characterData?["skin"]?.toString() ?? '';
+        height = characterData?["height"]?.toString() ?? '';
+        weight = characterData?["weight"]?.toString() ?? '';
+        age = characterData?["age"]?.toString() ?? '';
+        gender = characterData?["gender"]?.toString() ?? '';
+        personalityTraits =
+            characterData?["personalityTraits"]?.toString() ?? '';
+        ideals = characterData?["ideals"]?.toString() ?? '';
+        bonds = characterData?["bonds"]?.toString() ?? '';
+        flaws = characterData?["flaws"]?.toString() ?? '';
+        organizations = characterData?["organizations"]?.toString() ?? '';
+        allies = characterData?["allies"]?.toString() ?? '';
+        enemies = characterData?["enemies"]?.toString() ?? '';
+        backstory = characterData?["backstory"]?.toString() ?? '';
+        other = characterData?["other"]?.toString() ?? '';
+        startingArmor = characterData?["startingArmor"]?.toString() ?? '';
 
-        userPack = characterData?["startingKit"]
-                ?.toString()
-                .replaceAll(RegExp(r'[\[\]]'), '') ??
-            "Scholar’s Pack";
-
-        // Map of starting armors with their base AC and rules.
-        final Map<String, Map<String, dynamic>> armorStats = {
-          "Robe": {
-            "base": 10,
-            "plusDex": true,
-            "maxDex": null, // No cap.
-          },
-          "Chain Mail": {
-            "base": 16,
-            "plusDex": false,
-          },
-          "Studded Leather Armor": {
-            "base": 12,
-            "plusDex": true,
-            "maxDex": null,
-          },
-          "Scale Mail": {
-            "base": 14,
-            "plusDex": true,
-            "maxDex": 2, // Maximum Dex modifier of +2.
-          },
-          "Leather Armor": {
-            "base": 11,
-            "plusDex": true,
-            "maxDex": null,
-          },
-        };
-
-        // Calculate the final armor class.
-        if (armorStats.containsKey(startingArmor)) {
-          int baseAC = armorStats[startingArmor]!["base"];
-          bool plusDex = armorStats[startingArmor]!["plusDex"];
-          int additionalDex = 0;
-          if (plusDex) {
-            int dexMod = int.parse(dexterityModifier);
-            // If a maximum Dex modifier is defined, use the lesser of the Dex mod and the cap.
-            if (armorStats[startingArmor]!["maxDex"] != null) {
-              int maxDex = armorStats[startingArmor]!["maxDex"];
-              additionalDex = dexMod > maxDex ? maxDex : dexMod;
-            } else {
-              additionalDex = dexMod;
-            }
-          }
-          armorClass = baseAC + additionalDex;
-        } else {
-          // If the starting armor is not in the map, assume unarmored (10 + Dex mod).
-          armorClass = 10 + int.parse(dexterityModifier);
-        }
+        // Now update the trait controllers.
+        _traitsControllers['Background']?.text = background;
+        _traitsControllers['Alignment']?.text = alignment;
+        _traitsControllers['Faith']?.text = faith;
+        _traitsControllers['Lifestyle']?.text = lifestyle;
+        _traitsControllers['Hair']?.text = hair;
+        _traitsControllers['Eyes']?.text = eyes;
+        _traitsControllers['Skin']?.text = skin;
+        _traitsControllers['Height']?.text = height;
+        _traitsControllers['Weight']?.text = weight;
+        _traitsControllers['Age']?.text = age;
+        _traitsControllers['Gender']?.text = gender;
+        _traitsControllers['Personality Traits']?.text = personalityTraits;
+        _traitsControllers['Ideals']?.text = ideals;
+        _traitsControllers['Bonds']?.text = bonds;
+        _traitsControllers['Flaws']?.text = flaws;
+        _traitsControllers['Organizations']?.text = organizations;
+        _traitsControllers['Allies']?.text = allies;
+        _traitsControllers['Enemies']?.text = enemies;
+        _traitsControllers['Backstory']?.text = backstory;
+        _traitsControllers['Other']?.text = other;
       });
     } catch (e) {
       print('Error fetching character data: $e');
@@ -379,23 +409,194 @@ class _CharacterSheetState extends State<CharacterSheet> {
     }
   }
 
+  Future<void> _saveCharacterData() async {
+    final User user = FirebaseAuth.instance.currentUser!;
+    final uuid = user.uid;
+    final docRef = FirebaseFirestore.instance
+        .collection('app_user_profiles')
+        .doc(uuid)
+        .collection('characters')
+        .doc(widget.characterID);
+    final traitData = {
+      'background': _traitsControllers['Background']?.text ?? '',
+      'alignment': _traitsControllers['Alignment']?.text ?? '',
+      'faith': _traitsControllers['Faith']?.text ?? '',
+      'lifestyle': _traitsControllers['Lifestyle']?.text ?? '',
+      'hair': _traitsControllers['Hair']?.text ?? '',
+      'eyes': _traitsControllers['Eyes']?.text ?? '',
+      'skin': _traitsControllers['Skin']?.text ?? '',
+      'height': _traitsControllers['Height']?.text ?? '',
+      'weight': _traitsControllers['Weight']?.text ?? '',
+      'age': _traitsControllers['Age']?.text ?? '',
+      'gender': _traitsControllers['Gender']?.text ?? '',
+      'personalityTraits': _traitsControllers['Personality Traits']?.text ?? '',
+      'ideals': _traitsControllers['Ideals']?.text ?? '',
+      'bonds': _traitsControllers['Bonds']?.text ?? '',
+      'flaws': _traitsControllers['Flaws']?.text ?? '',
+      'organizations': _traitsControllers['Organizations']?.text ?? '',
+      'allies': _traitsControllers['Allies']?.text ?? '',
+      'enemies': _traitsControllers['Enemies']?.text ?? '',
+      'backstory': _traitsControllers['Backstory']?.text ?? '',
+      'other': _traitsControllers['Other']?.text ?? '',
+    };
+
+    try {
+      await docRef.set(
+          {
+            'name': characterData?['name'] ?? 'Unknown Name',
+            'abilityScores': {
+              'Strength': int.parse(strengthScore),
+              'Dexterity': int.parse(dexterityScore),
+              'Constitution': int.parse(constitutionScore),
+              'Intelligence': int.parse(intelligenceScore),
+              'Wisdom': int.parse(wisdomScore),
+              'Charisma': int.parse(charismaScore),
+            },
+            'modifiers': {
+              'Strength': int.parse(strengthModifier),
+              'Dexterity': int.parse(dexterityModifier),
+              'Constitution': int.parse(constitutionModifier),
+              'Intelligence': int.parse(intelligenceModifier),
+              'Wisdom': int.parse(wisdomModifier),
+              'Charisma': int.parse(charismaModifier),
+            },
+            'hp': int.tryParse(hp) ?? 0,
+            'ac': int.tryParse(ac) ?? 0,
+            'hitDice': hitDice,
+            'proficiencies': proficiencies.toList(),
+            'languages': languages.toList(),
+            'spells': selectedSpells,
+            'cantrips': selectedCantrips,
+            'weapons': selectedWeapons,
+            ...traitData,
+          },
+          SetOptions(
+              merge: true)); // merge: true prevents overwriting other fields
+
+      print("Character data saved successfully!");
+    } catch (e) {
+      print("Error saving character data: $e");
+    }
+  }
+
+  String calculateArmorClass(String? selectedArmor, int dexterityModifier) {
+    final Map<String, String> armorClassMap = {
+      // Light Armor
+      "Padded": "11 + Dexterity modifier",
+      "Leather": "11 + Dexterity modifier",
+      "Studded Leather": "12 + Dexterity modifier",
+
+      // Medium Armor
+      "Hide": "12 + Dexterity modifier (max 2)",
+      "Chain Shirt": "13 + Dexterity modifier (max 2)",
+      "Scale Mail": "14 + Dexterity modifier (max 2)",
+      "Breastplate": "14 + Dexterity modifier (max 2)",
+      "Half Plate": "15 + Dexterity modifier (max 2)",
+
+      // Heavy Armor
+      "Ring Mail": "14 (no Dexterity modifier)",
+      "Chain Mail": "16 (no Dexterity modifier, requires Strength 13)",
+      "Splint": "17 (no Dexterity modifier, requires Strength 15)",
+      "Plate": "18 (no Dexterity modifier, requires Strength 15)",
+
+      // Shields
+      "Shield": "+2 AC (added to base AC)",
+
+      // Robes
+      "Robes": "10",
+    };
+
+    // Provide a default if no armor is selected:
+    if (selectedArmor == null || selectedArmor.isEmpty) {
+      selectedArmor = "Robes";
+    }
+
+    switch (selectedArmor) {
+      case "Padded":
+      case "Leather":
+        return (11 + dexterityModifier).toString();
+      case "Studded Leather":
+        return (12 + dexterityModifier).toString();
+      case "Hide":
+        return (12 + (dexterityModifier > 2 ? 2 : dexterityModifier))
+            .toString();
+      case "Chain Shirt":
+        return (13 + (dexterityModifier > 2 ? 2 : dexterityModifier))
+            .toString();
+      case "Scale Mail":
+        return (14 + (dexterityModifier > 2 ? 2 : dexterityModifier))
+            .toString();
+      case "Breastplate":
+        return (14 + (dexterityModifier > 2 ? 2 : dexterityModifier))
+            .toString();
+      case "Half Plate":
+        return (15 + (dexterityModifier > 2 ? 2 : dexterityModifier))
+            .toString();
+      case "Ring Mail":
+        return "14";
+      case "Chain Mail":
+        return "16";
+      case "Splint":
+        return "17";
+      case "Plate":
+        return "18";
+      case "Shield":
+        return "+2 AC (add to base AC)";
+      case "Robes":
+        return "10";
+      default:
+        return "Unknown Armor Type";
+    }
+  }
+
+  String _calculateModifier(String scoreStr) {
+    final int score = int.tryParse(scoreStr) ?? 10;
+    final int mod = ((score - 10) / 2).floor();
+    return mod >= 0 ? '+$mod' : '$mod';
+  }
+
   @override
   Widget build(BuildContext context) {
+    super.build(
+        context); // call the funny super.build to ensure the mixin works properly
     return PopScope(
       canPop: canPop,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(characterData?['name'] ?? 'Character Sheet'),
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () {
-              // Set the flag to true and pop the screen
+          title: EditableTextField(
+            initialText: characterData?['name'] ?? 'Character Sheet',
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+            onChanged: (newValue) {
               setState(() {
-                canPop = true;
+                characterData?['name'] =
+                    newValue.isEmpty ? characterData!['name'] : newValue;
               });
-              Navigator.of(context).pop();
             },
           ),
+          leading: widget.inSession
+              ? IconButton(
+                  onPressed: () {},
+                  icon: const SizedBox.shrink(), // Creates an invisible icon
+                ) // Remove the back button if inSession is true
+              : IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () {
+                    setState(() {
+                      canPop = true;
+                    });
+                    Navigator.of(context).pop();
+                  },
+                ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.save), // Save icon
+              onPressed: _saveCharacterData, // Call the save function
+              tooltip: 'Save Character', // Tooltip for accessibility
+            ),
+          ],
         ),
         body: isLoading
             ? const Center(child: CircularProgressIndicator())
@@ -430,30 +631,30 @@ class _CharacterSheetState extends State<CharacterSheet> {
                   ],
                 ),
               ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () async {
-            // Roll 2d6 using the popup dice roller
-            int? result = 0;
-            if (result != null) {
-              // Show the result in a dialog
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text("Dice Roll Result"),
-                  content: Text("You rolled: $result"),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: const Text("OK"),
-                    ),
-                  ],
-                ),
-              );
-            }
-          },
-          backgroundColor: Colors.blue,
-          child: const Icon(Icons.casino), // Dice icon
-        ),
+        // floatingActionButton: FloatingActionButton(
+        //   onPressed: () async {
+        //     // Roll 2d6 using the popup dice roller
+        //     int? result = 0;
+        //     if (result != null) {
+        //       // Show the result in a dialog
+        //       showDialog(
+        //         context: context,
+        //         builder: (context) => AlertDialog(
+        //           title: const Text("Dice Roll Result"),
+        //           content: Text("You rolled: $result"),
+        //           actions: [
+        //             TextButton(
+        //               onPressed: () => Navigator.of(context).pop(),
+        //               child: const Text("OK"),
+        //             ),
+        //           ],
+        //         ),
+        //       );
+        //     }
+        //   },
+        //   backgroundColor: Colors.blue,
+        //   child: const Icon(Icons.casino), // Dice icon
+        // ),
       ),
     );
   }
@@ -462,17 +663,13 @@ class _CharacterSheetState extends State<CharacterSheet> {
     // Retrieve character details
     final String name = characterData?['name'] ?? 'Unknown Name';
     final String charClass = characterData?['class'] ?? 'Unknown Class';
-    final int level =
-        characterData?['level'] ?? 1; // Default to level 1 if not provided
+    final int level = characterData?['level'] ?? 1;
 
-    // Replace these placeholder values with your actual data or variables.
-    final int initiative = 2;
-    final int hp = 11; // Replace with actual HP value.
-    final int speed = 25;
-    final String hitDice = "1d8";
+    final int initiative = int.parse(dexterityModifier);
+    final int speed = 30;
+    // final String hitDice = "1d8";
     final int proficiency = 2;
 
-    // Example: The "save" values can be computed from your character data.
     final int strengthSave = calculateSavingThrow("Strength", strengthModifier);
     final int dexSave = calculateSavingThrow("Dexterity", dexterityModifier);
     final int conSave =
@@ -538,7 +735,7 @@ class _CharacterSheetState extends State<CharacterSheet> {
             mod = "0";
         }
 
-        // Add proficiency bonus if the character is proficient in the skill
+        // Add proficiency bonus if the character is proficient in the skill.
         int skillMod = int.parse(mod);
         if (proficiencies.contains(skill)) {
           skillMod += proficiencyBonus;
@@ -566,12 +763,19 @@ class _CharacterSheetState extends State<CharacterSheet> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    name,
+                  // Editable character name.
+                  EditableTextField(
+                    initialText: name,
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
+                    onChanged: (newValue) {
+                      setState(() {
+                        characterData?['name'] =
+                            newValue.isEmpty ? name : newValue;
+                      });
+                    },
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -582,6 +786,7 @@ class _CharacterSheetState extends State<CharacterSheet> {
                     ),
                   ),
                   const SizedBox(height: 4),
+
                   Text(
                     "Level: $level",
                     style: const TextStyle(
@@ -599,18 +804,49 @@ class _CharacterSheetState extends State<CharacterSheet> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _buildTopStatCard("Initiative", "$initiative"),
-              _buildTopStatCard("HP", "$hp"),
-              _buildTopStatCard("Speed", "$speed"),
+              _buildTopStatCard(
+                "Initiative",
+                "$initiative",
+                onChanged: (newValue) {
+                  // Example: update initiative (if applicable)
+                },
+              ),
+              _buildTopStatCard(
+                "HP",
+                "$hp",
+                onChanged: (newValue) {
+                  setState(() {
+                    hp = newValue;
+                  });
+                },
+              ),
+              _buildTopStatCard(
+                "Speed",
+                "$speed",
+                onChanged: (newValue) {
+                  // Example: update speed (if needed)
+                },
+              ),
             ],
           ),
           const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _buildTopStatCard("Hit Dice", hitDice),
-              _buildTopStatCard("AC", "$armorClass"),
-              _buildTopStatCard("Prof.", "+$proficiency"),
+              _buildTopStatCard("Hit Dice", hitDice, onChanged: (newValue) {
+                setState(() {
+                  hitDice = newValue;
+                });
+              }),
+              _buildTopStatCard("AC", "$armorClass", onChanged: (newValue) {
+                setState(() {
+                  armorClass = int.tryParse(newValue) ?? armorClass;
+                });
+              }),
+              _buildTopStatCard("Prof.", "+$proficiency",
+                  onChanged: (newValue) {
+                // Remove '+' sign and then update if needed.
+              }),
             ],
           ),
           const SizedBox(height: 16),
@@ -628,12 +864,25 @@ class _CharacterSheetState extends State<CharacterSheet> {
                       strengthScore,
                       strengthModifier,
                       "$strengthSave",
+                      onChanged: (newVal) {
+                        setState(() {
+                          strengthScore = newVal;
+                          strengthModifier = _calculateModifier(strengthScore);
+                        });
+                      },
                     ),
                     _buildAbilityScoreCard(
                       "Dexterity",
                       dexterityScore,
                       dexterityModifier,
                       "$dexSave",
+                      onChanged: (newVal) {
+                        setState(() {
+                          dexterityScore = newVal;
+                          dexterityModifier =
+                              _calculateModifier(dexterityScore);
+                        });
+                      },
                     ),
                   ],
                 ),
@@ -646,12 +895,26 @@ class _CharacterSheetState extends State<CharacterSheet> {
                       constitutionScore,
                       constitutionModifier,
                       "$conSave",
+                      onChanged: (newVal) {
+                        setState(() {
+                          constitutionScore = newVal;
+                          constitutionModifier =
+                              _calculateModifier(constitutionScore);
+                        });
+                      },
                     ),
                     _buildAbilityScoreCard(
                       "Intelligence",
                       intelligenceScore,
                       intelligenceModifier,
                       "$intSave",
+                      onChanged: (newVal) {
+                        setState(() {
+                          intelligenceScore = newVal;
+                          intelligenceModifier =
+                              _calculateModifier(intelligenceScore);
+                        });
+                      },
                     ),
                   ],
                 ),
@@ -664,12 +927,24 @@ class _CharacterSheetState extends State<CharacterSheet> {
                       wisdomScore,
                       wisdomModifier,
                       "$wisSave",
+                      onChanged: (newVal) {
+                        setState(() {
+                          wisdomScore = newVal;
+                          wisdomModifier = _calculateModifier(wisdomScore);
+                        });
+                      },
                     ),
                     _buildAbilityScoreCard(
                       "Charisma",
                       charismaScore,
                       charismaModifier,
                       "$chaSave",
+                      onChanged: (newVal) {
+                        setState(() {
+                          charismaScore = newVal;
+                          charismaModifier = _calculateModifier(charismaScore);
+                        });
+                      },
                     ),
                   ],
                 ),
@@ -700,7 +975,8 @@ class _CharacterSheetState extends State<CharacterSheet> {
     );
   }
 
-  Widget _buildTopStatCard(String label, String value) {
+  Widget _buildTopStatCard(String label, String value,
+      {void Function(String)? onChanged}) {
     return Card(
       elevation: 3,
       shape: RoundedRectangleBorder(
@@ -717,9 +993,10 @@ class _CharacterSheetState extends State<CharacterSheet> {
               style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
-            Text(
-              value,
+            EditableTextField(
+              initialText: value,
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              onChanged: onChanged,
             ),
           ],
         ),
@@ -728,7 +1005,8 @@ class _CharacterSheetState extends State<CharacterSheet> {
   }
 
   Widget _buildAbilityScoreCard(
-      String ability, String score, String mod, String save) {
+      String ability, String score, String mod, String save,
+      {void Function(String)? onChanged}) {
     return Card(
       elevation: 3,
       shape: RoundedRectangleBorder(
@@ -745,12 +1023,14 @@ class _CharacterSheetState extends State<CharacterSheet> {
             ),
             const Divider(),
             const SizedBox(height: 4),
-            Text(
-              "$score",
+            // Editable field for the ability score.
+            EditableTextField(
+              initialText: score,
               style: const TextStyle(fontSize: 18),
+              onChanged: onChanged,
             ),
             Text(
-              "Mod: ${mod.startsWith('-') ? mod : '+' + mod}",
+              "Mod: $mod",
               style: const TextStyle(fontSize: 14),
             ),
             Text(
@@ -909,28 +1189,9 @@ class _CharacterSheetState extends State<CharacterSheet> {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(8.0),
       child: Column(
-        children: [
-          _buildSummaryTile(context, 'Background', background),
-          _buildSummaryTile(context, 'Alignment', alignment),
-          _buildSummaryTile(context, 'Faith', faith),
-          _buildSummaryTile(context, 'Lifestyle', lifestyle),
-          _buildSummaryTile(context, 'Hair', hair),
-          _buildSummaryTile(context, 'Eyes', eyes),
-          _buildSummaryTile(context, 'Skin', skin),
-          _buildSummaryTile(context, 'Height', height),
-          _buildSummaryTile(context, 'Weight', weight),
-          _buildSummaryTile(context, 'Age', age),
-          _buildSummaryTile(context, 'Gender', gender),
-          _buildSummaryTile(context, 'Personality Traits', personalityTraits),
-          _buildSummaryTile(context, 'Ideals', ideals),
-          _buildSummaryTile(context, 'Bonds', bonds),
-          _buildSummaryTile(context, 'Flaws', flaws),
-          _buildSummaryTile(context, 'Organizations', organizations),
-          _buildSummaryTile(context, 'Allies', allies),
-          _buildSummaryTile(context, 'Enemies', enemies),
-          _buildSummaryTile(context, 'Backstory', backstory),
-          _buildSummaryTile(context, 'Other', other),
-        ],
+        children: _traitKeys
+            .map((title) => _buildSummaryTile(context, title))
+            .toList(),
       ),
     );
   }
@@ -1231,19 +1492,21 @@ class _CharacterSheetState extends State<CharacterSheet> {
     );
   }
 
-  Widget _buildSummaryTile(BuildContext context, String title, String value) {
+  Widget _buildSummaryTile(BuildContext context, String title) {
+    final controller = _traitsControllers[title]!;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: ListTile(
-        tileColor: Theme.of(context).listTileTheme.tileColor,
-        title: Text(
-          title,
-          style: Theme.of(context).textTheme.bodyMedium,
+      child: TextFormField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: title,
+          filled: true,
+          fillColor: Theme.of(context).listTileTheme.tileColor,
+          border: const OutlineInputBorder(),
         ),
-        subtitle: Text(
-          value,
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
+        maxLines: null, // allows for multiline input
+        style: Theme.of(context).textTheme.bodyMedium,
       ),
     );
   }

@@ -3,8 +3,7 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:uuid/uuid.dart';
-import 'package:warlocks_of_the_beach/prelaunch_campaign_screen.dart';
-import '../combat/dm_combat_screen.dart';
+import '../prelaunch_campaign_screen.dart';
 import '../widgets/navigation/main_appbar.dart';
 import '../widgets/navigation/main_drawer.dart';
 import '../widgets/navigation/bottom_navbar.dart';
@@ -59,7 +58,7 @@ class _CampaignScreenState extends State<CampaignScreen> {
           .set({
         'title': campaign.title,
         'color':
-            '#${_selectedColor.value.toRadixString(16).substring(2)}', // Save color as hex
+        '#${_selectedColor.value.toRadixString(16).substring(2)}', // Save color as hex
         'DM': user.uid,
         'players': [],
         'createdDate': DateTime.now(),
@@ -75,22 +74,26 @@ class _CampaignScreenState extends State<CampaignScreen> {
 
     if (_selectedCharacterId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a character before joining!')),
+        const SnackBar(
+            content: Text('Please select a character before joining!')),
       );
       return;
     }
 
     if (_joinFormKey.currentState!.validate()) {
+      // Remove spaces from the join code
+      final sanitizedJoinCode = joinCodeCampaignId.replaceAll(' ', '');
+
       final campaignDoc = await FirebaseFirestore.instance
           .collection('user_campaigns')
-          .doc(joinCodeCampaignId)
+          .doc(sanitizedJoinCode)
           .get();
 
       if (campaignDoc.exists) {
-        // Add player with character
+        // Add player with character to the campaign
         await FirebaseFirestore.instance
             .collection('user_campaigns')
-            .doc(joinCodeCampaignId)
+            .doc(sanitizedJoinCode)
             .update({
           'players': FieldValue.arrayUnion([
             {
@@ -100,15 +103,15 @@ class _CampaignScreenState extends State<CampaignScreen> {
           ])
         });
 
-        // Update user profile
+        // Save campaign reference in the user's profile
         await FirebaseFirestore.instance
             .collection('app_user_profiles')
             .doc(user.uid)
             .collection('your_campaigns')
-            .doc(joinCodeCampaignId)
+            .doc(sanitizedJoinCode)
             .set({
           'your role': 'Player',
-          'campaign_code': joinCodeCampaignId,
+          'campaign_code': sanitizedJoinCode,
         });
 
         // Close the modal
@@ -121,7 +124,8 @@ class _CampaignScreenState extends State<CampaignScreen> {
       } else {
         // Show error message for invalid join code
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Invalid campaign code. Please try again.')),
+          const SnackBar(
+              content: Text('Invalid campaign code. Please try again.')),
         );
       }
     }
@@ -142,7 +146,7 @@ class _CampaignScreenState extends State<CampaignScreen> {
       context: context,
       builder: (_) => Padding(
         padding:
-            EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -160,7 +164,7 @@ class _CampaignScreenState extends State<CampaignScreen> {
                     TextFormField(
                       controller: _titleController,
                       decoration:
-                          const InputDecoration(labelText: 'Campaign Title'),
+                      const InputDecoration(labelText: 'Campaign Title'),
                       validator: (value) => value == null || value.isEmpty
                           ? 'Please enter a campaign title'
                           : null,
@@ -230,7 +234,7 @@ class _CampaignScreenState extends State<CampaignScreen> {
       context: context,
       builder: (_) => Padding(
         padding:
-            EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
           child: Column(children: [
@@ -249,7 +253,7 @@ class _CampaignScreenState extends State<CampaignScreen> {
                 const SizedBox(height: 20),
                 DropdownButtonFormField<String>(
                   decoration:
-                      const InputDecoration(labelText: 'Select Character'),
+                  const InputDecoration(labelText: 'Select Character'),
                   items: characters.map((char) {
                     return DropdownMenuItem<String>(
                       value: char['id'],
@@ -262,7 +266,7 @@ class _CampaignScreenState extends State<CampaignScreen> {
                     });
                   },
                   validator: (val) =>
-                      val == null ? 'Please select a character' : null,
+                  val == null ? 'Please select a character' : null,
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
@@ -305,7 +309,7 @@ class _CampaignScreenState extends State<CampaignScreen> {
                     final colorHex =
                         campaign.imageUrl ?? '#6A11CB'; // Default color if none
                     final color =
-                        Color(int.parse('0xFF${colorHex.substring(1)}'));
+                    Color(int.parse('0xFF${colorHex.substring(1)}'));
 
                     return Column(
                       children: [
@@ -323,8 +327,8 @@ class _CampaignScreenState extends State<CampaignScreen> {
                           onTap: () {
                             Navigator.of(context).push(
                               MaterialPageRoute(
-                                builder: (_) =>
-                                    PreLaunchCampaignScreen(campaignID: campaign.id, isDM: campaign.isDM,),
+                                  builder: (_) =>
+                                 PreLaunchCampaignScreen(campaignID: campaign.id, isDM: campaign.isDM)
                               ),
                             );
                           },
@@ -393,7 +397,7 @@ class _CampaignScreenState extends State<CampaignScreen> {
         .get();
 
     final campaignIds =
-        userCampaignsSnapshot.docs.map((doc) => doc.id).toList();
+    userCampaignsSnapshot.docs.map((doc) => doc.id).toList();
 
     final campaigns = <Campaign>[];
     for (final campaignId in campaignIds) {

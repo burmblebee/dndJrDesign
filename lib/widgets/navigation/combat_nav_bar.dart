@@ -3,6 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:warlocks_of_the_beach/combat/dm_combat_screen.dart';
 import 'package:warlocks_of_the_beach/item/bag_of_holding.dart';
 import 'package:warlocks_of_the_beach/screens/campaign_screen.dart';
+import 'package:warlocks_of_the_beach/combat/other_campaign_screen.dart';
 
 import '../../combat/player_combat_screen.dart';
 
@@ -27,12 +28,12 @@ class _CombatBottomNavBarState extends State<CombatBottomNavBar> {
           ? DMCombatScreen(campaignId: widget.campaignId)
           : PlayerCombatScreen(campaignId: widget.campaignId);
     } else if (index == 1) {
-      screen = BagOfHolding(campaignId: widget.campaignId, isDM: widget.isDM);
+      screen = OtherCampaignScreen(isDM: widget.isDM, campaignID: widget.campaignId);
     } else {
       return;
     }
-    debugPrint('Selected index: $_selectedIndex');
-    debugPrint('index: $index');
+    // debugPrint('Selected index: $_selectedIndex');
+    // debugPrint('index: $index');
 
     // Replace the current screen instead of stacking new ones
     Navigator.pushReplacement(

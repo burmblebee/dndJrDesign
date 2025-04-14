@@ -74,6 +74,7 @@ class _ExpandableSectionState extends State<ExpandableSection> {
 class Notes extends StatefulWidget {
   const Notes({super.key, required this.campaignID});
   final String campaignID;
+  // Constructor to accept campaignId if needed
 
   @override
   State<Notes> createState() => _NotesState();
@@ -83,7 +84,6 @@ class _NotesState extends State<Notes> {
   final List<Map<String, dynamic>> _notes = []; // Store notes with timestamps
   final TextEditingController _textController = TextEditingController();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final String collectionPath = "/notes";
   int? _editingIndex;
 
   @override
@@ -93,9 +93,10 @@ class _NotesState extends State<Notes> {
   }
 
   // Load notes from Firestore
+  // Improved Path to get from the campaign in question
   void _loadNotes() async {
     final snapshot = await _firestore
-        .collection(collectionPath)
+        .collection('user_campaigns').doc(widget.campaignID).collection('notes')
         .orderBy('timestamp', descending: false)
         .get();
     setState(() {
@@ -114,7 +115,7 @@ class _NotesState extends State<Notes> {
   Future<void> _addNote() async {
     if (_textController.text.isNotEmpty) {
       final newNote = _textController.text;
-      final docRef = await _firestore.collection(collectionPath).add({
+      final docRef = await _firestore.collection('user_campaign').doc(widget.campaignID).collection('notes').add({
         'user_notes': newNote,
         'timestamp': FieldValue.serverTimestamp(),
       });
@@ -132,7 +133,7 @@ class _NotesState extends State<Notes> {
   // Remove a note from Firestore
   Future<void> _removeNote(int index) async {
     final noteId = _notes[index]['id'];
-    await _firestore.collection(collectionPath).doc(noteId).delete();
+    await _firestore.collection('user_campaign').doc(widget.campaignID).collection('notes').doc(noteId).delete();
     setState(() {
       _notes.removeAt(index);
     });
@@ -141,7 +142,7 @@ class _NotesState extends State<Notes> {
   // Save an edited note to Firestore
   Future<void> _saveEditedNote(int index, String newValue) async {
     final noteId = _notes[index]['id'];
-    await _firestore.collection(collectionPath).doc(noteId).update({
+    await _firestore.collection('user_campaign').doc(widget.campaignID).collection('notes').doc(noteId).update({
       'user_notes': newValue,
     });
     setState(() {
@@ -248,129 +249,137 @@ class _NotesState extends State<Notes> {
             ),
 
             //player character sheet section
-            const SizedBox(height: 10),
-            ExpandableSection(
-              title: "View Player Character Sheets",
-              expandedContent: Column(
+            // Removed 4/8/25 Unneeded
+            /**
+                const SizedBox(height: 10),
+                ExpandableSection(
+                title: "View Player Character Sheets",
+                expandedContent: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.person,
-                        color: Colors.white,
-                        size: 27,
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          "Dingus",
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 17,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.person,
-                        color: Colors.white,
-                        size: 27,
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          "Bee",
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 17,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.person,
-                        color: Colors.white,
-                        size: 27,
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          "Eldrin",
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 17,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                Row(
+                children: [
+                Icon(
+                Icons.person,
+                color: Colors.white,
+                size: 27,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                child: Text(
+                "Dingus",
+                style: const TextStyle(
+                color: Colors.white,
+                fontSize: 17,
+                ),
+                ),
+                ),
                 ],
-              ),
-            ),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                children: [
+                Icon(
+                Icons.person,
+                color: Colors.white,
+                size: 27,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                child: Text(
+                "Bee",
+                style: const TextStyle(
+                color: Colors.white,
+                fontSize: 17,
+                ),
+                ),
+                ),
+                ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                children: [
+                Icon(
+                Icons.person,
+                color: Colors.white,
+                size: 27,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                child: Text(
+                "Eldrin",
+                style: const TextStyle(
+                color: Colors.white,
+                fontSize: 17,
+                ),
+                ),
+                ),
+                ],
+                ),
+                ],
+                ),
+                ),
+             */
 
             //save npcs section
-            const SizedBox(height: 10),
-            ExpandableSection(
-              title: "View Saved NPC's & Characters",
-              expandedContent: Column(
+            // Removed 4/8/25 Unneeded
+            /**
+                const SizedBox(height: 10),
+                ExpandableSection(
+                title: "View Saved NPC's & Characters",
+                expandedContent: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.person,
-                        color: Colors.white,
-                        size: 27,
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          "Dart",
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 17,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.person,
-                        color: Colors.white,
-                        size: 27,
-                      ),
-                      //are you reading this 0-0
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          "Cart",
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 17,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                Row(
+                children: [
+                Icon(
+                Icons.person,
+                color: Colors.white,
+                size: 27,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                child: Text(
+                "Dart",
+                style: const TextStyle(
+                color: Colors.white,
+                fontSize: 17,
+                ),
+                ),
+                ),
                 ],
-              ),
-            ),
-            const SizedBox(height: 10),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                children: [
+                Icon(
+                Icons.person,
+                color: Colors.white,
+                size: 27,
+                ),
+                //are you reading this 0-0
+                // Maybe perhaps
+                const SizedBox(width: 10),
+                Expanded(
+                child: Text(
+                "Cart",
+                style: const TextStyle(
+                color: Colors.white,
+                fontSize: 17,
+                ),
+                ),
+                ),
+                ],
+                ),
+                ],
+                ),
+                ),
+                const SizedBox(height: 10),
+             */
           ],
         ),
       ),
+
 
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -435,7 +444,7 @@ class _NotesState extends State<Notes> {
         child: const Icon(Icons.edit, color: Colors.black),
       ),
 
-      //temp bot nav
+      //temp bot nav, NEEDS TO BE REPLACED WITH THE RELEVANT BOTTOM NAV
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: const Color(0xFF25291C),
         onTap: null,

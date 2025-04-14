@@ -23,7 +23,9 @@ class Monster {
 
 /// Main widget for the Monster Compendium screen.
 class MonsterCompendium extends StatefulWidget {
-  const MonsterCompendium({Key? key}) : super(key: key);
+  final bool inSession; 
+
+  const MonsterCompendium({Key? key, this.inSession = false}) : super(key: key);
 
   @override
   _MonsterCompendiumState createState() => _MonsterCompendiumState();
@@ -136,21 +138,25 @@ class _MonsterCompendiumState extends State<MonsterCompendium> {
       // Sort monsters by challenge rating (crValue) in ascending order.
       temp.sort((a, b) => a.crValue.compareTo(b.crValue));
 
-      setState(() {
-        allMonsters = temp;
-        displayedMonsters = List.from(allMonsters);
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          allMonsters = temp;
+          displayedMonsters = List.from(allMonsters);
+          isLoading = false;
+        });
+      }
 
       // Print the list of all monsters to the console
       for (var monster in allMonsters) {
         print('Name: ${monster.name}, CR: ${monster.challengeRating}, Size: ${monster.size}, Type: ${monster.type}');
       }
     } catch (e) {
-      setState(() {
-        errorMessage = 'Error loading monsters: $e';
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          errorMessage = 'Error loading monsters: $e';
+          isLoading = false;
+        });
+      }
       print('Error loading monsters: $e');
     }
   }
@@ -559,21 +565,37 @@ String cleanText(String text) {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[900],
+      // backgroundColor: Colors.grey[900],
       appBar: AppBar(
         title: const Text('Monster Compendium'),
-        backgroundColor: Colors.grey[850],
+        backgroundColor: Colors.grey[ 900],
+        leading: widget.inSession
+            ? IconButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Navigate back if inSession is true
+                },
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+              )
+            : IconButton(
+                onPressed: () {}, // Invisible button with no action
+                icon: const SizedBox.shrink(),
+              ),
         actions: [
           IconButton(
             icon: const Icon(Icons.filter_alt, color: Colors.white),
             onPressed: _showFilterModal,
-          )
+          ),
         ],
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : errorMessage.isNotEmpty
-              ? Center(child: Text(errorMessage, style: const TextStyle(color: Colors.white)))
+              ? Center(
+                  child: Text(
+                    errorMessage,
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                )
               : Column(
                   children: [
                     // Search Bar
@@ -584,7 +606,8 @@ String cleanText(String text) {
                         decoration: InputDecoration(
                           hintText: 'Search Monsters',
                           prefixIcon: const Icon(Icons.search, size: 20),
-                          contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                          contentPadding: const EdgeInsets.symmetric(
+                              vertical: 8, horizontal: 12),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12.0),
                           ),
@@ -599,7 +622,8 @@ String cleanText(String text) {
                           Monster monster = displayedMonsters[index];
                           return Card(
                             color: Colors.grey[800],
-                            margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                            margin: const EdgeInsets.symmetric(
+                                vertical: 4, horizontal: 8),
                             child: ListTile(
                               // Only show the last segment of the monster name.
                               title: Text(
@@ -614,7 +638,8 @@ String cleanText(String text) {
                                 style: const TextStyle(color: Colors.white70),
                               ),
                               trailing: IconButton(
-                                icon: const Icon(Icons.info_outline, color: Colors.white),
+                                icon: const Icon(Icons.info_outline,
+                                    color: Colors.white),
                                 onPressed: () => showMonsterInfo(monster),
                               ),
                             ),

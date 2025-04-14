@@ -22,6 +22,8 @@ class SummarizationScreen extends ConsumerWidget {
       final uuid = user.uid;
       final String characterId = const Uuid().v4();
 
+
+
       final characterData = {
         'name': character.name,
         'race': character.race,
@@ -61,10 +63,14 @@ class SummarizationScreen extends ConsumerWidget {
         'spells': character.spells,
         // Equipment selections using unified field names.
         'startingKit': character.selectedKit,
-        'startingArmor': character.selectedArmor,
+        'startingArmor': character.selectedArmor ?? 'Robes',
         'selectedEquipment': character.selectedEquipment,
         'level': 1, // Hard-coded until leveling up functionality is added.
+        'hp' : calculateHP(character.characterClass, character.abilityScores['Constitution']),
+        'ac' : 0,
+        'hitDice' : calculateHitDice(character.characterClass),
       };
+
 
       try {
         await FirebaseFirestore.instance
@@ -83,6 +89,66 @@ class SummarizationScreen extends ConsumerWidget {
       }
     }
   }
+
+  String calculateHitDice(String characterClass) {
+  switch (characterClass) {
+    case "Barbarian":
+      return "1d12"; // Barbarian uses a d12 for hit dice
+    case "Fighter":
+    case "Paladin":
+    case "Ranger":
+      return "1d10"; // Fighter, Paladin, and Ranger use a d10 for hit dice
+    case "Bard":
+    case "Cleric":
+    case "Druid":
+    case "Monk":
+    case "Rogue":
+    case "Warlock":
+      return "1d8"; // Bard, Cleric, Druid, Monk, Rogue, and Warlock use a d8 for hit dice
+    case "Sorcerer":
+    case "Wizard":
+      return "1d6"; // Sorcerer and Wizard use a d6 for hit dice
+    default:
+      return "Unknown Hit Dice"; // Default case for unknown or unsupported classes
+  }
+}
+
+  String calculateHP(String characterClass, int constitution) {
+    //calcualte the constituion modifier
+    int constitutionModifier = ((constitution - 10) / 2).floor();
+
+   
+
+
+    switch (characterClass) {
+      case "Barbarian":
+        return (12 + constitutionModifier).toString();
+      case "Bard":
+        return (8 + constitutionModifier).toString();
+      case "Cleric":
+        return (8 + constitutionModifier).toString();
+      case "Druid":
+        return (8 + constitutionModifier).toString();
+      case "Fighter":
+        return (10 + constitutionModifier).toString();
+      case "Monk":
+        return (8 + constitutionModifier).toString();
+      case "Paladin":
+        return (10 + constitutionModifier).toString();
+      case "Ranger":
+        return (10 + constitutionModifier).toString();
+      case "Rogue":
+        return (8 + constitutionModifier).toString();
+      case "Sorcerer":
+        return (6 + constitutionModifier).toString();
+      case "Warlock":
+        return (8 + constitutionModifier).toString();
+      case "Wizard":
+        return (6 + constitutionModifier).toString();
+      default:
+        return 'Unknown Class';
+    }
+  } 
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

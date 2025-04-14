@@ -87,6 +87,29 @@ class _SpellSelectionScreenState extends ConsumerState<SpellSelectionScreen> {
         return;
       }
 
+      // Hardcode for wizards
+      if (characterClass == 'Wizard') {
+        allowedCantrips = 3; // Wizards can pick 3 cantrips
+        allowedSpells = 6; // Wizards can pick 6 spells
+
+        availableCantrips = await SpellService.getSpellsByClass(
+            'Wizard Spells', 'Cantrips (0 Level)');
+        availableSpells = await SpellService.getSpellsByClass(
+            'Wizard Spells', '1st Level');
+
+        setState(() {
+          isLoading = false;
+        });
+
+        // Debugging: Log the allowed spells and cantrips
+        print('Allowed Cantrips for Wizard: $allowedCantrips');
+        print('Allowed Spells for Wizard: $allowedSpells');
+        print('Available Cantrips: $availableCantrips');
+        print('Available Spells: $availableSpells');
+        return;
+      }
+
+      // Default behavior for other classes
       final classData = await ClassService.getClassData(characterClass);
       if (classData == null) {
         setState(() {
@@ -104,6 +127,7 @@ class _SpellSelectionScreenState extends ConsumerState<SpellSelectionScreen> {
         });
         return;
       }
+
       final classTableKey = "The $characterClass";
       final classTable = features[classTableKey];
       if (classTable == null || classTable["table"] == null) {
@@ -113,16 +137,25 @@ class _SpellSelectionScreenState extends ConsumerState<SpellSelectionScreen> {
         });
         return;
       }
+
       final table = classTable["table"];
       allowedSpells =
           int.tryParse((table["Spells Known"]?[0] ?? "0").toString()) ?? 0;
       allowedCantrips =
           int.tryParse((table["Cantrips Known"]?[0] ?? "0").toString()) ?? 0;
 
+      // Debugging: Log the allowed spells and cantrips
+      print('Allowed Spells: $allowedSpells');
+      print('Allowed Cantrips: $allowedCantrips');
+
       availableCantrips = await SpellService.getSpellsByClass(
           '$characterClass Spells', 'Cantrips (0 Level)');
       availableSpells = await SpellService.getSpellsByClass(
           '$characterClass Spells', '1st Level');
+
+      // Debugging: Log the retrieved spells
+      print('Available Cantrips: $availableCantrips');
+      print('Available Spells: $availableSpells');
 
       setState(() {
         isLoading = false;

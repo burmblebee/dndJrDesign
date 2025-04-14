@@ -105,6 +105,7 @@ flutter:
     - assets/profile.png
     - lib/data/SRD Data/spellcasting.json
     - lib/data/SRD Data/classes.json
+    - lib/data/SRD Data/monsters.json
     - assets/Barbarian.svg
     - assets/Bard.svg
     - assets/Cleric.svg
