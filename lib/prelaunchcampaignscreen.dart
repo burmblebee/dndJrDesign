@@ -63,7 +63,7 @@ class PreLaunchCampaignScreen extends StatelessWidget {
             const SizedBox(height: 10),
             ElevatedButton.icon( // Changed to ElevatedButton.icon to see if it is more clear that it is a button
               onPressed: () {
-                //Navigator.push(context, MaterialPageRoute(builder: (context) => const Schedule()));
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const Schedule()));
               },
               icon: const Icon(Icons.calendar_today, size: 40),
               label: const Text('Session Calendar'),
@@ -113,7 +113,7 @@ class PreLaunchCampaignScreen extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    //MaterialPageRoute(builder: (context) => AddCombat(campaignID: campaignID)),
+                    MaterialPageRoute(builder: (context) => AddCombat(campaignID: campaignID)),
                   );
                 },
                 child: const Text('Add Combat'),
