@@ -232,9 +232,11 @@ class _NotesState extends State<Notes> {
       body: Center(
         child: Column(
           children: [
+            if(isDm) ...[
+              ElevatedButton.icon(onPressed: (){_viewingDMNotes = !_viewingDMNotes;}, label: const Text('DM Notes'), icon: FaIcon(FontAwesomeIcons.dragon, size: 20)),
+              const SizedBox(height: 10),
+            ],
             const SizedBox(height: 20),
-            ElevatedButton.icon(onPressed: (){_viewingDMNotes = !_viewingDMNotes;}, label: const Text('DM Notes'), icon: FaIcon(FontAwesomeIcons.dragon, size: 20)),
-            const SizedBox(height: 10),
             const Text(
               "Your Notes:",
               style: TextStyle(
