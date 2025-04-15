@@ -1,2 +1,0 @@
-C:/Users/mike9/Desktop/JuniorDesign/PreLaunchCampaignTesting/dndJrDesign/android/app/.cxx/Debug/3k2q1244/armeabi-v7a/CMakeFiles/edit_cache.dir
-C:/Users/mike9/Desktop/JuniorDesign/PreLaunchCampaignTesting/dndJrDesign/android/app/.cxx/Debug/3k2q1244/armeabi-v7a/CMakeFiles/rebuild_cache.dir

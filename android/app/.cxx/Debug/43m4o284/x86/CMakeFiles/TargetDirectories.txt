@@ -1,2 +1,0 @@
-C:/Users/abbyo/dndJrDesign/merged1/android/app/.cxx/Debug/43m4o284/x86/CMakeFiles/edit_cache.dir
-C:/Users/abbyo/dndJrDesign/merged1/android/app/.cxx/Debug/43m4o284/x86/CMakeFiles/rebuild_cache.dir
