@@ -98,7 +98,7 @@ class _NotesState extends State<Notes> {
   // Improved Path to get from the campaign in question 
   void _loadNotes() async {
     // Notes for players
-    if (!isDm) { // This displays the notes for Players
+    if (!_viewingDMNotes) { // Player Notees
       final snapshot = await _firestore
           .collection('user_campaigns').doc(widget.campaignId).collection('notes')
           .orderBy('timestamp', descending: false)
@@ -133,7 +133,7 @@ class _NotesState extends State<Notes> {
 
   // Add a new note to Firestore
   Future<void> _addNote() async {
-    if(!isDm){ // Player Notes
+    if (!_viewingDMNotes) { // Player Notees
         if (_textController.text.isNotEmpty) {
         final newNote = _textController.text;
         final docRef = await _firestore.collection('user_campaign').doc(widget.campaignId).collection('notes').add({
@@ -171,7 +171,7 @@ class _NotesState extends State<Notes> {
 
   // Remove a note from Firestore
   Future<void> _removeNote(int index) async {
-    if(!isDm) {// Player Notes
+    if (!_viewingDMNotes) { // Player Notees
         final noteId = _notes[index]['id'];
       await _firestore.collection('user_campaign').doc(widget.campaignId).collection('notes').doc(noteId).delete();
       setState(() {
@@ -188,7 +188,7 @@ class _NotesState extends State<Notes> {
 
   // Save an edited note to Firestore
   Future<void> _saveEditedNote(int index, String newValue) async {
-    if (!isDm) { // Player Notees
+    if (!_viewingDMNotes) { // Player Notees
       final noteId = _notes[index]['id'];
       await _firestore.collection('user_campaign').doc(widget.campaignId).collection('notes').doc(noteId).update({
         'user_notes': newValue,
@@ -207,7 +207,6 @@ class _NotesState extends State<Notes> {
         _editingIndex = null;
       });
     }
-    
   }
 
   // Variable to hold the viewing of DM notes
