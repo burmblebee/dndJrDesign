@@ -136,7 +136,7 @@ class _NotesState extends State<Notes> {
     if (!_viewingDMNotes) { // Player Notees
         if (_textController.text.isNotEmpty) {
         final newNote = _textController.text;
-        final docRef = await _firestore.collection('user_campaign').doc(widget.campaignId).collection('notes').add({
+        final docRef = await _firestore.collection('user_campaigns').doc(widget.campaignId).collection('notes').add({
           'user_notes': newNote,
           'timestamp': FieldValue.serverTimestamp(),
         });
@@ -152,7 +152,7 @@ class _NotesState extends State<Notes> {
     } else { // DM Notes
       if (_textController.text.isNotEmpty) {
         final newNote = _textController.text;
-        final docRef = await _firestore.collection('user_campaign').doc(widget.campaignId).collection('DMnotes').add({
+        final docRef = await _firestore.collection('user_campaigns').doc(widget.campaignId).collection('DMnotes').add({
           'user_notes': newNote,
           'timestamp': FieldValue.serverTimestamp(),
         });
@@ -173,13 +173,13 @@ class _NotesState extends State<Notes> {
   Future<void> _removeNote(int index) async {
     if (!_viewingDMNotes) { // Player Notees
         final noteId = _notes[index]['id'];
-      await _firestore.collection('user_campaign').doc(widget.campaignId).collection('notes').doc(noteId).delete();
+      await _firestore.collection('user_campaigns').doc(widget.campaignId).collection('notes').doc(noteId).delete();
       setState(() {
         _notes.removeAt(index);
       });
     } else { // DM Notes
       final noteId = _notes[index]['id'];
-      await _firestore.collection('user_campaign').doc(widget.campaignId).collection('DMnotes').doc(noteId).delete();
+      await _firestore.collection('user_campaigns').doc(widget.campaignId).collection('DMnotes').doc(noteId).delete();
       setState(() {
         _notes.removeAt(index);
       });
@@ -190,7 +190,7 @@ class _NotesState extends State<Notes> {
   Future<void> _saveEditedNote(int index, String newValue) async {
     if (!_viewingDMNotes) { // Player Notees
       final noteId = _notes[index]['id'];
-      await _firestore.collection('user_campaign').doc(widget.campaignId).collection('notes').doc(noteId).update({
+      await _firestore.collection('user_campaigns').doc(widget.campaignId).collection('notes').doc(noteId).update({
         'user_notes': newValue,
       });
       setState(() {
@@ -199,7 +199,7 @@ class _NotesState extends State<Notes> {
       });
     } else { // DM Notes
       final noteId = _notes[index]['id'];
-      await _firestore.collection('user_campaign').doc(widget.campaignId).collection('DMnotes').doc(noteId).update({
+      await _firestore.collection('user_campaigns').doc(widget.campaignId).collection('DMnotes').doc(noteId).update({
         'user_notes': newValue,
       });
       setState(() {

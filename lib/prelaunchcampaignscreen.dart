@@ -98,7 +98,7 @@ class PreLaunchCampaignScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) =>  Notes(campaignId: campaignID, isDM: isDM)),
+                  MaterialPageRoute(builder: (context) =>  Notes(campaignId: campaignID, isDm: isDM)),
                 );
               },
               icon: const Icon(Icons.note, size: 40),
@@ -116,7 +116,7 @@ class PreLaunchCampaignScreen extends StatelessWidget {
                     MaterialPageRoute(builder: (context) => AddCombat(campaignID: campaignID)),
                   );
                 },
-                child: const Text('DM Combat Screen'),
+                child: const Text('Add Combat'),
               ),
               const SizedBox(height: 10),
               Center( // Centered Text to hopefully make it look better
