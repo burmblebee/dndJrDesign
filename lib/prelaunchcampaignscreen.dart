@@ -49,7 +49,7 @@ class PreLaunchCampaignScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // Image asset (should be replaced with a campaign image)
-            Image.asset('assets/Wizard_Lady.jpg'),
+            //Image.asset('assets/Wizard_Lady.jpg'),
 
             // Calendar Session information, should be pulled from the database (Currently Isn't)
             const SizedBox(height: 20),
