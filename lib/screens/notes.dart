@@ -227,8 +227,8 @@ class _NotesState extends State<Notes> {
               const SizedBox(height: 10),
             ],
             const SizedBox(height: 20),
-            const Text(
-              "Your Notes:",
+             Text(
+              !_viewingDMNotes ? "Player Notes" : "DM Notes",
               style: TextStyle(
                 color: Color.fromRGBO(255, 255, 255, 1),
                 fontSize: 18,
@@ -297,6 +297,7 @@ class _NotesState extends State<Notes> {
                                       ),
                                     ),
                             ),
+                            const SizedBox(width: 10),
                           ],
                         ),
                       );
