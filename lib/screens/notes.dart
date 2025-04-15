@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class ExpandableSection extends StatefulWidget {
   final String title;
@@ -96,61 +97,123 @@ class _NotesState extends State<Notes> {
   // Load notes from Firestore
   // Improved Path to get from the campaign in question 
   void _loadNotes() async {
-    final snapshot = await _firestore
-        .collection('user_campaigns').doc(widget.campaignId).collection('notes')
-        .orderBy('timestamp', descending: false)
-        .get();
-    setState(() {
-      _notes.clear();
-      _notes.addAll(snapshot.docs.map((doc) {
-        return {
-          'id': doc.id,
-          'note': doc['user_notes'],
-          'timestamp': doc['timestamp'],
-        };
-      }));
-    });
+    // Notes for players
+    if (!isDm) { // This displays the notes for Players
+      final snapshot = await _firestore
+          .collection('user_campaigns').doc(widget.campaignId).collection('notes')
+          .orderBy('timestamp', descending: false)
+          .get();
+      setState(() {
+        _notes.clear();
+        _notes.addAll(snapshot.docs.map((doc) {
+          return {
+            'id': doc.id,
+            'note': doc['user_notes'],
+            'timestamp': doc['timestamp'],
+          };
+        }));
+      });
+    } else { // This displays the notes for DM
+        final snapshot = await _firestore
+          .collection('user_campaigns').doc(widget.campaignId).collection('DMnotes')
+          .orderBy('timestamp', descending: false)
+          .get();
+        setState(() {
+        _notes.clear();
+        _notes.addAll(snapshot.docs.map((doc) {
+          return {
+            'id': doc.id,
+            'note': doc['user_notes'],
+            'timestamp': doc['timestamp'],
+          };
+        }));
+      });
+    }
   }
 
   // Add a new note to Firestore
   Future<void> _addNote() async {
-    if (_textController.text.isNotEmpty) {
-      final newNote = _textController.text;
-      final docRef = await _firestore.collection('user_campaign').doc(widget.campaignId).collection('notes').add({
-        'user_notes': newNote,
-        'timestamp': FieldValue.serverTimestamp(),
-      });
-      setState(() {
-        _notes.add({
-          'id': docRef.id,
-          'note': newNote,
-          'timestamp': DateTime.now(),
+    if(!isDm){ // Player Notes
+        if (_textController.text.isNotEmpty) {
+        final newNote = _textController.text;
+        final docRef = await _firestore.collection('user_campaign').doc(widget.campaignId).collection('notes').add({
+          'user_notes': newNote,
+          'timestamp': FieldValue.serverTimestamp(),
         });
-      });
-      _textController.clear();
+        setState(() {
+          _notes.add({
+            'id': docRef.id,
+            'note': newNote,
+            'timestamp': DateTime.now(),
+          });
+        });
+        _textController.clear();
+      }
+    } else { // DM Notes
+      if (_textController.text.isNotEmpty) {
+        final newNote = _textController.text;
+        final docRef = await _firestore.collection('user_campaign').doc(widget.campaignId).collection('DMnotes').add({
+          'user_notes': newNote,
+          'timestamp': FieldValue.serverTimestamp(),
+        });
+        setState(() {
+          _notes.add({
+            'id': docRef.id,
+            'note': newNote,
+            'timestamp': DateTime.now(),
+          });
+        });
+        _textController.clear();
+      }
     }
+    
   }
 
   // Remove a note from Firestore
   Future<void> _removeNote(int index) async {
-    final noteId = _notes[index]['id'];
-    await _firestore.collection('user_campaign').doc(widget.campaignId).collection('notes').doc(noteId).delete();
-    setState(() {
-      _notes.removeAt(index);
-    });
+    if(!isDm) {// Player Notes
+        final noteId = _notes[index]['id'];
+      await _firestore.collection('user_campaign').doc(widget.campaignId).collection('notes').doc(noteId).delete();
+      setState(() {
+        _notes.removeAt(index);
+      });
+    } else { // DM Notes
+      final noteId = _notes[index]['id'];
+      await _firestore.collection('user_campaign').doc(widget.campaignId).collection('DMnotes').doc(noteId).delete();
+      setState(() {
+        _notes.removeAt(index);
+      });
+    }
   }
 
   // Save an edited note to Firestore
   Future<void> _saveEditedNote(int index, String newValue) async {
-    final noteId = _notes[index]['id'];
-    await _firestore.collection('user_campaign').doc(widget.campaignId).collection('notes').doc(noteId).update({
-      'user_notes': newValue,
-    });
-    setState(() {
-      _notes[index]['note'] = newValue;
-      _editingIndex = null;
-    });
+    if (!isDm) { // Player Notees
+      final noteId = _notes[index]['id'];
+      await _firestore.collection('user_campaign').doc(widget.campaignId).collection('notes').doc(noteId).update({
+        'user_notes': newValue,
+      });
+      setState(() {
+        _notes[index]['note'] = newValue;
+        _editingIndex = null;
+      });
+    } else { // DM Notes
+      final noteId = _notes[index]['id'];
+      await _firestore.collection('user_campaign').doc(widget.campaignId).collection('DMnotes').doc(noteId).update({
+        'user_notes': newValue,
+      });
+      setState(() {
+        _notes[index]['note'] = newValue;
+        _editingIndex = null;
+      });
+    }
+    
   }
+
+  // Variable to hold the viewing of DM notes
+  bool _viewingDMNotes = false;
+  
+  bool get isDm => isDm;
 
   @override
   Widget build(BuildContext context) {
@@ -170,6 +233,8 @@ class _NotesState extends State<Notes> {
         child: Column(
           children: [
             const SizedBox(height: 20),
+            ElevatedButton.icon(onPressed: (){_viewingDMNotes = !_viewingDMNotes;}, label: const Text('DM Notes'), icon: FaIcon(FontAwesomeIcons.dragon, size: 20)),
+            const SizedBox(height: 10),
             const Text(
               "Your Notes:",
               style: TextStyle(
