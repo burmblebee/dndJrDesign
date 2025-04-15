@@ -248,7 +248,7 @@ class _OtherCampaignScreenState extends State<OtherCampaignScreen> {
         ),
       MonsterCompendium(),
       SpellCompendium(),
-      Notes(campaignID: widget.campaignID),
+      Notes(campaignId: widget.campaignID, isDm: widget.isDM,),
       BagOfHolding(campaignId: widget.campaignID, isDM: widget.isDM,),
     ];
 

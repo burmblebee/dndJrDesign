@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class ExpandableSection extends StatefulWidget {
   final String title;
@@ -72,8 +73,9 @@ class _ExpandableSectionState extends State<ExpandableSection> {
 }
 
 class Notes extends StatefulWidget {
-  const Notes({super.key, required this.campaignID});
-  final String campaignID;
+  const Notes({super.key, required this.campaignId, required this.isDm});
+  final bool isDm;
+  final String campaignId;
   // Constructor to accept campaignId if needed
 
   @override
@@ -95,82 +97,152 @@ class _NotesState extends State<Notes> {
   // Load notes from Firestore
   // Improved Path to get from the campaign in question
   void _loadNotes() async {
-    final snapshot = await _firestore
-        .collection('user_campaigns').doc(widget.campaignID).collection('notes')
-        .orderBy('timestamp', descending: false)
-        .get();
-    setState(() {
-      _notes.clear();
-      _notes.addAll(snapshot.docs.map((doc) {
-        return {
-          'id': doc.id,
-          'note': doc['user_notes'],
-          'timestamp': doc['timestamp'],
-        };
-      }));
-    });
+    // Notes for players
+    if (!_viewingDMNotes) { // Player Notees
+      final snapshot = await _firestore
+          .collection('user_campaigns').doc(widget.campaignId).collection('notes')
+          .orderBy('timestamp', descending: false)
+          .get();
+      setState(() {
+        _notes.clear();
+        _notes.addAll(snapshot.docs.map((doc) {
+          return {
+            'id': doc.id,
+            'note': doc['user_notes'],
+            'timestamp': doc['timestamp'],
+          };
+        }));
+      });
+    } else { // This displays the notes for DM
+      final snapshot = await _firestore
+          .collection('user_campaigns').doc(widget.campaignId).collection('DMnotes')
+          .orderBy('timestamp', descending: false)
+          .get();
+      setState(() {
+        _notes.clear();
+        _notes.addAll(snapshot.docs.map((doc) {
+          return {
+            'id': doc.id,
+            'note': doc['user_notes'],
+            'timestamp': doc['timestamp'],
+          };
+        }));
+      });
+    }
   }
 
   // Add a new note to Firestore
   Future<void> _addNote() async {
-    if (_textController.text.isNotEmpty) {
-      final newNote = _textController.text;
-      final docRef = await _firestore.collection('user_campaign').doc(widget.campaignID).collection('notes').add({
-        'user_notes': newNote,
-        'timestamp': FieldValue.serverTimestamp(),
-      });
-      setState(() {
-        _notes.add({
-          'id': docRef.id,
-          'note': newNote,
-          'timestamp': DateTime.now(),
+    if (!_viewingDMNotes) { // Player Notees
+      if (_textController.text.isNotEmpty) {
+        final newNote = _textController.text;
+        final docRef = await _firestore.collection('user_campaigns').doc(widget.campaignId).collection('notes').add({
+          'user_notes': newNote,
+          'timestamp': FieldValue.serverTimestamp(),
         });
-      });
-      _textController.clear();
+        setState(() {
+          _notes.add({
+            'id': docRef.id,
+            'note': newNote,
+            'timestamp': DateTime.now(),
+          });
+        });
+        _textController.clear();
+      }
+    } else { // DM Notes
+      if (_textController.text.isNotEmpty) {
+        final newNote = _textController.text;
+        final docRef = await _firestore.collection('user_campaigns').doc(widget.campaignId).collection('DMnotes').add({
+          'user_notes': newNote,
+          'timestamp': FieldValue.serverTimestamp(),
+        });
+        setState(() {
+          _notes.add({
+            'id': docRef.id,
+            'note': newNote,
+            'timestamp': DateTime.now(),
+          });
+        });
+        _textController.clear();
+      }
     }
+
   }
 
   // Remove a note from Firestore
   Future<void> _removeNote(int index) async {
-    final noteId = _notes[index]['id'];
-    await _firestore.collection('user_campaign').doc(widget.campaignID).collection('notes').doc(noteId).delete();
-    setState(() {
-      _notes.removeAt(index);
-    });
+    if (!_viewingDMNotes) { // Player Notees
+      final noteId = _notes[index]['id'];
+      await _firestore.collection('user_campaigns').doc(widget.campaignId).collection('notes').doc(noteId).delete();
+      setState(() {
+        _notes.removeAt(index);
+      });
+    } else { // DM Notes
+      final noteId = _notes[index]['id'];
+      await _firestore.collection('user_campaigns').doc(widget.campaignId).collection('DMnotes').doc(noteId).delete();
+      setState(() {
+        _notes.removeAt(index);
+      });
+    }
   }
 
   // Save an edited note to Firestore
   Future<void> _saveEditedNote(int index, String newValue) async {
-    final noteId = _notes[index]['id'];
-    await _firestore.collection('user_campaign').doc(widget.campaignID).collection('notes').doc(noteId).update({
-      'user_notes': newValue,
-    });
-    setState(() {
-      _notes[index]['note'] = newValue;
-      _editingIndex = null;
-    });
+    if (!_viewingDMNotes) { // Player Notees
+      final noteId = _notes[index]['id'];
+      await _firestore.collection('user_campaigns').doc(widget.campaignId).collection('notes').doc(noteId).update({
+        'user_notes': newValue,
+      });
+      setState(() {
+        _notes[index]['note'] = newValue;
+        _editingIndex = null;
+      });
+    } else { // DM Notes
+      final noteId = _notes[index]['id'];
+      await _firestore.collection('user_campaigns').doc(widget.campaignId).collection('DMnotes').doc(noteId).update({
+        'user_notes': newValue,
+      });
+      setState(() {
+        _notes[index]['note'] = newValue;
+        _editingIndex = null;
+      });
+    }
   }
+
+  // Variable to hold the viewing of DM notes
+  bool _viewingDMNotes = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF464538),
-      //tempy appbar
-      appBar: AppBar(
-        title: const Text(
-          "Notes",
-          style: TextStyle(
-            color: Colors.white,
-          ),
-        ),
-        backgroundColor: const Color(0xFF25291C),
-      ),
       body: Center(
         child: Column(
           children: [
             const SizedBox(height: 20),
-            const Text(
-              "Your Notes:",
+            if(widget.isDm) ...[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('Player', style: TextStyle(fontWeight: FontWeight.bold)),
+                  Switch(value: _viewingDMNotes, onChanged: (value) {
+                    setState(() {
+                      _viewingDMNotes = value;
+                    });
+                    _loadNotes();
+                  }),
+                  const Text('DM', style: TextStyle(fontWeight: FontWeight.bold)),
+                ],
+              ),
+              // ElevatedButton.icon(onPressed: (){
+              //   setState((){_viewingDMNotes = !_viewingDMNotes;});_loadNotes();
+              // },
+              //     label: const Text('DM Notes'), icon: FaIcon(FontAwesomeIcons.dragon, size: 20)),
+              // const SizedBox(height: 10),
+            ],
+            const SizedBox(height: 20),
+            Text(
+              !_viewingDMNotes ? "Player Notes" : "DM Notes",
               style: TextStyle(
                 color: Color.fromRGBO(255, 255, 255, 1),
                 fontSize: 18,
@@ -239,6 +311,7 @@ class _NotesState extends State<Notes> {
                                 ),
                               ),
                             ),
+                            const SizedBox(width: 10),
                           ],
                         ),
                       );
@@ -247,6 +320,7 @@ class _NotesState extends State<Notes> {
                 ),
               ),
             ),
+            const SizedBox(height: 40),
 
             //player character sheet section
             // Removed 4/8/25 Unneeded
@@ -432,7 +506,7 @@ class _NotesState extends State<Notes> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color.fromARGB(255, 241, 187, 87),
                     ),
-                    child: const Text("Add"),
+                    child: const Text("Add", style: TextStyle(color: Colors.black)),
                   ),
                 ],
               );
@@ -442,25 +516,6 @@ class _NotesState extends State<Notes> {
         backgroundColor: const Color.fromARGB(255, 241, 187, 87),
         // Changed to pencil icon
         child: const Icon(Icons.edit, color: Colors.black),
-      ),
-
-      //temp bot nav, NEEDS TO BE REPLACED WITH THE RELEVANT BOTTOM NAV
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: const Color(0xFF25291C),
-        onTap: null,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.home,
-              color: Colors.white,
-            ),
-            label: 'temp',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.event, color: Colors.white),
-            label: "tempyy",
-          ),
-        ],
       ),
     );
   }

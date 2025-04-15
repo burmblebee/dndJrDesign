@@ -3,7 +3,7 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:uuid/uuid.dart';
-import '../prelaunch_campaign_screen.dart';
+import 'package:warlocks_of_the_beach/prelaunch_campaign_screen.dart';
 import '../widgets/navigation/main_appbar.dart';
 import '../widgets/navigation/main_drawer.dart';
 import '../widgets/navigation/bottom_navbar.dart';
@@ -51,14 +51,13 @@ class _CampaignScreenState extends State<CampaignScreen> {
         'campaign_code': campaignId,
       });
 
-      // Save campaign details in the global campaigns collection
+
       await FirebaseFirestore.instance
           .collection('user_campaigns')
           .doc(campaignId)
           .set({
         'title': campaign.title,
-        'color':
-        '#${_selectedColor.value.toRadixString(16).substring(2)}', // Save color as hex
+        'color': '#${_selectedColor.value.toRadixString(16).substring(2)}',
         'DM': user.uid,
         'players': [],
         'createdDate': DateTime.now(),
@@ -141,12 +140,36 @@ class _CampaignScreenState extends State<CampaignScreen> {
     return snapshot.docs.map((doc) => {'id': doc.id, ...doc.data()}).toList();
   }
 
+  Future<void> _updateLastPlayed(
+      BuildContext context, String campaignID) async {
+    if (FirebaseAuth.instance.currentUser == null) {
+      return;
+    } else {
+      final User user = FirebaseAuth.instance.currentUser!;
+      final uuid = user.uid;
+      final String characterId = const Uuid().v4();
+
+      try {
+        await FirebaseFirestore.instance
+            .collection('app_user_profiles')
+            .doc(uuid)
+            .set({
+          'last_played': DateTime.now(),
+          'last_campaign_player' : campaignID,
+        },);
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update last played: $e')),
+        );
+      }
+    }
+  }
+
   void _createNewCampaignSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
       builder: (_) => Padding(
-        padding:
-        EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -163,8 +186,7 @@ class _CampaignScreenState extends State<CampaignScreen> {
                     // Campaign Title Field
                     TextFormField(
                       controller: _titleController,
-                      decoration:
-                      const InputDecoration(labelText: 'Campaign Title'),
+                      decoration: const InputDecoration(labelText: 'Campaign Title'),
                       validator: (value) => value == null || value.isEmpty
                           ? 'Please enter a campaign title'
                           : null,
@@ -178,15 +200,17 @@ class _CampaignScreenState extends State<CampaignScreen> {
                           context: context,
                           builder: (context) {
                             return AlertDialog(
-                              title: const Text('Pick a Color'),
+                              title: const Text('Pick a Campaign Color'),
                               content: SingleChildScrollView(
-                                child: BlockPicker(
+                                child: ColorPicker(
                                   pickerColor: _selectedColor,
                                   onColorChanged: (color) {
                                     setState(() {
                                       _selectedColor = color;
                                     });
                                   },
+                                  showLabel: true,
+                                  pickerAreaHeightPercent: 0.8,
                                 ),
                               ),
                               actions: [
@@ -325,10 +349,13 @@ class _CampaignScreenState extends State<CampaignScreen> {
                         ),
                         GestureDetector(
                           onTap: () {
+                            _updateLastPlayed(context, campaign.id);
                             Navigator.of(context).push(
                               MaterialPageRoute(
-                                  builder: (_) =>
-                                 PreLaunchCampaignScreen(campaignID: campaign.id, isDM: campaign.isDM)
+                                  builder: (_) => PreLaunchCampaignScreen(
+                                      isDM: campaign.isDM,
+                                      campaignID: campaign.id)
+                                // PreLaunchCampaignScreen(campaignID: campaign.id, isDM: campaign.isDM)
                               ),
                             );
                           },
@@ -339,7 +366,8 @@ class _CampaignScreenState extends State<CampaignScreen> {
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 colors: [
-                                  color.withOpacity(0.7),
+                                  color.withOpacity(0.9),
+                                  color.withOpacity(0.6),
                                   color.withOpacity(0.3),
                                 ],
                                 begin: Alignment.topLeft,
