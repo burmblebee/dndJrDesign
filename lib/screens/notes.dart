@@ -212,8 +212,6 @@ class _NotesState extends State<Notes> {
   // Variable to hold the viewing of DM notes
   bool _viewingDMNotes = false;
   
-  bool get isDm => isDm;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -231,8 +229,11 @@ class _NotesState extends State<Notes> {
       body: Center(
         child: Column(
           children: [
-            if(isDm) ...[
-              ElevatedButton.icon(onPressed: (){_viewingDMNotes = !_viewingDMNotes;}, label: const Text('DM Notes'), icon: FaIcon(FontAwesomeIcons.dragon, size: 20)),
+            if(widget.isDm) ...[
+              ElevatedButton.icon(onPressed: (){
+                setState((){_viewingDMNotes = !_viewingDMNotes;});_loadNotes();
+                },
+                label: const Text('DM Notes'), icon: FaIcon(FontAwesomeIcons.dragon, size: 20)),
               const SizedBox(height: 10),
             ],
             const SizedBox(height: 20),
@@ -510,25 +511,6 @@ class _NotesState extends State<Notes> {
   // Changed to pencil icon
   child: const Icon(Icons.edit, color: Colors.black), 
 ),
-
-      //temp bot nav, NEEDS TO BE REPLACED WITH THE RELEVANT BOTTOM NAV
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: const Color(0xFF25291C),
-        onTap: null,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.home,
-              color: Colors.white,
-            ),
-            label: 'temp',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.event, color: Colors.white),
-            label: "tempyy",
-          ),
-        ],
-      ),
     );
   }
 }
