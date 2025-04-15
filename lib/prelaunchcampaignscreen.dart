@@ -98,7 +98,7 @@ class PreLaunchCampaignScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) =>  Notes(campaignId: campaignID)),
+                  MaterialPageRoute(builder: (context) =>  Notes(campaignId: campaignID, isDM: isDM)),
                 );
               },
               icon: const Icon(Icons.note, size: 40),

@@ -72,7 +72,8 @@ class _ExpandableSectionState extends State<ExpandableSection> {
 }
 
 class Notes extends StatefulWidget {
-  const Notes({super.key, required this.campaignId});
+  const Notes({super.key, required this.campaignId, required this.isDm});
+  final bool isDm;
   final String campaignId;
   // Constructor to accept campaignId if needed
 
