@@ -216,16 +216,6 @@ class _NotesState extends State<Notes> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF464538),
-      //tempy appbar
-      appBar: AppBar(
-        title: const Text(
-          "Notes",
-          style: TextStyle(
-            color: Colors.white,
-          ),
-        ),
-        backgroundColor: const Color(0xFF25291C),
-      ),
       body: Center(
         child: Column(
           children: [
