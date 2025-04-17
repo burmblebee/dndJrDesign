@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:warlocks_of_the_beach/combat/premade_attacks.dart';
@@ -362,15 +363,15 @@ class PlayerCombatScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    //TODO: Get character for that player
-    playerCharacter = CombatCharacter(
-      name: 'Suffering',
-      health: 100,
-      maxHealth: 100,
-      armorClass: 15,
-      attacks: [],
-      isNPC: false
-    );
+    // //TODO: Get character for that player
+    // playerCharacter = CombatCharacter(
+    //   name: 'Suffering',
+    //   health: 100,
+    //   maxHealth: 100,
+    //   armorClass: 15,
+    //   attacks: [],
+    //   isNPC: false
+    // );
     final combatState = ref.watch(combatProvider(campaignId));
 
     final characters = combatState.characters;
@@ -378,7 +379,22 @@ class PlayerCombatScreen extends ConsumerWidget {
 
     final oddItemColor = Theme.of(context).canvasColor;
     final evenItemColor = Color(0xFFD4C097).withOpacity(0.5);
+// Get current user UID
+    final user = FirebaseAuth.instance.currentUser;
+    final userId = user?.uid;
 
+    // Find this user's character (assuming you've added playerId to CombatCharacter)
+    final playerCharacter = characters.firstWhere(
+          (char) => char.playerId == userId,
+      orElse: () => CombatCharacter(
+        name: 'Unknown',
+        health: 0,
+        maxHealth: 0,
+        armorClass: 0,
+        attacks: [],
+        isNPC: false,
+      ),
+    );
     return Scaffold(
       appBar: AppBar(title: const Text('Combat Screen')),
       bottomNavigationBar: CombatBottomNavBar(campaignId: campaignId, isDM: false),

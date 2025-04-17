@@ -41,20 +41,54 @@ class CombatStateNotifier extends StateNotifier<CombatState> {
 
   // Load combat data from Firestore and listen for real-time updates
   void _loadCombatData() {
-    _firestore.collection('user_campaigns').doc(campaignId).snapshots().listen((snapshot) {
-      if (snapshot.exists) {
-        final data = snapshot.data()!;
-        List<CombatCharacter> fetchedCharacters = (data['characters'] as List)
-            .map((char) => CombatCharacter.fromMap(char))
-            .toList();
+    _firestore.collection('user_campaigns').doc(campaignId).snapshots().listen((snapshot) async {
+      if (!snapshot.exists) return;
 
-        state = state.copyWith(
-          characters: fetchedCharacters,
-          currentTurnIndex: data['currentTurnIndex'] ?? 0,
-        );
+      final data = snapshot.data()!;
+      final List<dynamic> npcData = data['characters'] ?? [];
+      final List<dynamic> players = data['players'] ?? [];
+
+      // Parse existing NPCs
+      List<CombatCharacter> fetchedNPCs = npcData
+          .map((char) => CombatCharacter.fromMap(char))
+          .where((c) => c.isNPC)
+          .toList();
+
+      // Fetch player characters and attach playerId
+      List<CombatCharacter> playerCharacters = [];
+
+      for (var playerEntry in players) {
+        final characterId = playerEntry['character'];
+        final playerId = playerEntry['player'];
+
+        final charDoc = await _firestore.collection('characters').doc(characterId).get();
+        if (charDoc.exists) {
+          final charData = charDoc.data()!;
+          final character = CombatCharacter.fromMap(charData).copyWith(
+            playerId: playerId,
+            isNPC: false,
+          );
+          playerCharacters.add(character);
+        }
       }
+
+      // Combine and upload to Firestore
+      final allCharacters = [...fetchedNPCs, ...playerCharacters];
+
+      // Write merged characters into Firestore
+      await _firestore.collection('user_campaigns').doc(campaignId).update({
+        'characters': allCharacters.map((c) => c.toFirestore()).toList(),
+      });
+
+      // Update local state
+      state = state.copyWith(
+        characters: allCharacters,
+        currentTurnIndex: data['currentTurnIndex'] ?? 0,
+      );
     });
   }
+
+
 
   // Update Firestore with new turn index
   void nextTurn() {

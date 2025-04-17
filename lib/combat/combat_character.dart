@@ -7,6 +7,7 @@ class CombatCharacter {
   final int armorClass;
   List<AttackOption> attacks;
   final bool isNPC;
+  final String? playerId;
 
   CombatCharacter({
     required this.name,
@@ -15,6 +16,7 @@ class CombatCharacter {
     required this.armorClass,
     required this.attacks,
     required this.isNPC,
+    this.playerId
   });
 
   CombatCharacter copyWith({
@@ -24,6 +26,7 @@ class CombatCharacter {
     int? armorClass,
     List<AttackOption>? attacks,
     bool? isNPC,
+    String? playerId,
   }) {
     return CombatCharacter(
       name: name ?? this.name,
@@ -32,6 +35,7 @@ class CombatCharacter {
       armorClass: armorClass ?? this.armorClass,
       attacks: attacks ?? this.attacks,
       isNPC: isNPC ?? this.isNPC,
+      playerId: playerId ?? this.playerId,
     );
   }
 
@@ -44,6 +48,7 @@ class CombatCharacter {
       'armorClass': armorClass,
       'attacks': attacks.map((attack) => attack.toMap()).toList(),
       'isNPC': isNPC,
+      'playerId': playerId,
     };
   }
 
@@ -59,6 +64,7 @@ class CombatCharacter {
           .toList() ??
           [],
       isNPC: data['isNPC'] as bool? ?? false,
+      playerId: data['playerId'] as String?,
     );
   }
 }

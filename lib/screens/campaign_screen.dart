@@ -3,7 +3,9 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:uuid/uuid.dart';
-import 'package:warlocks_of_the_beach/prelaunch_campaign_screen.dart';
+import 'package:warlocks_of_the_beach/screens/other_campaign_screen.dart';
+import '../combat/firestore_service.dart';
+import '../prelaunch_campaign_screen.dart';
 import '../widgets/navigation/main_appbar.dart';
 import '../widgets/navigation/main_drawer.dart';
 import '../widgets/navigation/bottom_navbar.dart';
@@ -50,7 +52,6 @@ class _CampaignScreenState extends State<CampaignScreen> {
         'your role': 'DM',
         'campaign_code': campaignId,
       });
-
 
       await FirebaseFirestore.instance
           .collection('user_campaigns')
@@ -153,10 +154,12 @@ class _CampaignScreenState extends State<CampaignScreen> {
         await FirebaseFirestore.instance
             .collection('app_user_profiles')
             .doc(uuid)
-            .set({
-          'last_played': DateTime.now(),
-          'last_campaign_player' : campaignID,
-        },);
+            .set(
+          {
+            'last_played': DateTime.now(),
+            'last_campaign_player': campaignID,
+          },
+        );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to update last played: $e')),
@@ -169,7 +172,8 @@ class _CampaignScreenState extends State<CampaignScreen> {
     showModalBottomSheet(
       context: context,
       builder: (_) => Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        padding:
+            EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -186,7 +190,8 @@ class _CampaignScreenState extends State<CampaignScreen> {
                     // Campaign Title Field
                     TextFormField(
                       controller: _titleController,
-                      decoration: const InputDecoration(labelText: 'Campaign Title'),
+                      decoration:
+                          const InputDecoration(labelText: 'Campaign Title'),
                       validator: (value) => value == null || value.isEmpty
                           ? 'Please enter a campaign title'
                           : null,
@@ -258,7 +263,7 @@ class _CampaignScreenState extends State<CampaignScreen> {
       context: context,
       builder: (_) => Padding(
         padding:
-        EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+            EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
           child: Column(children: [
@@ -277,7 +282,7 @@ class _CampaignScreenState extends State<CampaignScreen> {
                 const SizedBox(height: 20),
                 DropdownButtonFormField<String>(
                   decoration:
-                  const InputDecoration(labelText: 'Select Character'),
+                      const InputDecoration(labelText: 'Select Character'),
                   items: characters.map((char) {
                     return DropdownMenuItem<String>(
                       value: char['id'],
@@ -290,11 +295,14 @@ class _CampaignScreenState extends State<CampaignScreen> {
                     });
                   },
                   validator: (val) =>
-                  val == null ? 'Please select a character' : null,
+                      val == null ? 'Please select a character' : null,
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
-                  onPressed: () => _joinCampaign(_campaignCodeController.text),
+                  onPressed: () {
+                    _joinCampaign(_campaignCodeController.text);
+                    addCharacter(_selectedCharacterId!, _campaignCodeController.text);
+                  },
                   child: const Text('Join Campaign'),
                 ),
               ]),
@@ -333,7 +341,7 @@ class _CampaignScreenState extends State<CampaignScreen> {
                     final colorHex =
                         campaign.imageUrl ?? '#6A11CB'; // Default color if none
                     final color =
-                    Color(int.parse('0xFF${colorHex.substring(1)}'));
+                        Color(int.parse('0xFF${colorHex.substring(1)}'));
 
                     return Column(
                       children: [
@@ -353,10 +361,8 @@ class _CampaignScreenState extends State<CampaignScreen> {
                             Navigator.of(context).push(
                               MaterialPageRoute(
                                   builder: (_) => PreLaunchCampaignScreen(
-                                      isDM: campaign.isDM,
-                                      campaignID: campaign.id)
-                                // PreLaunchCampaignScreen(campaignID: campaign.id, isDM: campaign.isDM)
-                              ),
+                                      campaignID: campaign.id,
+                                      isDM: campaign.isDM)),
                             );
                           },
                           child: Container(
@@ -425,7 +431,7 @@ class _CampaignScreenState extends State<CampaignScreen> {
         .get();
 
     final campaignIds =
-    userCampaignsSnapshot.docs.map((doc) => doc.id).toList();
+        userCampaignsSnapshot.docs.map((doc) => doc.id).toList();
 
     final campaigns = <Campaign>[];
     for (final campaignId in campaignIds) {
@@ -446,5 +452,43 @@ class _CampaignScreenState extends State<CampaignScreen> {
     }
 
     yield campaigns;
+  }
+
+  Future<void> addCharacter(String characterId, String campaignId) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+// Pull character from user profile
+    final characterDoc = await FirebaseFirestore.instance
+        .collection('app_user_profiles')
+        .doc(user.uid)
+        .collection('characters')
+        .doc(characterId)
+        .get();
+
+    if (!characterDoc.exists) {
+      // Handle case where character doesn't exist
+      print("Character not found.");
+      return;
+    }
+
+    final characterData = characterDoc.data();
+    if (characterData == null) {
+      // Just in case data is null somehow
+      print("Character data is null.");
+      return;
+    }
+
+// Add character to campaign
+    await FirestoreService().addCharacterToCampaign(
+      campaignId,
+      characterData['name'],
+      characterData['hp'],
+      characterData['hp'],
+      characterData['ac'],
+      [],
+    );
+
+
   }
 }
