@@ -31,6 +31,7 @@ class PlayerCombatScreen extends ConsumerWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
+      useSafeArea: true,
       builder: (context) {
         return Consumer(
           builder: (context, ref, child) {
@@ -40,9 +41,7 @@ class PlayerCombatScreen extends ConsumerWidget {
               builder: (BuildContext context, StateSetter setState) {
                 List<Map<String, String>> characterList = characters
                     .where((character) => character.health > 0)
-                    .map((character) => {
-                  'name': character.name
-                })
+                    .map((character) => {'name': character.name})
                     .toList();
 
                 return Padding(
@@ -51,7 +50,8 @@ class PlayerCombatScreen extends ConsumerWidget {
                   child: Container(
                     decoration: const BoxDecoration(
                       color: Color.fromARGB(255, 159, 158, 154),
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                      borderRadius:
+                      BorderRadius.vertical(top: Radius.circular(16)),
                     ),
                     child: Wrap(
                       children: [
@@ -77,7 +77,8 @@ class PlayerCombatScreen extends ConsumerWidget {
                                     value: char['name'],
                                     child: Text(char['name']!),
                                     onTap: () {
-                                      selectedCharacterId = char['id']; // Save the character's Firestore ID
+                                      selectedCharacterId = char[
+                                      'id']; // Save the character's Firestore ID
                                     },
                                   );
                                 }).toList(),
@@ -89,7 +90,8 @@ class PlayerCombatScreen extends ConsumerWidget {
                               ),
                               const SizedBox(height: 20),
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                mainAxisAlignment:
+                                MainAxisAlignment.spaceEvenly,
                                 children: [
                                   ElevatedButton(
                                     onPressed: () {
@@ -98,7 +100,9 @@ class PlayerCombatScreen extends ConsumerWidget {
                                         MaterialPageRoute(
                                           builder: (context) => PremadeAttack(
                                             campaignId: campaignId,
-                                            attackOptions: characters[currentTurnIndex].attacks,
+                                            attackOptions:
+                                            characters[currentTurnIndex]
+                                                .attacks,
                                             onRollComplete: handleRollComplete,
                                           ),
                                         ),
@@ -120,7 +124,8 @@ class PlayerCombatScreen extends ConsumerWidget {
                                             keyboardType: TextInputType.number,
                                             onChanged: (value) {
                                               setState(() {
-                                                damage = int.tryParse(value) ?? 0;
+                                                damage =
+                                                    int.tryParse(value) ?? 0;
                                               });
                                             },
                                           ),
@@ -133,7 +138,10 @@ class PlayerCombatScreen extends ConsumerWidget {
                                             ),
                                             TextButton(
                                               onPressed: () {
-                                                ref.read(diceRollProvider.notifier).state = damage;
+                                                ref
+                                                    .read(diceRollProvider
+                                                    .notifier)
+                                                    .state = damage;
                                                 Navigator.pop(context);
                                               },
                                               child: const Text('Save'),
@@ -172,11 +180,14 @@ class PlayerCombatScreen extends ConsumerWidget {
                               ),
                               const SizedBox(height: 20),
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                mainAxisAlignment:
+                                MainAxisAlignment.spaceEvenly,
                                 children: [
                                   ElevatedButton(
                                     onPressed: () {
-                                      ref.read(diceRollProvider.notifier).state = 0;
+                                      ref
+                                          .read(diceRollProvider.notifier)
+                                          .state = 0;
                                       Navigator.pop(context);
                                     },
                                     child: const Text('Cancel'),
@@ -185,17 +196,27 @@ class PlayerCombatScreen extends ConsumerWidget {
                                     onPressed: () async {
                                       if (selectedCharacter != null) {
                                         int newHealth = characters
-                                            .firstWhere((char) => char.name == selectedCharacter)
-                                            .health - damage;
+                                            .firstWhere((char) =>
+                                        char.name ==
+                                            selectedCharacter)
+                                            .health -
+                                            damage;
 
-                                        await firestoreService.updateCharacterHealth(campaignId, selectedCharacter!, newHealth);
-
+                                        await firestoreService
+                                            .updateCharacterHealth(campaignId,
+                                            selectedCharacter!, newHealth);
+                                        ref
+                                            .read(combatProvider(campaignId)
+                                            .notifier)
+                                            .updateHealth(
+                                            selectedCharacter!, newHealth);
                                         Navigator.pop(context);
                                       } else {
                                         showDialog(
                                           context: context,
                                           builder: (context) => AlertDialog(
-                                            title: const Text('No Character Selected'),
+                                            title: const Text(
+                                                'No Character Selected'),
                                             actions: [
                                               TextButton(
                                                 onPressed: () {

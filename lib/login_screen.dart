@@ -114,32 +114,31 @@ class LoginScreen extends StatelessWidget {
         automaticallyImplyLeading: false,
 
       ),
-      body: SingleChildScrollView(
-        child: Center(
-          child: Column(
-            children: [
-              const Spacer(),
-              Image.asset(
-                'assets/dragon.png',
-                fit: BoxFit
-                    .contain, // Ensures the image scales while maintaining aspect ratio
-              // ),
-                            ),
-              ElevatedButton.icon(
-                icon: const Icon(Icons.email),
-                label: const Text("Sign in with Email"),
-                onPressed: () => loginPopup(context), // Open login popup
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton.icon(
-                icon: const Icon(Icons.person_add),
-                label: const Text("Sign Up"),
-                onPressed: () => signupPopup(context), // Open signup popup
-              ),
-              const SizedBox(height: 30,),
-              const Spacer()
-            ],
-          ),
+      
+      body: Center(
+        child: Column(
+          children: [
+            const Spacer(),
+            Image.asset(
+              'assets/dragon.png',
+              fit: BoxFit
+                  .contain, // Ensures the image scales while maintaining aspect ratio
+            // ),
+                          ),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.email),
+              label: const Text("Sign in with Email"),
+              onPressed: () => loginPopup(context), // Open login popup
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.person_add),
+              label: const Text("Sign Up"),
+              onPressed: () => signupPopup(context), // Open signup popup
+            ),
+            const SizedBox(height: 30,),
+            const Spacer()
+          ],
         ),
       ),
     );

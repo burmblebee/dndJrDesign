@@ -12,7 +12,8 @@ import '../screens/notes.dart';
 import 'item/bag_of_holding.dart';
 
 class PreLaunchCampaignScreen extends StatelessWidget {
-  const PreLaunchCampaignScreen({super.key, required this.campaignID, required this.isDM});
+  const PreLaunchCampaignScreen(
+      {super.key, required this.campaignID, required this.isDM});
 
   final bool isDM;
   final String campaignID;
@@ -20,20 +21,23 @@ class PreLaunchCampaignScreen extends StatelessWidget {
   Stream<List<String>> _getPlayers() async* {
     final user = FirebaseAuth.instance.currentUser;
 
-    if(user == null) {
-      yield[];
+    if (user == null) {
+      yield [];
       return;
     }
 
-    final snapshot = await FirebaseFirestore.instance.collection('user_campaigns').doc(campaignID).get();
+    final snapshot = await FirebaseFirestore.instance
+        .collection('user_campaigns')
+        .doc(campaignID)
+        .get();
 
-    if(snapshot.exists) {
+    if (snapshot.exists) {
       final data = snapshot.data() as Map<String, dynamic>;
       final playersList = data['players'] as List<dynamic>;
       final players = playersList.map((player) => player.toString()).toList();
       yield players;
     } else {
-      yield[];
+      yield [];
     }
   }
 
@@ -43,138 +47,189 @@ class PreLaunchCampaignScreen extends StatelessWidget {
       appBar: MainAppbar(),
       drawer: const MainDrawer(),
       bottomNavigationBar: const MainBottomNavBar(),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Image asset (should be replaced with a campaign image)
-            //Image.asset('assets/Wizard_Lady.jpg'),
-
-            // Calendar Session information, should be pulled from the database (Currently Isn't)
-            const SizedBox(height: 20),
-            const Text(
-              'Next Scheduled Session: 2/13/2025 @ 6pm',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-
-            // Calendar Icon that is a button that leads to the schedule screen 
-            // (Might need to be changed depending on what Gabby says is the correct calendar screen)
-            const SizedBox(height: 10),
-            ElevatedButton.icon( // Changed to ElevatedButton.icon to see if it is more clear that it is a button
-              onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const Schedule(events: {},)));
-              },
-              icon: const Icon(Icons.calendar_today, size: 40),
-              label: const Text('Session Calendar'),
-            ),
-            //IconButton(
-            //  onPressed: () {
-            //    Navigator.push(context, MaterialPageRoute(builder: (context) => const Schedule()));
-            //  },
-            //   icon: const Icon(Icons.calendar_today, size: 40)),
-            //const SizedBox(height: 10),
-            //ElevatedButton(onPressed: () {
-            //  Navigator.push(context, MaterialPageRoute(builder: (context) => const Schedule()));
-            //}, child: const Text('Session Calendar')),
-            const SizedBox(height: 20),
-
-            // Elevated Button to launch the campaign, Want to make the button more impressive
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  // Should be a function that checks if the user is a DM or a player, and sorting them to the correctr screen depending on that.
-                  MaterialPageRoute(builder: (context) => ((isDM) ? DMCombatScreen(campaignId: campaignID) : PlayerCombatScreen(campaignId: campaignID))),
-                );
-              },
-              child: const Text('Launch Campaign'),
-            ),
-
-            // Note Screen Button, should be a button that leads to the note screen
-            const SizedBox(height: 10),
-            //const Icon(Icons.note, size: 40), // ITS JUST GONNA STAY SIDEWAYS
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) =>  Notes(campaignId: campaignID, isDm: isDM,)),
-                );
-              },
-              icon: const Icon(Icons.note, size: 40),
-              label: const Text('Notes'),
-            ),
-            const SizedBox(height: 10),
-
-            // DM Combat Screen button, should only be visible to the DM
-            // Check to see if works because I cannot check this (Michael 4/7/25 1:29pm){Works!}
-            if (isDM) ... [
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const SizedBox(height: 20),
+              const Text(
+                'Next Scheduled Session: 2/13/2025 @ 6pm',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const Schedule(events: {})),
+                  );
+                },
+                icon: const Icon(Icons.calendar_today, size: 40),
+                label: const Text('Session Calendar'),
+              ),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => AddCombat(campaignId: campaignID)),
+                    MaterialPageRoute(
+                      builder: (context) => isDM
+                          ? DMCombatScreen(campaignId: campaignID)
+                          : PlayerCombatScreen(campaignId: campaignID),
+                    ),
                   );
                 },
-                child: const Text('Add Combat'),
+                child: const Text('Launch Campaign'),
               ),
               const SizedBox(height: 10),
-              Center( // Centered Text to hopefully make it look better
-                child: Text(
-                  'Campaign Invite Code: $campaignID',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          Notes(campaignId: campaignID, isDm: isDM),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.note, size: 40),
+                label: const Text('Notes'),
+              ),
+              const SizedBox(height: 10),
+              if (isDM) ...[
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              AddCombat(campaignId: campaignID)),
+                    );
+                  },
+                  child: const Text('Add Combat'),
                 ),
+                const SizedBox(height: 10),
+                Text(
+                  'Campaign Invite Code: $campaignID',
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ],
+              const SizedBox(height: 10),
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          BagOfHolding(campaignId: campaignID, isDM: isDM),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.backpack, size: 40),
+                label: const Text('Bag of Holding'),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'Your Players',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+              StreamBuilder<List<String>>(
+                stream: _getPlayers(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const CircularProgressIndicator();
+                  } else if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Text('No players found');
+                  } else {
+                    final players = snapshot.data!;
+                    return ListView.separated(
+                      physics: const NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      itemCount: players.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 10),
+                      itemBuilder: (context, index) {
+                        return FutureBuilder<String>(
+                          future: getPlayerInfo(players[index], index),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return const ListTile(
+                                leading: Icon(Icons.account_circle),
+                                title: Text('Loading...'),
+                              );
+                            } else if (snapshot.hasError) {
+                              return ListTile(
+                                leading: const Icon(Icons.error),
+                                title: Text('Error: ${snapshot.error}'),
+                              );
+                            } else {
+                              return ListTile(
+                                leading: const Icon(Icons.account_circle),
+                                title: Text(snapshot.data ?? 'Unknown player'),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              );
+                            }
+                          },
+                        );
+                      },
+                    );
+                  }
+                },
               ),
             ],
-
-            // Bag of Holding button (Consider switching icon to Icons.shopping_bag)
-            const SizedBox(height: 10),
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => BagOfHolding(campaignId: campaignID, isDM: isDM,)));
-              },
-              icon: const Icon(Icons.backpack, size: 40),
-              label: const Text('Bag of Holding'),
-            ),
-
-            // Title card for the player list
-            const SizedBox(height: 20),
-            const Text(
-              'Your Players',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-
-            // A list of players in the campaign, should be pulled from the database
-            //const SizedBox(height: 20), {Commented out to see if it looks better}
-            StreamBuilder<List<String>>(
-              stream: _getPlayers(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const CircularProgressIndicator(); // Show a loading indicator
-                } else if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}'); // Show an error message
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Text('No players found'); // Handle empty data
-                } else {
-                  final players = snapshot.data!;
-                  return Column(
-                    children: players.map((player) {
-                      return Column(
-                        children: [
-                          ListTile(
-                            leading: const Icon(Icons.account_circle),
-                            title: Text(player),
-                          ),
-                          const SizedBox(height: 10),
-                        ],
-                      );
-                    }).toList(),
-                  );
-                }
-              },
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
+
+  Future<String> getPlayerInfo(String player, int index) async {
+    //pull player and character ids from firestore
+    // Remove the curly braces
+    player = player.replaceAll('{', '').replaceAll('}', '');
+
+    // Split the string into key-value pairs
+    List<String> pairs = player.split(', ');
+
+    // Create a map from the key-value pairs
+    Map<String, String> parsedMap = {
+      for (var pair in pairs) pair.split(': ')[0]: pair.split(': ')[1],
+    };
+
+    // Access the values
+    String characterId = parsedMap['character']!;
+    String playerId = parsedMap['player']!;
+    //pull player username using id
+    DocumentSnapshot userDoc = await FirebaseFirestore.instance
+        .collection('app_user_profiles')
+        .doc(playerId).get();
+    String playerName = "Player $index"; // Default value
+
+// Check if the document exists and contains the 'username' field
+    if (userDoc.exists) {
+      Map<String, dynamic> data = userDoc.data() as Map<String, dynamic>;
+      playerName = data.containsKey('username') ? data['username'] : playerName;
+    }
+
+
+    //pull character name using ids
+    DocumentSnapshot characterDoc = await FirebaseFirestore.instance
+        .collection('app_user_profiles')
+        .doc(playerId)
+        .collection('characters')
+        .doc(characterId)
+        .get();
+    String characterName = characterDoc['name'];
+
+    return "Character: $characterName\nPlayer: $playerName";
+  }
+
 }

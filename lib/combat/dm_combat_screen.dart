@@ -30,6 +30,7 @@ class DMCombatScreen extends ConsumerWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
+      useSafeArea: true,
       builder: (context) {
         return Consumer(
           builder: (context, ref, child) {
@@ -254,6 +255,7 @@ class DMCombatScreen extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
         return StatefulBuilder(
@@ -407,6 +409,7 @@ class DMCombatScreen extends ConsumerWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
+      useSafeArea: true,
       builder: (context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
@@ -756,6 +759,7 @@ class DMCombatScreen extends ConsumerWidget {
     String? selectedCombat;
     showModalBottomSheet(
       context: context,
+      useSafeArea: true,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
@@ -844,11 +848,11 @@ class DMCombatScreen extends ConsumerWidget {
     if (npcState.npcs.isEmpty) {
       Future.microtask(() => npcNotifier.fetchNPCs());
     }
-
+    final combatState = ref.watch(combatProvider(campaignId));
     List<CombatCharacter> characters =
-        ref.watch(combatProvider(campaignId)).characters;
+        combatState.characters;
     int currentTurnIndex =
-        ref.watch(combatProvider(campaignId)).currentTurnIndex;
+        combatState.currentTurnIndex;
     final oddItemColor = Theme.of(context).canvasColor;
     final evenItemColor = Color(0xFFD4C097).withOpacity(0.5);
 
