@@ -487,7 +487,24 @@ class _CampaignScreenState extends State<CampaignScreen> {
       characterData['hp'],
       characterData['ac'],
       [],
+      false
     );
+    await FirebaseFirestore.instance
+        .collection('user_campaigns')
+        .doc(campaignId)
+        .update({
+      'characters': FieldValue.arrayUnion([
+        {
+          'playerId': user.uid,
+          'armorClass': characterData['ac'],
+          'health': characterData['hp'],
+          'maxHealth': characterData['hp'],
+          'name': characterData['name'],
+          'attacks':[],
+          'isNPC': false,
+        }
+      ])
+    });
 
 
   }

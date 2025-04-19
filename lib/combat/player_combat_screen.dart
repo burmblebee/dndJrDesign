@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:warlocks_of_the_beach/combat/player_character.dart';
 import 'package:warlocks_of_the_beach/combat/premade_attacks.dart';
 import 'package:warlocks_of_the_beach/widgets/navigation/combat_nav_bar.dart';
 import '../dice/diceRoller.dart';
@@ -14,7 +15,7 @@ import 'firestore_service.dart';
 class PlayerCombatScreen extends ConsumerWidget {
   PlayerCombatScreen({super.key, required this.campaignId});
   final String campaignId;
-  late CombatCharacter playerCharacter;
+  // late CombatCharacter playerCharacter;
 
   void attackBottomSheet(BuildContext context, List<CombatCharacter> characters,
       WidgetRef ref, int currentTurnIndex, String campaignId) {
@@ -409,14 +410,14 @@ class PlayerCombatScreen extends ConsumerWidget {
         },
         child: const Icon(Icons.casino),
       ),
-      body: Center(
+      body: SizedBox.expand(
         child: Column(
           children: [
             const SizedBox(height: 20),
             currentTurnOrder(context, ref, oddItemColor, evenItemColor),
              const SizedBox(height: 20),
             const SizedBox(height: 40),
-            currentTurn(context, characters, currentTurnIndex, ref),
+            currentTurn(context, playerCharacter, characters, currentTurnIndex, ref),
             const Spacer(),
             const SizedBox(height: 20),
           ],
@@ -467,7 +468,7 @@ class PlayerCombatScreen extends ConsumerWidget {
   }
 
 
-  Widget currentTurn(context, List<CombatCharacter> characters, int currentTurnIndex,
+  Widget currentTurn(context, CombatCharacter playerCharacter, List<CombatCharacter> characters, int currentTurnIndex,
       WidgetRef ref) {
     if (characters.isEmpty || currentTurnIndex >= characters.length) {
       return const Text("Waiting for characters to be added...");

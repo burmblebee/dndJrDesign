@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:warlocks_of_the_beach/npc/npc.dart';
 
 import '../combat/combat_character.dart';
@@ -79,7 +80,7 @@ class FirestoreService {
 
 
   Future<void> addCharacterToCampaign(
-      String campaignId, String name, int hp, int maxHealth, int ac, List<AttackOption> attacks) async {
+      String campaignId, String name, int hp, int maxHealth, int ac, List<AttackOption> attacks, bool isNPC) async {
     try {
       final campaignRef = FirebaseFirestore.instance.collection('user_campaigns').doc(campaignId);
 
@@ -96,15 +97,36 @@ class FirestoreService {
 
       // Now proceed to add the character
       final attacksMap = attacks.map((attack) => attack.toMap()).toList();
-      await campaignRef.update({
-        'characters': FieldValue.arrayUnion([{
-          'name': name,
-          'hp': hp,
-          'maxHealth': maxHealth,
-          'ac': ac,
-          'attacks': attacksMap,
-        }]),
-      });
+      final user = FirebaseAuth.instance.currentUser;
+
+      if(isNPC) {
+        await campaignRef.update({
+          'characters': FieldValue.arrayUnion([{
+            'playerId': null,
+            'name': name,
+            'hp': hp,
+            'maxHealth': maxHealth,
+            'ac': ac,
+            'attacks': attacksMap,
+            'isNPC': true,
+          }
+          ]),
+        });
+      } else {
+        await campaignRef.update({
+          'characters': FieldValue.arrayUnion([{
+            'playerId': user?.uid,
+            'name': name,
+            'hp': hp,
+            'maxHealth': maxHealth,
+            'ac': ac,
+            'attacks': attacksMap,
+            'isNPC': false,
+          }]),
+        });
+
+      }
+
 
     } catch (e) {
       print("Error adding character: $e");

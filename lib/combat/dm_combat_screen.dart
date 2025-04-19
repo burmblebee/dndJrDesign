@@ -561,7 +561,9 @@ class DMCombatScreen extends ConsumerWidget {
                                             selectedName!,
                                             hp!,
                                             maxHealth!,
-                                            ac!, []);
+                                            ac!,
+                                            [],
+                                            true);
 
                                     ref
                                         .read(
@@ -605,7 +607,8 @@ class DMCombatScreen extends ConsumerWidget {
                                             selectedNpc.maxHealth,
                                             selectedNpc.maxHealth,
                                             selectedNpc.ac,
-                                            selectedNpc.attacks);
+                                            selectedNpc.attacks,
+                                            true);
 
                                     ref
                                         .read(

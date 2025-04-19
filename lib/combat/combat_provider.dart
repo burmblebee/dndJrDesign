@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../combat/combat_character.dart';
@@ -32,7 +33,7 @@ class CombatStateNotifier extends StateNotifier<CombatState> {
 
   // Add startCombat method that uses _firestoreService
   void startCombat(String campaignId) async {
-    await _firestoreService.initializeCombat(campaignId, state.characters);  // Use the instance here
+    await _firestoreService.initializeCombat(campaignId, state.characters);
   }
 
 
@@ -61,14 +62,28 @@ class CombatStateNotifier extends StateNotifier<CombatState> {
         final characterId = playerEntry['character'];
         final playerId = playerEntry['player'];
 
-        final charDoc = await _firestore.collection('characters').doc(characterId).get();
+        final charDoc = await _firestore
+            .collection('app_user_profiles')
+            .doc(playerId) // assuming playerId is also their profile doc ID
+            .collection('characters')
+            .doc(characterId)
+            .get();
         if (charDoc.exists) {
           final charData = charDoc.data()!;
-          final character = CombatCharacter.fromMap(charData).copyWith(
-            playerId: playerId,
-            isNPC: false,
-          );
+          //try parsing health and max health from string
+          final health = int.tryParse(charData['hp'].toString()) ?? 0;
+          final character = CombatCharacter
+            (
+              name: charData['name'],
+              health: health,
+              maxHealth: health,
+              armorClass: charData['ac'],
+              attacks: [],
+              isNPC: false,
+          playerId: playerId);
+
           playerCharacters.add(character);
+          debugPrint('Player character fetched: ${character.name}');
         }
       }
 
