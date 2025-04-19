@@ -384,7 +384,6 @@ class PlayerCombatScreen extends ConsumerWidget {
     final user = FirebaseAuth.instance.currentUser;
     final userId = user?.uid;
 
-    // Find this user's character (assuming you've added playerId to CombatCharacter)
     final playerCharacter = characters.firstWhere(
           (char) => char.playerId == userId,
       orElse: () => CombatCharacter(
@@ -410,19 +409,21 @@ class PlayerCombatScreen extends ConsumerWidget {
         },
         child: const Icon(Icons.casino),
       ),
-      body: SizedBox.expand(
-        child: Column(
-          children: [
-            const SizedBox(height: 20),
-            currentTurnOrder(context, ref, oddItemColor, evenItemColor),
-             const SizedBox(height: 20),
-            const SizedBox(height: 40),
-            currentTurn(context, playerCharacter, characters, currentTurnIndex, ref),
-            const Spacer(),
-            const SizedBox(height: 20),
-          ],
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            child: Column(
+              children: [
+                currentTurnOrder(context, ref, oddItemColor, evenItemColor),
+                const SizedBox(height: 40),
+                currentTurn(context, playerCharacter, characters, currentTurnIndex, ref),
+              ],
+            ),
+          ),
         ),
       ),
+
     );
   }
 
@@ -517,7 +518,7 @@ class PlayerCombatScreen extends ConsumerWidget {
                         child: const Text('Heal')),
                   ],
                 ),
-                const Spacer(),
+                // const Spacer(),
                 ElevatedButton(
                   onPressed: () {
                     ref.read(combatProvider(campaignId).notifier).nextTurn();
