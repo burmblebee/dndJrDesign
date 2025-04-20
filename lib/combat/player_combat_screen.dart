@@ -436,7 +436,7 @@ class PlayerCombatScreen extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(vertical: 20),
             child: Column(
               children: [
-                currentTurnOrder(context, ref, oddItemColor, evenItemColor),
+                currentTurnOrder(context, ref, oddItemColor, evenItemColor, playerCharacter),
                 const SizedBox(height: 40),
                 currentTurn(context, playerCharacter, characters, currentTurnIndex, ref),
               ],
@@ -448,8 +448,14 @@ class PlayerCombatScreen extends ConsumerWidget {
     );
   }
 
-  Widget currentTurnOrder(BuildContext context, WidgetRef ref, Color oddItemColor, Color evenItemColor) {
-    final characters = ref.watch(combatProvider(campaignId)).characters; // Live updates
+  Widget currentTurnOrder(
+      BuildContext context,
+      WidgetRef ref,
+      Color oddItemColor,
+      Color evenItemColor,
+      CombatCharacter playerCharacter,
+      ) {
+    final characters = ref.watch(combatProvider(campaignId)).characters;
 
     return SizedBox(
       height: 300,
@@ -480,6 +486,24 @@ class PlayerCombatScreen extends ConsumerWidget {
                         maxLines: 1,
                       ),
                     ),
+                    if (characters[index].name == playerCharacter.name) ...[
+                      const SizedBox(width: 5),
+                      Text(
+                        '${characters[index].health}/${characters[index].maxHealth}',
+                        style: TextStyle(
+                          color: Theme.of(context).textTheme.bodyMedium?.color,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        '${characters[index].armorClass}',
+                        style: TextStyle(
+                          color: Theme.of(context).textTheme.bodyMedium?.color,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                    ],
                   ],
                 ),
               ),
@@ -488,6 +512,7 @@ class PlayerCombatScreen extends ConsumerWidget {
       ),
     );
   }
+
 
 
   Widget currentTurn(context, CombatCharacter playerCharacter, List<CombatCharacter> characters, int currentTurnIndex,
