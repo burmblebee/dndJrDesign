@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:warlocks_of_the_beach/widgets/navigation/combat_nav_bar.dart';
 
 import 'fixed_item.dart';
 import 'item sub-widgets/armor_details.dart';

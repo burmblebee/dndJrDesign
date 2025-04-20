@@ -9,9 +9,9 @@ import '../widgets/navigation/bottom_navbar.dart';
 import '../combat/dm_combat_screen.dart';
 import '../combat/player_combat_screen.dart';
 import '../combat/create_combat.dart';
-import '../screens/notes.dart';
+import '../screens/notes_prelaunch.dart';
 import 'combat/combat_provider.dart';
-import 'item/bag_of_holding.dart';
+import 'item/bag_of_holding_prelaunch.dart';
 
 class PreLaunchCampaignScreen extends ConsumerWidget {
   const PreLaunchCampaignScreen({
