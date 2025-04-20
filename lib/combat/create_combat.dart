@@ -59,11 +59,22 @@ class _AddCombatState extends State<AddCombat> {
   }
 
   Future<void> saveCombat() async {
-    await _firestore.collection('user_campaigns').doc(widget.campaignId).collection('combats').doc().set({
+    final combatRef = _firestore
+        .collection('user_campaigns')
+        .doc(widget.campaignId)
+        .collection('combats')
+        .doc(); // Auto-generated ID
+
+    await combatRef.set({
+      'combatId': combatRef.id,
       'name': combatNameController.text,
-      'npcs': npcs.where((npc) => isSelected[npcs.indexOf(npc)]).map((npc) => npc.toMap()).toList(),
+      'npcs': npcs
+          .where((npc) => isSelected[npcs.indexOf(npc)])
+          .map((npc) => npc.toMap())
+          .toList(),
     });
   }
+
 
 
 
@@ -132,6 +143,23 @@ class _AddCombatState extends State<AddCombat> {
             // Create Combat Button
             ElevatedButton(
               onPressed: () {
+                if (combatNameController.text.trim().isEmpty) {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Missing Combat Name'),
+                      content: const Text('Please enter a name for the combat.'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: const Text('OK'),
+                        ),
+                      ],
+                    ),
+                  );
+                  return;
+                }
+
                 saveCombat();
                 Navigator.pop(context);
               },

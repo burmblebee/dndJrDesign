@@ -81,7 +81,6 @@ class PreLaunchCampaignScreen extends ConsumerWidget {
                   final combatNotifier =
                   ref.read(combatProvider(campaignID).notifier);
                   await combatNotifier.startCombat(campaignID);
-                  debugPrint('🔥 startCombat triggered');
 
                   Navigator.push(
                     context,

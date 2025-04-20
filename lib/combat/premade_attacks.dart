@@ -122,41 +122,39 @@ class _PremadeAttackState extends State<PremadeAttack>
         return; // Prevent the dialog from showing yet
       } else {
         doubleRoll[1] = total; // Store second roll
-        sendToCampaign();
+        // sendToCampaign();
         showAdvantageDialog();
       }
     } else {
-      sendToCampaign();
+      // sendToCampaign();
       showRollResultDialog(total);
     }
   }
 
-  void sendToCampaign() async {
-    if (widget.campaignId != '') {
-      //  final String? currentUserUid = FirebaseAuth.instance.currentUser?.uid;
-      //    if (currentUserUid != null) {
-      final docRef = FirebaseFirestore.instance
-          .collection('campaigns')
-          .doc(campaignId)
-          .collection('rolls');
-
-      try {
-        await docRef.add(
-          {
-            'Rolls': diceValues,
-            'Total': diceValues.reduce((value, element) => value + element),
-            'timestamp': FieldValue.serverTimestamp(), // Add timestamp
-            //      'userId': currentUserUid,
-          },
-        );
-
-        print('Rolls successfully sent to campaign: $campaignId');
-      } catch (e) {
-        print('Error saving dice rolls: $e');
-      }
-      // }
-    }
-  }
+  // void sendToCampaign() async {
+  //   if (widget.campaignId != '') {
+  //     //  final String? currentUserUid = FirebaseAuth.instance.currentUser?.uid;
+  //     //    if (currentUserUid != null) {
+  //     final docRef = FirebaseFirestore.instance
+  //         .collection('campaigns')
+  //         .doc(campaignId)
+  //         .collection('rolls');
+  //
+  //     try {
+  //       await docRef.add(
+  //         {
+  //           'Rolls': diceValues,
+  //           'Total': diceValues.reduce((value, element) => value + element),
+  //           'timestamp': FieldValue.serverTimestamp(), // Add timestamp
+  //           //      'userId': currentUserUid,
+  //         },
+  //       );
+  //     } catch (e) {
+  //       print('Error saving dice rolls: $e');
+  //     }
+  //     // }
+  //   }
+  // }
 
   void showAdvantageDialog() {
 
@@ -182,7 +180,7 @@ class _PremadeAttackState extends State<PremadeAttack>
               onPressed: () {
                 Navigator.of(context).pop();
                 Navigator.of(context).pop();
-                sendToCampaign();
+                // sendToCampaign();
                 setState(() {
                   showDice = false;
                 });
@@ -377,7 +375,6 @@ class _PremadeAttackState extends State<PremadeAttack>
                   ),
                   ElevatedButton(
                       onPressed: () {
-                        debugPrint("Dice to roll: $diceToRoll");
                         rollDice();
                       },
                       child: const Text("Roll Dice",

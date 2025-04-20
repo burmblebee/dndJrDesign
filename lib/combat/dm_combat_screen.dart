@@ -404,7 +404,7 @@ class DMCombatScreen extends ConsumerWidget {
 
     final npcState = ref.watch(npcProvider); // Watch the NPC state
     final existingNames = characters.map((c) => c.name).toSet();
-    debugPrint("NPCs available: ${npcState.npcs.map((e) => e.name).toList()}");
+    // debugPrint("NPCs available: ${npcState.npcs.map((e) => e.name).toList()}");
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -733,7 +733,7 @@ class DMCombatScreen extends ConsumerWidget {
     );
   }
 
-  Future<List<String>> fetchCombatNames(String campaignId) async {
+  Future<List<Map<String, dynamic>>> fetchCombats(String campaignId) async {
     final FirebaseFirestore _firestore = FirebaseFirestore.instance;
     try {
       QuerySnapshot combatDocs = await _firestore
@@ -742,21 +742,29 @@ class DMCombatScreen extends ConsumerWidget {
           .collection('combats')
           .get();
 
-      // Extract combat names
-      List<String> combatNames =
-          combatDocs.docs.map((doc) => doc['name'] as String).toList();
+      List<Map<String, dynamic>> combats = combatDocs.docs.map((doc) {
+        return {
+          'id': doc.id,
+          'name': doc['name'] ?? 'Unnamed Combat',
+        };
+      }).toList();
 
-      return combatNames;
+      return combats;
     } catch (e) {
       print("Error fetching combats: $e");
       return [];
     }
   }
 
-//TODO: Implement this function
-  Future<void> startNewCombatBottomSheet(BuildContext context) async {
-    List<String> combats = await fetchCombatNames(campaignId);
-    String? selectedCombat;
+
+  Future<void> startNewCombatBottomSheet(
+      BuildContext context,
+      WidgetRef ref,
+      String campaignId,
+      ) async {
+    List<Map<String, dynamic>> combats = await fetchCombats(campaignId);
+    String? selectedCombatId;
+
     showModalBottomSheet(
       context: context,
       useSafeArea: true,
@@ -772,8 +780,7 @@ class DMCombatScreen extends ConsumerWidget {
                 child: Container(
                   decoration: const BoxDecoration(
                     color: Color.fromARGB(255, 159, 158, 154),
-                    borderRadius:
-                        BorderRadius.vertical(top: Radius.circular(16)),
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
                   ),
                   child: Wrap(
                     children: [
@@ -791,40 +798,74 @@ class DMCombatScreen extends ConsumerWidget {
                                 ),
                               ),
                               const SizedBox(height: 20),
-                              DropdownButton(
-                                  items: combats
-                                      .map((combat) => DropdownMenuItem<String>(
-                                            value: combat,
-                                            child: Text(combat),
-                                          ))
-                                      .toList(),
-                                  value: selectedCombat,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      selectedCombat = value;
-                                    });
-                                  }),
+                              DropdownButton<String>(
+                                items: combats.map((combat) {
+                                  return DropdownMenuItem<String>(
+                                    value: combat['id'],
+                                    child: Text(combat['name'] ?? 'Unnamed'),
+                                  );
+                                }).toList(),
+                                value: selectedCombatId,
+                                hint: const Text('Select a saved combat'),
+                                onChanged: (value) {
+                                  setState(() {
+                                    selectedCombatId = value;
+                                  });
+                                },
+                              ),
                               const SizedBox(height: 20),
                               ElevatedButton(
-                                  //TODO: Start a new combat with only player characters
-                                  onPressed: () {},
-                                  child: Text('Reset Combat with No NPCs')),
+                                onPressed: () async {
+                                  final notifier = ref
+                                      .read(combatProvider(campaignId).notifier);
+
+                                  final playersOnly = notifier.state.characters
+                                      .where((c) => !c.isNPC)
+                                      .toList();
+
+                                  notifier.state = notifier.state.copyWith(
+                                    characters: playersOnly,
+                                    currentTurnIndex: 0,
+                                  );
+
+                                  await FirebaseFirestore.instance
+                                      .collection('user_campaigns')
+                                      .doc(campaignId)
+                                      .update({
+                                    'characters': playersOnly
+                                        .map((c) => c.toFirestore())
+                                        .toList(),
+                                    'currentTurnIndex': 0,
+                                  });
+
+                                  Navigator.pop(context);
+                                },
+                                child: const Text('Reset Combat with No NPCs'),
+                              ),
                               Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                 children: [
                                   ElevatedButton(
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                      },
-                                      child: Text('Cancel')),
+                                    onPressed: () => Navigator.pop(context),
+                                    child: const Text('Cancel'),
+                                  ),
                                   ElevatedButton(
-                                      //TODO: Start new combat with selected combat
-                                      onPressed: () {},
-                                      child: Text('Start New Combat')),
+                                    onPressed: selectedCombatId == null
+                                        ? null
+                                        : () async {
+                                      final notifier = ref.read(
+                                          combatProvider(campaignId)
+                                              .notifier);
+
+                                      await notifier.loadCombatFromSaved(
+                                          selectedCombatId!);
+                                      Navigator.pop(context);
+                                    },
+                                    child: const Text('Start New Combat'),
+                                  ),
                                 ],
                               ),
-                              SizedBox(height: 50)
+                              const SizedBox(height: 50),
                             ],
                           ),
                         ),
@@ -839,6 +880,8 @@ class DMCombatScreen extends ConsumerWidget {
       },
     );
   }
+
+
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -891,7 +934,7 @@ class DMCombatScreen extends ConsumerWidget {
                 const SizedBox(width: 20),
                 ElevatedButton(
                   onPressed: () async {
-                    await startNewCombatBottomSheet(context);
+                    await startNewCombatBottomSheet(context, ref, campaignId);
                   },
                   child: const Text('Start New Combat'),
                 ),

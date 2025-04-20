@@ -122,7 +122,10 @@ class CombatStateNotifier extends StateNotifier<CombatState> {
         playerId: playerId,
       );
 
-      allCharacters.add(pc);
+      // Only add player character if not already in combat state
+      if (!allCharacters.any((character) => character.name == pc.name && !character.isNPC)) {
+        allCharacters.add(pc);
+      }
     }
 
     // Write ALL characters into Firestore
@@ -135,6 +138,55 @@ class CombatStateNotifier extends StateNotifier<CombatState> {
     state = state.copyWith(characters: allCharacters, currentTurnIndex: 0);
   }
 
+
+  Future<void> loadCombatFromSaved(String combatId) async {
+    final savedCombatDoc = await _firestore
+        .collection('user_campaigns')
+        .doc(campaignId)
+        .collection('combats')
+        .doc(combatId)
+        .get();
+
+    if (!savedCombatDoc.exists) {
+      debugPrint("Saved combat $combatId not found.");
+      return;
+    }
+
+    final data = savedCombatDoc.data()!;
+    final List<dynamic> savedNpcs = data['npcs'] ?? [];
+
+    // Convert to CombatCharacters
+    List<CombatCharacter> newNpcCharacters = savedNpcs.map((npcData) {
+      final attacks = (npcData['attacks'] as List<dynamic>).map((a) {
+        return AttackOption(
+          name: a['name'],
+          diceConfig: List<int>.from(a['diceConfig']),
+        );
+      }).toList();
+
+      return CombatCharacter(
+        name: npcData['name'],
+        health: npcData['maxHealth'],
+        maxHealth: npcData['maxHealth'],
+        armorClass: npcData['ac'],
+        attacks: attacks,
+        isNPC: true,
+      );
+    }).toList();
+
+    // Keep only player characters
+    List<CombatCharacter> playersOnly = state.characters.where((c) => !c.isNPC).toList();
+
+    // Merge and update
+    final mergedCharacters = [...playersOnly, ...newNpcCharacters];
+
+    state = state.copyWith(characters: mergedCharacters);
+
+    await _firestore.collection('user_campaigns').doc(campaignId).update({
+      'characters': mergedCharacters.map((c) => c.toFirestore()).toList(),
+    });
+
+  }
 
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
