@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:warlocks_of_the_beach/schedule.dart';
 import '../widgets/main_appbar.dart';
 import '../widgets/navigation/main_drawer.dart';
@@ -9,18 +10,21 @@ import '../combat/dm_combat_screen.dart';
 import '../combat/player_combat_screen.dart';
 import '../combat/create_combat.dart';
 import '../screens/notes.dart';
+import 'combat/combat_provider.dart';
 import 'item/bag_of_holding.dart';
 
-class PreLaunchCampaignScreen extends StatelessWidget {
-  const PreLaunchCampaignScreen(
-      {super.key, required this.campaignID, required this.isDM});
+class PreLaunchCampaignScreen extends ConsumerWidget {
+  const PreLaunchCampaignScreen({
+    super.key,
+    required this.campaignID,
+    required this.isDM,
+  });
 
   final bool isDM;
   final String campaignID;
 
   Stream<List<String>> _getPlayers() async* {
     final user = FirebaseAuth.instance.currentUser;
-
     if (user == null) {
       yield [];
       return;
@@ -42,7 +46,7 @@ class PreLaunchCampaignScreen extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: MainAppbar(),
       drawer: const MainDrawer(),
@@ -64,7 +68,8 @@ class PreLaunchCampaignScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const Schedule(events: {})),
+                      builder: (context) => const Schedule(events: {}),
+                    ),
                   );
                 },
                 icon: const Icon(Icons.calendar_today, size: 40),
@@ -72,7 +77,12 @@ class PreLaunchCampaignScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
+                  final combatNotifier =
+                  ref.read(combatProvider(campaignID).notifier);
+                  await combatNotifier.startCombat(campaignID);
+                  debugPrint('🔥 startCombat triggered');
+
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -105,8 +115,9 @@ class PreLaunchCampaignScreen extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) =>
-                              AddCombat(campaignId: campaignID)),
+                        builder: (context) =>
+                            AddCombat(campaignId: campaignID),
+                      ),
                     );
                   },
                   child: const Text('Add Combat'),
@@ -124,8 +135,8 @@ class PreLaunchCampaignScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) =>
-                          BagOfHolding(campaignId: campaignID, isDM: isDM),
+                      builder: (context) => BagOfHolding(
+                          campaignId: campaignID, isDM: isDM),
                     ),
                   );
                 },
@@ -153,12 +164,14 @@ class PreLaunchCampaignScreen extends StatelessWidget {
                       physics: const NeverScrollableScrollPhysics(),
                       shrinkWrap: true,
                       itemCount: players.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 10),
+                      separatorBuilder: (_, __) =>
+                      const SizedBox(height: 10),
                       itemBuilder: (context, index) {
                         return FutureBuilder<String>(
                           future: getPlayerInfo(players[index], index),
                           builder: (context, snapshot) {
-                            if (snapshot.connectionState == ConnectionState.waiting) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
                               return const ListTile(
                                 leading: Icon(Icons.account_circle),
                                 title: Text('Loading...'),
@@ -171,7 +184,8 @@ class PreLaunchCampaignScreen extends StatelessWidget {
                             } else {
                               return ListTile(
                                 leading: const Icon(Icons.account_circle),
-                                title: Text(snapshot.data ?? 'Unknown player'),
+                                title:
+                                Text(snapshot.data ?? 'Unknown player'),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
@@ -192,35 +206,15 @@ class PreLaunchCampaignScreen extends StatelessWidget {
   }
 
   Future<String> getPlayerInfo(String player, int index) async {
-    //pull player and character ids from firestore
-    // Remove the curly braces
     player = player.replaceAll('{', '').replaceAll('}', '');
-
-    // Split the string into key-value pairs
     List<String> pairs = player.split(', ');
-
-    // Create a map from the key-value pairs
     Map<String, String> parsedMap = {
       for (var pair in pairs) pair.split(': ')[0]: pair.split(': ')[1],
     };
 
-    // Access the values
     String characterId = parsedMap['character']!;
     String playerId = parsedMap['player']!;
-    //pull player username using id
-    DocumentSnapshot userDoc = await FirebaseFirestore.instance
-        .collection('app_user_profiles')
-        .doc(playerId).get();
-    String playerName = "Player $index"; // Default value
 
-// Check if the document exists and contains the 'username' field
-    if (userDoc.exists) {
-      Map<String, dynamic> data = userDoc.data() as Map<String, dynamic>;
-      playerName = data.containsKey('username') ? data['username'] : playerName;
-    }
-
-
-    //pull character name using ids
     DocumentSnapshot characterDoc = await FirebaseFirestore.instance
         .collection('app_user_profiles')
         .doc(playerId)
@@ -228,8 +222,6 @@ class PreLaunchCampaignScreen extends StatelessWidget {
         .doc(characterId)
         .get();
     String characterName = characterDoc['name'];
-
-    return "Character: $characterName\nPlayer: $playerName";
+    return characterName;
   }
-
 }

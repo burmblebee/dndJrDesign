@@ -34,26 +34,26 @@ class FirestoreService {
   }
 
   // Update HP
-  Future<void> updateCharacterHealth(String campaignId, String characterName, int health) async {
-    QuerySnapshot querySnapshot = await firestore
-        .collection('user_campaigns')
-        .doc(campaignId)
-        .collection('characters')
-        .where('name', isEqualTo: characterName)
-        .get();
-
-    if (querySnapshot.docs.isNotEmpty) {
-      String docId = querySnapshot.docs.first.id; // Get the document ID of the matching character
-      await firestore
-          .collection('user_campaigns')
-          .doc(campaignId)
-          .collection('characters')
-          .doc(docId)
-          .update({'hp': health});
-    } else {
-      print("Character $characterName not found in Firestore!");
-    }
-  }
+  // Future<void> updateCharacterHealth(String campaignId, String characterName, int health) async {
+  //   QuerySnapshot querySnapshot = await firestore
+  //       .collection('user_campaigns')
+  //       .doc(campaignId)
+  //       .collection('characters')
+  //       .where('name', isEqualTo: characterName)
+  //       .get();
+  //
+  //   if (querySnapshot.docs.isNotEmpty) {
+  //     String docId = querySnapshot.docs.first.id; // Get the document ID of the matching character
+  //     await firestore
+  //         .collection('user_campaigns')
+  //         .doc(campaignId)
+  //         .collection('characters')
+  //         .doc(docId)
+  //         .update({'hp': health});
+  //   } else {
+  //     print("Character $characterName not found in Firestore!");
+  //   }
+  // }
 
   Future<void> initializeCombat(String campaignId, List<CombatCharacter> characters) async {
     WriteBatch batch = firestore.batch();
@@ -71,6 +71,7 @@ class FirestoreService {
         'armorClass': character.armorClass,
       });
     }
+
 
     await batch.commit();
   }

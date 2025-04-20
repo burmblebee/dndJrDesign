@@ -201,9 +201,9 @@ class DMCombatScreen extends ConsumerWidget {
                                                 .health -
                                             damage;
 
-                                        await firestoreService
-                                            .updateCharacterHealth(campaignId,
-                                                selectedCharacter!, newHealth);
+                                        // await firestoreService
+                                        //     .updateCharacterHealth(campaignId,
+                                        //         selectedCharacter!, newHealth);
                                         ref
                                             .read(combatProvider(campaignId)
                                                 .notifier)
@@ -341,11 +341,11 @@ class DMCombatScreen extends ConsumerWidget {
                                           : newHealth;
 
                                       // Update character health in Firestore
-                                      await FirestoreService()
-                                          .updateCharacterHealth(
-                                              campaignId,
-                                              selectedCharacter!.name,
-                                              newHealth);
+                                      // await FirestoreService()
+                                      //     .updateCharacterHealth(
+                                      //         campaignId,
+                                      //         selectedCharacter!.name,
+                                      //         newHealth);
 
                                       ref
                                           .read(combatProvider(campaignId)
@@ -871,6 +871,7 @@ class DMCombatScreen extends ConsumerWidget {
             ),
           );
         },
+
         child: const Icon(Icons.casino),
       ),
       body: Center(

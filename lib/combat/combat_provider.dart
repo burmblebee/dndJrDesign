@@ -33,15 +33,6 @@ class CombatStateNotifier extends StateNotifier<CombatState> {
     _loadCombatData();
   }
 
-  // Add startCombat method that uses _firestoreService
-  void startCombat(String campaignId) async {
-    await _firestoreService.initializeCombat(campaignId, state.characters);
-  }
-
-
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final String campaignId;
-
   final Map<String, String> simpleWeaponDamage = {
     'Club': '1d4',
     'Dagger': '1d4',
@@ -85,6 +76,70 @@ class CombatStateNotifier extends StateNotifier<CombatState> {
     'Net': '0',
   };
 
+  // Add startCombat method that uses _firestoreService
+  Future<void> startCombat(String campaignId) async {
+    final campaignDoc = await _firestore.collection('user_campaigns').doc(campaignId).get();
+
+    if (!campaignDoc.exists) return;
+
+    final data = campaignDoc.data()!;
+    final List<dynamic> players = data['players'] ?? [];
+
+    List<CombatCharacter> allCharacters = [...state.characters]; // include NPCs already in state
+
+    for (var playerEntry in players) {
+      final characterId = playerEntry['character'];
+      final playerId = playerEntry['player'];
+
+      final charDoc = await _firestore
+          .collection('app_user_profiles')
+          .doc(playerId)
+          .collection('characters')
+          .doc(characterId)
+          .get();
+
+      if (!charDoc.exists) continue;
+
+      final charData = charDoc.data()!;
+      final hp = int.tryParse(charData['hp'].toString()) ?? 0;
+      final ac = charData['ac'] ?? 10;
+      final weapons = List<String>.from(charData['weapons'] ?? []);
+
+      final attacks = weapons.map((weapon) {
+        final dice = simpleWeaponDamage[weapon] ??
+            martialWeaponDamage[weapon] ??
+            'Unknown';
+        return AttackOption(name: weapon, diceConfig: parseDiceString(dice));
+      }).toList();
+
+      final pc = CombatCharacter(
+        name: charData['name'],
+        health: hp,
+        maxHealth: hp,
+        armorClass: ac,
+        attacks: attacks,
+        isNPC: false,
+        playerId: playerId,
+      );
+
+      allCharacters.add(pc);
+    }
+
+    // Write ALL characters into Firestore
+    await _firestore.collection('user_campaigns').doc(campaignId).update({
+      'characters': allCharacters.map((c) => c.toFirestore()).toList(),
+      'currentTurnIndex': 0,
+    });
+
+    // Local state update
+    state = state.copyWith(characters: allCharacters, currentTurnIndex: 0);
+  }
+
+
+
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final String campaignId;
+
   List<int> parseDiceString(String diceString) {
     List<int> diceToRoll = List.filled(7, 0); // d4, d6, d8, d10, d12, d20, d100
     final diceParts = diceString.split(RegExp(r'\s*\+\s*'));
@@ -124,79 +179,55 @@ class CombatStateNotifier extends StateNotifier<CombatState> {
       if (!snapshot.exists) return;
 
       final data = snapshot.data()!;
-      final List<dynamic> npcData = data['characters'] ?? [];
+      final List<dynamic> firestoreCharacters = data['characters'] ?? [];
       final List<dynamic> players = data['players'] ?? [];
 
-      // Parse existing NPCs
-      List<CombatCharacter> fetchedNPCs = npcData
-          .map((char) => CombatCharacter.fromMap(char))
-          .where((c) => c.isNPC)
-          .toList();
+      // Start with all characters already in Firestore (players + NPCs)
+      List<CombatCharacter> characters = firestoreCharacters.map((char) {
+        return CombatCharacter.fromMap(char);
+      }).toList();
 
-      // Fetch player characters and attach playerId
-      List<CombatCharacter> playerCharacters = [];
+      // Optionally enrich characters with weapons from profile
+      for (var i = 0; i < characters.length; i++) {
+        var char = characters[i];
+        if (!char.isNPC) {
+          try {
+            final charDoc = await _firestore
+                .collection('app_user_profiles')
+                .doc(char.playerId)
+                .collection('characters')
+                .where('name', isEqualTo: char.name)
+                .limit(1)
+                .get();
 
-      for (var playerEntry in players) {
-        final characterId = playerEntry['character'];
-        final playerId = playerEntry['player'];
+            if (charDoc.docs.isNotEmpty) {
+              final profileData = charDoc.docs.first.data();
+              final weapons = profileData['weapons'] ?? [];
 
-        final charDoc = await _firestore
-            .collection('app_user_profiles')
-            .doc(playerId) // assuming playerId is also their profile doc ID
-            .collection('characters')
-            .doc(characterId)
-            .get();
-        if (charDoc.exists) {
-          final charData = charDoc.data()!;
+              List<AttackOption> attacks = [];
+              for (String weapon in weapons) {
+                final attackData = simpleWeaponDamage[weapon] ??
+                    martialWeaponDamage[weapon] ?? 'Unknown';
+                final diceConfig = parseDiceString(attackData);
 
-          //try parsing health and max health from string
-          final health = int.tryParse(charData['hp'].toString()) ?? 0;
-          final weapons = charData['weapons'];
-          List<AttackOption> attacks = [];
+                attacks.add(AttackOption(name: weapon, diceConfig: diceConfig));
+              }
 
-          //pull weapon damage from weapon_data.dart
-          for(String weapon in weapons){
-            final attackData = simpleWeaponDamage[weapon] ??
-                martialWeaponDamage[weapon] ??
-                'Unknown';
-            final diceConfig = parseDiceString(attackData);
-            final attack = AttackOption(
-              name: weapon,
-              diceConfig: diceConfig,
-            );
-
-            attacks.add(attack);
+              characters[i] = char.copyWith(attacks: attacks);
+            }
+          } catch (e) {
+            print('Failed to load extra weapon data: $e');
           }
-          final character = CombatCharacter
-            (
-              name: charData['name'],
-              health: health,
-              maxHealth: health,
-              armorClass: charData['ac'],
-              attacks: attacks,
-              isNPC: false,
-          playerId: playerId);
-
-          playerCharacters.add(character);
-          debugPrint('Player character fetched: ${character.name}');
         }
       }
 
-      // Combine and upload to Firestore
-      final allCharacters = [...fetchedNPCs, ...playerCharacters];
-
-      // Write merged characters into Firestore
-      await _firestore.collection('user_campaigns').doc(campaignId).update({
-        'characters': allCharacters.map((c) => c.toFirestore()).toList(),
-      });
-
-      // Update local state
       state = state.copyWith(
-        characters: allCharacters,
+        characters: characters,
         currentTurnIndex: data['currentTurnIndex'] ?? 0,
       );
     });
   }
+
 
 
 
