@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import '../prelaunch_campaign_screen.dart';
 
 class ExpandableSection extends StatefulWidget {
   final String title;
@@ -76,7 +77,7 @@ class Notes extends StatefulWidget {
   const Notes({super.key, required this.campaignId, required this.isDm});
   final bool isDm;
   final String campaignId;
-  // Constructor to accept campaignId if needed
+  // Constructor to accept campaignId
 
   @override
   State<Notes> createState() => _NotesState();
@@ -216,6 +217,22 @@ class _NotesState extends State<Notes> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF464538),
+      appBar: AppBar(
+        backgroundColor: const Color (0xFF25291C),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.push(context, 
+            MaterialPageRoute(
+              builder: (context) => PreLaunchCampaignScreen(
+                campaignID: widget.campaignId, isDM: widget.isDm,)));
+          },
+        ),
+        title: const Text(
+          'Notes',
+          style: TextStyle(color: Colors.white),
+        ),
+      ),
       body: Center(
         child: Column(
           children: [

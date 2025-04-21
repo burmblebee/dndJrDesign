@@ -10,6 +10,8 @@ import 'item sub-widgets/misc_details.dart';
 import 'item sub-widgets/weapon_details.dart';
 import 'item sub-widgets/wondrous_details.dart';
 
+import '../prelaunch_campaign_screen.dart';
+
 class BagOfHolding extends ConsumerStatefulWidget {
   BagOfHolding({super.key, required this.campaignId, required this.isDM});
   String campaignId;
@@ -218,6 +220,18 @@ class _BagOfHoldingState extends ConsumerState<BagOfHolding> {
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: const Color(0xFF464538),
+        appBar: AppBar(
+        backgroundColor: const Color (0xFF25291C),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.push(context, 
+            MaterialPageRoute(
+              builder: (context) => PreLaunchCampaignScreen(
+                campaignID: widget.campaignId, isDM: widget.isDM,)));
+          },
+        ), 
+        ),
         body: Column(
           children: [
             const SizedBox(height: 20),
