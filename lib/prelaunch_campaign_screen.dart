@@ -12,7 +12,7 @@ import '../combat/create_combat.dart';
 import '../screens/notes_prelaunch.dart';
 import 'combat/combat_provider.dart';
 import 'item/bag_of_holding_prelaunch.dart';
-import ''; // Funny logos ¯\_(ツ)_/¯
+import 'package:font_awesome_flutter/font_awesome_flutter.dart'; // Funny logos ¯\_(ツ)_/¯
 
 class PreLaunchCampaignScreen extends ConsumerWidget {
   const PreLaunchCampaignScreen({
@@ -79,7 +79,7 @@ class PreLaunchCampaignScreen extends ConsumerWidget {
                 label: const Text('Session Calendar'),
               ),
               const SizedBox(height: 10),
-              ElevatedButton(
+              ElevatedButton.icon(
                 onPressed: () async {
                   final combatNotifier =
                   ref.read(combatProvider(campaignID).notifier);
@@ -94,7 +94,8 @@ class PreLaunchCampaignScreen extends ConsumerWidget {
                     ),
                   );
                 },
-                child: const Text('Launch Campaign'),
+                icon: Icon(FontAwesomeIcons.handFist, size: 40,),
+                label: const Text('Launch Campaign'),
               ),
               const SizedBox(height: 10),
               ElevatedButton.icon(
