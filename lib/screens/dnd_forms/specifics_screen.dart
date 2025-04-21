@@ -21,53 +21,27 @@ class SpecificsScreen extends ConsumerStatefulWidget {
 }
 
 class _SpecificsScreenState extends ConsumerState<SpecificsScreen> {
-  final List<String> proficiencies = [
-    'Acrobatics',
-    'Animal Handling',
-    'Arcana',
-    'Athletics',
-    'Deception',
-    'History',
-    'Insight',
-    'Intimidation',
-    'Investigation',
-    'Medicine',
-    'Nature',
-    'Perception',
-    'Performance',
-    'Persuasion',
-    'Religion',
-    'Sleight of Hand',
-    'Stealth',
-    'Survival'
+  // Full list of possible skills
+  final List<String> allProficiencies = [
+    'Acrobatics', 'Animal Handling', 'Arcana', 'Athletics', 'Deception',
+    'History', 'Insight', 'Intimidation', 'Investigation', 'Medicine',
+    'Nature', 'Perception', 'Performance', 'Persuasion', 'Religion',
+    'Sleight of Hand', 'Stealth', 'Survival'
   ];
-  List<String> languages = [
-    'Undercommon',
-    'Primordial',
-    'Deep Speech',
-    'Celestial',
-    'Abyssal',
-    'Halfling',
-    'Infernal',
-    'Dwarvish',
-    'Gnomish',
-    'Draconic',
-    'Elvish',
-    'Sylvan',
-    'Common',
-    'Goblin',
-    'Giant',
-    'Orc',
+  final List<String> languages = [
+    'Undercommon', 'Primordial', 'Deep Speech', 'Celestial', 'Abyssal',
+    'Halfling', 'Infernal', 'Dwarvish', 'Gnomish', 'Draconic',
+    'Elvish', 'Sylvan', 'Common', 'Goblin', 'Giant', 'Orc',
   ];
+
+  List<String> _possibleProficiencies = [];
   List<String> _selectedProficiencies = [];
-  List<String> _selectedLanguages = [];
   List<String> _givenProficiencies = [];
+  List<String> _selectedLanguages = [];
   List<String> _givenLanguages = [];
 
   late int numberOfProficiencies = 0;
-  late List<String> _possibleProficiencies = [];
   late int numberOfLanguages = 0;
-
   String _currentSection = 'Proficiency';
 
   late String characterName;
@@ -75,198 +49,206 @@ class _SpecificsScreenState extends ConsumerState<SpecificsScreen> {
   late String background;
   late String race;
 
-  void showSnackbar(String message) {
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        duration: const Duration(seconds: 3),
-        content: Text(message),
-      ),
-    );
-  }
-
-  void updateSelectedProficiency(String proficiencyName) {
-    setState(() {
-      if (_givenProficiencies.contains(proficiencyName)) {
-        showSnackbar('This proficiency is included in your background!');
-      } else if (_selectedProficiencies.contains(proficiencyName)) {
-        _selectedProficiencies.remove(proficiencyName);
-      } else if (_selectedProficiencies.length >= numberOfProficiencies) {
-        showSnackbar('You\'ve already selected all your proficiencies!');
-      } else {
-        _selectedProficiencies.add(proficiencyName);
-      }
-    });
-  }
-
-  void updateSelectedLanguage(String languageName) {
-    setState(() {
-      if (_selectedLanguages.contains(languageName)) {
-        _selectedLanguages.remove(languageName);
-      } else if (_selectedLanguages.length >= numberOfLanguages) {
-        showSnackbar('You\'ve already selected all your languages!');
-      } else {
-        _selectedLanguages.add(languageName);
-      }
-    });
-  }
-
-  List<String> findProficiencies(String skillString) {
-    final RegExp numberPattern = RegExp(r'\d+');
-    final RegExp skillsPattern = RegExp(r'from (.+)$');
-
-    List<String> proficiencyList = [];
-    if (skillsPattern.hasMatch(skillString)) {
-      String skillList = skillsPattern.firstMatch(skillString)!.group(1)!;
-      proficiencyList =
-          skillList.split(',').map((skill) => skill.trim()).toList();
-    } else {
-      proficiencyList +=
-          skillString.split(',').map((skill) => skill.trim()).toList();
-    }
-
-    if (numberPattern.hasMatch(skillString)) {
-      numberOfProficiencies +=
-          int.parse(numberPattern.firstMatch(skillString)!.group(0)!);
-    }
-    return proficiencyList;
-  }
-
-  List<String> findLanguages(String languageString) {
-    final RegExp languagePattern = RegExp(r'from (.+)$');
-
-    List<String> languageList = [];
-    if (languagePattern.hasMatch(languageString)) {
-      String languageOptions =
-          languagePattern.firstMatch(languageString)!.group(1)!;
-      languageList =
-          languageOptions.split(',').map((lang) => lang.trim()).toList();
-    } else {
-      languageList +=
-          languageString.split(',').map((lang) => lang.trim()).toList();
-    }
-
-    return languageList;
-  }
-
-  void findNumLanguages(String input) {
-    final Map<String, int> wordToNumber = {
-      'One': 1,
-      'Two': 2,
-      'Three': 3,
-      'Four': 4,
-      'Five': 5,
-      'Six': 6,
-      'Seven': 7,
-      'Eight': 8,
-      'Nine': 9,
-      'Ten': 10,
-    };
-
-    final RegExp wordPattern = RegExp(
-        r'\b(One|Two|Three|Four|Five|Six|Seven|Eight|Nine|Ten)\b',
-        caseSensitive: false);
-    if (wordPattern.hasMatch(input)) {
-      String word = wordPattern.firstMatch(input)!.group(0)!.toLowerCase();
-      String capitalizedWord = word[0].toUpperCase() + word.substring(1);
-      setState(() => numberOfLanguages = (wordToNumber[capitalizedWord]!));
-    } else {
-      setState(() {
-        numberOfLanguages = _givenLanguages.length;
-      });
-    }
-  }
-
   @override
   void initState() {
     super.initState();
-    setMainContent('Proficiency');
-
+    // Read character details
     characterName = ref.read(characterProvider).name;
     characterClass = ref.read(characterProvider).characterClass;
     background = ref.read(characterProvider).background;
     race = ref.read(characterProvider).race;
 
-    List<String> proficiencies =
-        findProficiencies(ClassData[characterClass]?['skills']?.first ?? '');
-    _possibleProficiencies = proficiencies;
-    List<String> givenProficiencies = findProficiencies(
-        (BackgroundData[background]?['skills'] as List<dynamic>?)
-                ?.map((skill) => skill.toString())
-                .join(',') ??
-            '');
+    // Hard-code for Bard and Barbarian
+    if (characterClass == 'Bard') {
+      numberOfProficiencies = 3;
+      _possibleProficiencies = allProficiencies;
+    } else if (characterClass == 'Barbarian') {
+      numberOfProficiencies = 2;
+      _possibleProficiencies = [
+        'Athletics', 'Animal Handling', 'Intimidation',
+        'Nature', 'Perception', 'Survival'
+      ];
+    } else {
+      // Default: dynamic based on ClassData
+      final classSkills =
+          ClassData[characterClass]?['skills']?.first.toString() ?? '';
+      final found = _findItemsAndCount(classSkills);
+      _possibleProficiencies = found.itemList;
+      numberOfProficiencies = found.count;
+    }
 
-    List<String> givenLanguages = findProficiencies(
-        (RaceData[race]?['languages'] as List<dynamic>?)
-                ?.map((language) => language.toString())
-                .join(',') ??
-            '');
-    setState(() {
-      _selectedProficiencies = [];
-      _givenProficiencies = givenProficiencies;
-      _selectedLanguages = [];
-      _givenLanguages = givenLanguages;
-    });
+    // Given proficiencies from background
+    final bgSkills = (BackgroundData[background]?['skills'] as List<dynamic>?)
+        ?.map((e) => e.toString())
+        .join(',') ?? '';
+    final foundBg = _findItemsAndCount(bgSkills);
+    _givenProficiencies = foundBg.itemList;
 
-    findNumLanguages(
-        (BackgroundData[background]?['languages'] as List<dynamic>?)
-                ?.map((skill) => skill.toString())
-                .join(',') ??
-            '');
+    // Given languages from background and race
+    final bgLangs = (BackgroundData[background]?['languages'] as List<dynamic>?)
+        ?.map((e) => e.toString())
+        .join(',') ?? '';
+    _givenLanguages = _parseList(bgLangs);
+
+    final raceLangs = (RaceData[race]?['languages'] as List<dynamic>?)
+        ?.map((e) => e.toString())
+        .join(',') ?? '';
+    _givenLanguages += _parseList(raceLangs);
+
+    // Determine number of selectable languages (from background text)
+    final bgLangText = (BackgroundData[background]?['languages'] as List<dynamic>?)
+        ?.join(',') ?? '';
+    numberOfLanguages = _extractNumber(bgLangText, _givenLanguages.length);
+
+    // If no languages are provided by the background, set numberOfLanguages to 0
+    if (bgLangText.isEmpty) {
+      numberOfLanguages = 0;
+    }
+
+    setState(() {});
   }
 
-  void setMainContent(String type) {
+  // Helper to parse comma lists
+  List<String> _parseList(String input) {
+    if (input.isEmpty) return [];
+    return input.split(',').map((s) => s.trim()).toList();
+  }
+
+  // Helper to extract items and count
+  _FoundItems _findItemsAndCount(String input) {
+    final numPattern = RegExp(r'(\d+)');
+    final fromPattern = RegExp(r'from (.+)$'); // Fixed regex to match the full list
+    List<String> items = [];
+    int count = 0;
+
+    if (fromPattern.hasMatch(input)) {
+      items = fromPattern
+          .firstMatch(input)!
+          .group(1)!
+          .split(',')
+          .map((s) => s.trim())
+          .toList();
+    } else if (input.isNotEmpty) {
+      items = input.split(',').map((s) => s.trim()).toList();
+    }
+
+    if (numPattern.hasMatch(input)) {
+      count = int.parse(numPattern.firstMatch(input)!.group(1)!);
+    }
+
+    // Debugging: Log the parsed items and count
+    print('Parsed Items: $items, Count: $count');
+
+    return _FoundItems(items, count);
+  }
+
+  // Helper to extract number words or default
+  int _extractNumber(String text, int defaultVal) {
+    final words = {
+      'One': 1, 'Two': 2, 'Three': 3, 'Four': 4, 'Five': 5,
+      'Six': 6, 'Seven': 7, 'Eight': 8, 'Nine': 9, 'Ten': 10,
+    };
+    for (var entry in words.entries) {
+      if (text.toLowerCase().contains(entry.key.toLowerCase())) {
+        return entry.value;
+      }
+    }
+    return defaultVal;
+  }
+
+  void showSnackbar(String msg) {
+    ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(SnackBar(content: Text(msg), duration: Duration(seconds: 2)));
+  }
+
+  void updateSelectedProficiency(String name) {
     setState(() {
-      _currentSection = type;
+      if (_givenProficiencies.contains(name)) {
+        showSnackbar('Included by background');
+      } else if (_selectedProficiencies.contains(name)) {
+        _selectedProficiencies.remove(name);
+      } else if (_selectedProficiencies.length >= numberOfProficiencies) {
+        showSnackbar('Already selected $numberOfProficiencies');
+      } else {
+        _selectedProficiencies.add(name);
+      }
+    });
+  }
+
+  void updateSelectedLanguage(String name) {
+    if (numberOfLanguages == 0) {
+      showSnackbar('No languages available to select.');
+      return;
+    }
+
+    setState(() {
+      if (_selectedLanguages.contains(name)) {
+        _selectedLanguages.remove(name);
+      } else if (_selectedLanguages.length >= numberOfLanguages) {
+        showSnackbar('Already selected $numberOfLanguages');
+      } else {
+        _selectedLanguages.add(name);
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final elevatedButtonColor = Theme.of(context)
-            .elevatedButtonTheme
-            .style
-            ?.backgroundColor
-            ?.resolve({}) ??
-        Colors.grey;
-
+    final bgColor = Theme.of(context)
+        .elevatedButtonTheme
+        .style
+        ?.backgroundColor
+        ?.resolve({}) ?? Colors.grey;
     return Scaffold(
       appBar: MainAppbar(),
-      drawer: const MainDrawer(),
+      drawer: MainDrawer(),
       bottomNavigationBar: MainBottomNavBar(),
       body: Stack(
         children: [
           SingleChildScrollView(
             child: Column(
               children: [
-                Text(
-                  'Specifics Selection for $characterName',
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),               
-                const SizedBox(height: 20),
+                SizedBox(height: 20),
                 SegmentedButton<String>(
                   style: ButtonStyle(
                     backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                      (states) {
+                          (states) {
                         if (states.contains(MaterialState.selected)) {
-                          return elevatedButtonColor;
+                          return bgColor; // Use your button color for selected state
                         }
-                        return Colors.grey;
+                        return Colors.grey; // Default color for unselected state
                       },
                     ),
-                    foregroundColor: const MaterialStatePropertyAll(Colors.white),
+                    foregroundColor: MaterialStateProperty.resolveWith<Color>(
+                          (states) {
+                        if (states.contains(MaterialState.selected)) {
+                          return Colors.white; // Text color for selected state
+                        }
+                        return Colors.black; // Text color for unselected state
+                      },
+                    ),
+                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                    ),
                   ),
                   segments: const <ButtonSegment<String>>[
                     ButtonSegment<String>(
                       value: 'Proficiency',
                       label: SizedBox(
-                          width: 130, child: Center(child: Text('Proficiencies'))),
+                        width: 130, // Ensure consistent width
+                        child: Center(child: Text('Proficiencies')),
+                      ),
                       icon: Icon(Icons.catching_pokemon),
                     ),
                     ButtonSegment<String>(
                       value: 'Language',
                       label: SizedBox(
-                          width: 130, child: Center(child: Text('Languages'))),
+                        width: 130, // Ensure consistent width
+                        child: Center(child: Text('Languages')),
+                      ),
                       icon: Icon(Icons.language),
                     ),
                   ],
@@ -278,115 +260,11 @@ class _SpecificsScreenState extends ConsumerState<SpecificsScreen> {
                     });
                   },
                 ),
-                const SizedBox(height: 15),
                 IndexedStack(
-                  index: _getIndexForMainContent(),
-                  alignment: Alignment.topCenter,
+                  index: _currentSection == 'Proficiency' ? 0 : 1,
                   children: [
-                    Column(
-                      children: [
-                        const SizedBox(height: 10),
-                        SizedBox(
-                          height: 390,
-                          child: SingleChildScrollView(
-                            child: Center(
-                              child: Wrap(
-                                alignment: WrapAlignment.center,
-                                children: <Widget>[
-                                  for (final proficiency in proficiencies)
-                                    ButtonWithPadding(
-                                      onPressed: () {
-                                        if (_possibleProficiencies
-                                                .contains(proficiency) ||
-                                            _givenProficiencies
-                                                .contains(proficiency)) {
-                                          updateSelectedProficiency(proficiency);
-                                        } else {
-                                          showSnackbar(
-                                              'This proficiency is not within your class or background!');
-                                        }
-                                      },
-                                      textContent: proficiency,
-                                      color: (_selectedProficiencies
-                                                  .contains(proficiency) ||
-                                              _givenProficiencies
-                                                  .contains(proficiency))
-                                          ? elevatedButtonColor
-                                          : _possibleProficiencies
-                                                  .contains(proficiency)
-                                              ? Colors.grey
-                                              : Colors.blueGrey[800],
-                                    ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 25),
-                        Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.black),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: SizedBox(
-                            height: 175,
-                            width: 350,
-                            child: SingleChildScrollView(
-                              child: ProficiencyDataWidget(
-                                  backgroundName: background,
-                                  className: characterClass),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        SizedBox(
-                          height: 400,
-                          child: SingleChildScrollView(
-                            child: Wrap(
-                              alignment: WrapAlignment.center,
-                              children: <Widget>[
-                                for (final language in languages)
-                                  ButtonWithPadding(
-                                      onPressed: () {
-                                        if (!_givenLanguages.contains(language)) {
-                                          updateSelectedLanguage(language);
-                                        } else {
-                                          showSnackbar(
-                                              'This language is included in your race!');
-                                        }
-                                      },
-                                      textContent: language,
-                                      color: (_selectedLanguages
-                                                  .contains(language) ||
-                                              _givenLanguages.contains(language))
-                                          ? elevatedButtonColor
-                                          : Colors.grey),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 15),
-                        Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.black),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: SizedBox(
-                            height: 130,
-                            width: 350,
-                            child: SingleChildScrollView(
-                              child: LanguageDataWidget(
-                                backgroundName: background,
-                                raceName: race,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                    _buildProficiencySection(bgColor),
+                    _buildLanguageSection(bgColor),
                   ],
                 ),
                 SizedBox(height: 120),
@@ -394,41 +272,25 @@ class _SpecificsScreenState extends ConsumerState<SpecificsScreen> {
             ),
           ),
           Positioned(
-            bottom: 40,
-            left: 16,
-            right: 16,
+            bottom: 40, left: 16, right: 16,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 ElevatedButton.icon(
-                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => BackgroundScreen())),
-                  icon: const Icon(Icons.arrow_back, color: Colors.white),
-                  label: const Text("Back"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: elevatedButtonColor,
-                    foregroundColor: Colors.white,
-                  ),
+                  onPressed: () => Navigator.push(
+                      context, MaterialPageRoute(builder: (_) => BackgroundScreen())),
+                  icon: Icon(Icons.arrow_back), label: Text('Back'),
+                  style: ElevatedButton.styleFrom(backgroundColor: bgColor),
                 ),
                 ElevatedButton.icon(
                   onPressed: () {
-                    ref
-                        .read(characterProvider.notifier)
-                        .updateLanguages(_selectedLanguages + _givenLanguages);
-                    ref.read(characterProvider.notifier).updateProficiencies(
-                        _selectedProficiencies + _givenProficiencies);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => StatsScreen(),
-                      ),
-                    );
+                    ref.read(characterProvider.notifier)
+                      ..updateLanguages(_selectedLanguages + _givenLanguages)
+                      ..updateProficiencies(_selectedProficiencies + _givenProficiencies);
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => StatsScreen()));
                   },
-                  icon: const Icon(Icons.arrow_forward, color: Colors.white),
-                  label: const Text("Next"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: elevatedButtonColor,
-                    foregroundColor: Colors.white,
-                  ),
+                  icon: Icon(Icons.arrow_forward), label: Text('Next'),
+                  style: ElevatedButton.styleFrom(backgroundColor: bgColor),
                 ),
               ],
             ),
@@ -438,11 +300,71 @@ class _SpecificsScreenState extends ConsumerState<SpecificsScreen> {
     );
   }
 
-  int _getIndexForMainContent() {
-    if (_currentSection == 'Proficiency') {
-      return 0;
-    } else {
-      return 1;
-    }
+  Widget _buildProficiencySection(Color bgColor) {
+    return Column(
+      children: [
+        SizedBox(height: 10),
+        Wrap(
+          spacing: 8, runSpacing: 8,
+          children: allProficiencies.map((prof) {
+            final isSelectable = _possibleProficiencies.contains(prof);
+            final isSelected = _selectedProficiencies.contains(prof) || _givenProficiencies.contains(prof);
+            return ButtonWithPadding(
+              textContent: prof,
+              color: isSelected ? bgColor : (isSelectable ? Colors.grey : Colors.blueGrey[800]!),
+              onPressed: isSelectable ? () => updateSelectedProficiency(prof)
+                  : () => showSnackbar('Not available'),
+            );
+          }).toList(),
+        ),
+        SizedBox(height: 20),
+        Container(
+          decoration: BoxDecoration(border: Border.all(), borderRadius: BorderRadius.circular(8)),
+          child: SizedBox(
+            height: 175, width: 350,
+            child: ProficiencyDataWidget(backgroundName: background, className: characterClass),
+          ),
+        ),
+      ],
+    );
   }
+
+  Widget _buildLanguageSection(Color bgColor) {
+    return Column(
+      children: [
+        SizedBox(height: 10),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: languages.map((lang) {
+            final isSelected = _selectedLanguages.contains(lang) || _givenLanguages.contains(lang);
+            final isSelectable = numberOfLanguages > 0 && !_givenLanguages.contains(lang);
+
+            return ButtonWithPadding(
+              textContent: lang,
+              color: isSelected ? bgColor : (isSelectable ? Colors.grey : Colors.blueGrey[800]!),
+              onPressed: isSelectable
+                  ? () => updateSelectedLanguage(lang)
+                  : () => showSnackbar('No languages available to select.'),
+            );
+          }).toList(),
+        ),
+        SizedBox(height: 15),
+        Container(
+          decoration: BoxDecoration(border: Border.all(), borderRadius: BorderRadius.circular(8)),
+          child: SizedBox(
+            height: 130,
+            width: 350,
+            child: LanguageDataWidget(backgroundName: background, raceName: race),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _FoundItems {
+  final List<String> itemList;
+  final int count;
+  _FoundItems(this.itemList, this.count);
 }

@@ -12,6 +12,7 @@ import '../combat/create_combat.dart';
 import '../screens/notes_prelaunch.dart';
 import 'combat/combat_provider.dart';
 import 'item/bag_of_holding_prelaunch.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart'; // Funny logos ¯\_(ツ)_/¯
 
 class PreLaunchCampaignScreen extends ConsumerWidget {
   const PreLaunchCampaignScreen({
@@ -58,11 +59,13 @@ class PreLaunchCampaignScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: 20),
-              const Text(
-                'Next Scheduled Session: 2/13/2025 @ 6pm',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
+              if (isDM) ...[
+                Text(
+                  'Campaign Invite Code: $campaignID',
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ],
               ElevatedButton.icon(
                 onPressed: () {
                   Navigator.push(
@@ -75,8 +78,8 @@ class PreLaunchCampaignScreen extends ConsumerWidget {
                 icon: const Icon(Icons.calendar_today, size: 40),
                 label: const Text('Session Calendar'),
               ),
-              const SizedBox(height: 20),
-              ElevatedButton(
+              const SizedBox(height: 10),
+              ElevatedButton.icon(
                 onPressed: () async {
                   final combatNotifier =
                   ref.read(combatProvider(campaignID).notifier);
@@ -91,7 +94,8 @@ class PreLaunchCampaignScreen extends ConsumerWidget {
                     ),
                   );
                 },
-                child: const Text('Launch Campaign'),
+                icon: Icon(FontAwesomeIcons.childCombatant, size: 40,),
+                label: const Text('Launch Campaign'),
               ),
               const SizedBox(height: 10),
               ElevatedButton.icon(
@@ -109,7 +113,7 @@ class PreLaunchCampaignScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 10),
               if (isDM) ...[
-                ElevatedButton(
+                ElevatedButton.icon(
                   onPressed: () {
                     Navigator.push(
                       context,
@@ -119,16 +123,11 @@ class PreLaunchCampaignScreen extends ConsumerWidget {
                       ),
                     );
                   },
-                  child: const Text('Add Combat'),
+                  icon: const Icon(FontAwesomeIcons.bookJournalWhills, size: 40),
+                  label: const Text('Add Combat'),
                 ),
                 const SizedBox(height: 10),
-                Text(
-                  'Campaign Invite Code: $campaignID',
-                  style: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.bold),
-                ),
               ],
-              const SizedBox(height: 10),
               ElevatedButton.icon(
                 onPressed: () {
                   Navigator.push(
