@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:warlocks_of_the_beach/schedule.dart';
-import '../widgets/main_appbar.dart';
+import '../widgets/main_appbar_prelaunch.dart';
 import '../widgets/navigation/main_drawer.dart';
 import '../widgets/navigation/bottom_navbar.dart';
 import '../combat/dm_combat_screen.dart';
