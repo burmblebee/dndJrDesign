@@ -113,7 +113,7 @@ class PreLaunchCampaignScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 10),
               if (isDM) ...[
-                ElevatedButton(
+                ElevatedButton.icon(
                   onPressed: () {
                     Navigator.push(
                       context,
@@ -123,7 +123,8 @@ class PreLaunchCampaignScreen extends ConsumerWidget {
                       ),
                     );
                   },
-                  child: const Text('Add Combat'),
+                  icon: const Icon(FontAwesomeIcons.bookJournalWhills, size: 40),
+                  label: const Text('Add Combat'),
                 ),
                 const SizedBox(height: 10),
               ],
