@@ -3,15 +3,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:warlocks_of_the_beach/schedule.dart';
-import '../widgets/main_appbar.dart';
+import '../widgets/main_appbar_prelaunch.dart';
 import '../widgets/navigation/main_drawer.dart';
 import '../widgets/navigation/bottom_navbar.dart';
 import '../combat/dm_combat_screen.dart';
 import '../combat/player_combat_screen.dart';
 import '../combat/create_combat.dart';
-import '../screens/notes.dart';
+import '../screens/notes_prelaunch.dart';
 import 'combat/combat_provider.dart';
-import 'item/bag_of_holding.dart';
+import 'item/bag_of_holding_prelaunch.dart';
 
 class PreLaunchCampaignScreen extends ConsumerWidget {
   const PreLaunchCampaignScreen({
