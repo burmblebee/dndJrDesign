@@ -1,16 +1,7 @@
 # dnd_jr_design
 
-A new Flutter project.
+[App Demo](https://youtu.be/BiV8FEwuU5Y)
 
-## Getting Started
+Final App Branch: Combat-Screen-part-2
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+A Flutter-based D&D companion app supporting character creation, campaign management, and synchronized real-time combat between players, with tools for NPC and item creation.
